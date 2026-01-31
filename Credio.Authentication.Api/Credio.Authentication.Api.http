@@ -1,0 +1,6 @@
+@Credio.Authentication.Api_HostAddress = http://localhost:5096
+
+GET {{Credio.Authentication.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
