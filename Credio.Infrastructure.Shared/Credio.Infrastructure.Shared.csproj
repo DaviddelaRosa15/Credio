@@ -6,4 +6,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="MailKit" Version="4.12.1" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+		<PackageReference Include="MimeKit" Version="4.12.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+    <ProjectReference Include="..\Credio.Core.Application\Credio.Core.Application.csproj" />
+    <ProjectReference Include="..\Credio.Core.Domain\Credio.Core.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
