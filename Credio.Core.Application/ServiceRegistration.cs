@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Credio.Core.Application.Helpers;
+using Credio.Core.Application.Interfaces.Helpers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -15,6 +17,7 @@ namespace Credio.Core.Application
             #endregion
 
             #region Services
+            services.AddScoped<IEmailHelper, EmailHelper>();
             #endregion
         }
     }
