@@ -41,21 +41,6 @@ namespace Credio.Infrastructure.Persistence
 
             #region Repositories
             services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddTransient<IAffiliatePolicyRepository, AffiliatePolicyRepository>();
-            services.AddTransient<IAffiliateRepository, AffiliateRepository>();
-            services.AddTransient<IAnalystRepository, AnalystRepository>();
-            services.AddTransient<IAuthorizationRepository, AuthorizationRepository>();
-            services.AddTransient<IAuthorizationTypeRepository, AuthorizationTypeRepository>();
-            services.AddTransient<IClientRepository, ClientRepository>();
-            services.AddTransient<ICoverageRepository, CoverageRepository>();
-            services.AddTransient<IDocumentTypeRepository, DocumentTypeRepository>();
-            services.AddTransient<IHospitalRepository, HospitalRepository>();
-            services.AddTransient<IInstitutionTypeRepository, InstitutionTypeRepository>();
-            services.AddTransient<IPlanCoverageRepository, PlanCoverageRepository>();
-            services.AddTransient<IPlanRepository, PlanRepository>();
-            services.AddTransient<IPolicyRepository, PolicyRepository>();
-            services.AddTransient<IStatusRepository, StatusRepository>();
-            services.AddTransient<INotificationRepository, NotificationRepository>();
             #endregion
         }
     }

@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Credio.Authentication.Api", "Credio.Authentication.Api\Credio.Authentication.Api.csproj", "{A89BCC14-7070-40E4-B221-7B742F7E7889}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interface", "Interface", "{CBF1B2A5-7017-4E16-B9F0-4559EF93FACC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,7 @@ Global
 		{941E2D73-413D-4189-83DD-86BEE8DA697E} = {2458486E-8E6F-4CA6-8E3E-FFB3652A2959}
 		{121D9B65-F470-4A64-89DB-C605C74E30A2} = {2458486E-8E6F-4CA6-8E3E-FFB3652A2959}
 		{AD6A4E5B-1290-431B-B396-AFBBCED7FC54} = {2458486E-8E6F-4CA6-8E3E-FFB3652A2959}
+		{A89BCC14-7070-40E4-B221-7B742F7E7889} = {CBF1B2A5-7017-4E16-B9F0-4559EF93FACC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {834F6AFD-56D9-491E-A5E1-8277981B90D6}
