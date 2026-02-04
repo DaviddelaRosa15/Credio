@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.23">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
@@ -33,6 +37,12 @@
     <ProjectReference Include="..\Credio.Infrastructure.Identity\Credio.Infrastructure.Identity.csproj" />
     <ProjectReference Include="..\Credio.Infrastructure.Persistence\Credio.Infrastructure.Persistence.csproj" />
     <ProjectReference Include="..\Credio.Infrastructure.Shared\Credio.Infrastructure.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update=".env">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
