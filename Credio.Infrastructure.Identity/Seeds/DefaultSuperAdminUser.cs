@@ -13,8 +13,6 @@ namespace Credio.Infrastructure.Identity.Seeds
             defaultUser.Email = "superadminuser@email.com";
             defaultUser.FirstName = "SuperUser";
             defaultUser.LastName = "SuperUser";
-            defaultUser.Address = "Brisas del Este";
-            defaultUser.UrlImage = "no hay por ahora";
             defaultUser.EmailConfirmed = true;
             defaultUser.PhoneNumberConfirmed = true;
 

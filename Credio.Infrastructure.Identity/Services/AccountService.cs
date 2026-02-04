@@ -114,8 +114,6 @@ namespace Credio.Infrastructure.Identity.Services
                 LastName = request.LastName,
                 UserName = request.UserName,
                 PhoneNumber = request.PhoneNumber,
-                UrlImage = request.UrlImage,
-                Address = request.Address,
                 EmailConfirmed = true,
                 PhoneNumberConfirmed = true
             };
@@ -131,8 +129,6 @@ namespace Credio.Infrastructure.Identity.Services
                     response.LastName = user.LastName;
                     response.Email = user.Email;
                     response.PhoneNumber = user.PhoneNumber;
-                    response.Address = user.Address;
-                    response.UrlImage = user.UrlImage;
 
                     await _userManager.AddToRoleAsync(user, role.ToString());
 
@@ -380,7 +376,6 @@ namespace Credio.Infrastructure.Identity.Services
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email,user.Email),
                 new Claim("uid", user.Id),
-                new Claim("UrlImage", user.UrlImage)
             }
             .Union(userClaims)
             .Union(roleClaims);
@@ -487,8 +482,6 @@ namespace Credio.Infrastructure.Identity.Services
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                UrlImage = user.UrlImage,
-                Address = user.Address,
                 Role = roles.First(),
             };
 
@@ -502,8 +495,6 @@ namespace Credio.Infrastructure.Identity.Services
 
             userToUpdate.FirstName = user.FirstName;
             userToUpdate.LastName = user.LastName;
-            userToUpdate.UrlImage = user.UrlImage;
-            userToUpdate.Address = user.Address;
 
             try
             {
