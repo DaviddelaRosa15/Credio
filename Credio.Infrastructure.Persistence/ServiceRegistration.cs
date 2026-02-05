@@ -1,7 +1,6 @@
-﻿using Credio.Core.Application.Interfaces.Repositories;
-using Credio.Infrastructure.Persistence.Contexts;
+﻿using Credio.Infrastructure.Persistence.Contexts;
 using Credio.Infrastructure.Persistence.Extensions;
-using Credio.Infrastructure.Persistence.Repositories;
+using Credio.Infrastructure.Persistence.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,11 +34,14 @@ namespace Credio.Infrastructure.Persistence
                 var parameters = configuration["POSTGRESQL"];
                 connection = connection.Replace("%POSTGRESQL%", parameters);
 
-                services.AddDbContextFactory<ApplicationContext>(options =>
+                services.AddDbContextFactory<ApplicationContext>((provider, options) =>
                 {
                     options.EnableSensitiveDataLogging();
                     options.UseNpgsql(connection,
-                    m => m.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName));
+                        builder => builder.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName))
+                        .AddInterceptors(
+                            provider.GetRequiredService<AuditableEntityInterceptor>(),
+                            provider.GetRequiredService<SoftDeleteInterceptor>());
                 });
             }
             #endregion
