@@ -1,5 +1,6 @@
 ﻿using Credio.Core.Domain.Common;
 using Credio.Core.Domain.Entities;
+using Credio.Infrastructure.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Credio.Infrastructure.Persistence.Contexts
@@ -18,6 +19,8 @@ namespace Credio.Infrastructure.Persistence.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationContext).Assembly);
+            
+            modelBuilder.ApplyGlobalQueryFilter<AuditableBaseEntity>(x => !x.IsDeleted);
             
             //FLUENT API
             base.OnModelCreating(modelBuilder);
