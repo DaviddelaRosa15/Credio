@@ -1,5 +1,6 @@
 ﻿using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Infrastructure.Persistence.Contexts;
+using Credio.Infrastructure.Persistence.Extensions;
 using Credio.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -11,6 +12,10 @@ namespace Credio.Infrastructure.Persistence
     {
         public static void AddPersistenceInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services
+                .AddRepositories()
+                .AddInterceptors();
+            
             #region Vaciar tablas
             /*var optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();
             optionsBuilder.EnableSensitiveDataLogging();
@@ -37,12 +42,6 @@ namespace Credio.Infrastructure.Persistence
                     m => m.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName));
                 });
             }
-            #endregion
-
-            #region Repositories
-            services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddTransient<IClientRepository, ClientRepository>();
-            services.AddTransient<IEmployeeRepository, EmployeeRepository>();
             #endregion
         }
     }
