@@ -97,7 +97,7 @@ namespace Credio.Infrastructure.Identity.Services
             }
         }
 
-        public async Task<RegisterResponse> RegisterUserAsync(RegisterRequest request, Roles role)
+        public async Task<RegisterResponse> RegisterEmployeeAsync(RegisterRequest request, Roles role)
         {
             RegisterResponse response = await ValidateUserBeforeRegistrationAsync(request);
 
@@ -138,13 +138,13 @@ namespace Credio.Infrastructure.Identity.Services
 
                     switch (role)
                     {
-                        case Roles.Analyst:
+                        case Roles.Officer:
                             userRole = "analista";
                             break;
                         case Roles.Administrator:
                             userRole = "administrador";
                             break;
-                        case Roles.Guest:
+                        case Roles.Client:
                             userRole = "hospital";
                             break;
                     }
@@ -166,6 +166,88 @@ namespace Credio.Infrastructure.Identity.Services
 
                 response.Status = "Exitoso";
                 response.Details = [new ErrorDetailsDTO { Code = "000", Message = $"Se insertó correctamente el {userRole}"}];
+
+                _logger.LogInformation($"La contraseña del usuario {request.UserName} es {request.Password}");
+                return response;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.InnerException, "Error al crear usuario");
+                response.Status = "Fallido";
+                response.Details = [new ErrorDetailsDTO { Code = "000", Message = "Ocurrió algo mientras se creaba el usuario" }];
+                return response;
+            }
+        }
+
+        public async Task<RegisterResponse> RegisterClientAsync(RegisterRequest request, Roles role)
+        {
+            RegisterResponse response = await ValidateUserBeforeRegistrationAsync(request);
+
+            if (response.Status == "Fallido")
+            {
+                return response;
+            }
+
+            response.Details = new();
+            var user = new ApplicationUser
+            {
+                Email = request.Email,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                UserName = request.UserName,
+                PhoneNumber = request.PhoneNumber,
+                UrlImage = request.UrlImage,
+                Address = request.Address,
+                EmailConfirmed = true,
+                PhoneNumberConfirmed = true
+            };
+
+            try
+            {
+                var result = await _userManager.CreateAsync(user, request.Password);
+                string userRole = "";
+                if (result.Succeeded)
+                {
+                    response.Id = user.Id;
+                    response.FirstName = user.FirstName;
+                    response.LastName = user.LastName;
+                    response.Email = user.Email;
+                    response.PhoneNumber = user.PhoneNumber;
+                    response.Address = user.Address;
+                    response.UrlImage = user.UrlImage;
+
+                    await _userManager.AddToRoleAsync(user, role.ToString());
+
+                    switch (role)
+                    {
+                        case Roles.Officer:
+                            userRole = "analista";
+                            break;
+                        case Roles.Administrator:
+                            userRole = "administrador";
+                            break;
+                        case Roles.Client:
+                            userRole = "hospital";
+                            break;
+                    }
+                }
+                else
+                {
+                    response.Status = "Fallido";
+                    foreach (var error in result.Errors)
+                    {
+                        ErrorDetailsDTO errorDTO = new()
+                        {
+                            Code = ErrorMessages.BadRequest,
+                            Message = error.Description
+                        };
+                        response.Details.Add(errorDTO);
+                    }
+                    return response;
+                }
+
+                response.Status = "Exitoso";
+                response.Details = [new ErrorDetailsDTO { Code = "000", Message = $"Se insertó correctamente el {userRole}" }];
 
                 _logger.LogInformation($"La contraseña del usuario {request.UserName} es {request.Password}");
                 return response;

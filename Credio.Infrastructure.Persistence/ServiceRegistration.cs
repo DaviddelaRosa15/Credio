@@ -41,6 +41,8 @@ namespace Credio.Infrastructure.Persistence
 
             #region Repositories
             services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddTransient<IClientRepository, ClientRepository>();
+            services.AddTransient<IEmployeeRepository, EmployeeRepository>();
             #endregion
         }
     }

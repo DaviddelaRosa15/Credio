@@ -1,10 +1,13 @@
 using Credio.Core.Application.Constants;
 using Credio.Core.Application.Dtos.Account;
 using Credio.Core.Application.Dtos.Common;
+using Credio.Core.Application.Enums;
 using Credio.Core.Application.Features.Account.Commands.Authenticate;
 using Credio.Core.Application.Features.Account.Commands.ChangePassword;
 using Credio.Core.Application.Features.Account.Commands.ConfirmCode;
 using Credio.Core.Application.Features.Account.Commands.ConfirmEmail;
+using Credio.Core.Application.Features.Account.Commands.RegisterClient;
+using Credio.Core.Application.Features.Account.Commands.RegisterEmployee;
 using Credio.Core.Application.Features.Account.Commands.ResetPassword;
 using Credio.Core.Application.Features.Account.Queries.GetRefreshAccessToken;
 using Credio.Core.Application.Features.Account.Queries.GetValidationRefreshToken;
@@ -119,6 +122,82 @@ namespace Credio.Interface.Authentication.Controllers
                 if (response.HasError)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, ErrorMapperHelper.Error(ErrorMessages.InternalServer, response.Error));
+                }
+
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ErrorMapperHelper.Error(ErrorMessages.InternalServer, e.Message));
+            }
+        }
+
+        //[Authorize(Roles = "Administrator")]
+        [HttpPost("register-employee")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegisterResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RegisterResponse))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(RegisterResponse))]
+        [SwaggerOperation(
+           Summary = "Registro de empleados",
+           Description = "Cree usuarios empleados para usar el sistema"
+        )]
+        public async Task<IActionResult> RegisterAdmin([FromForm] RegisterEmployeeCommand command)
+        {
+            try
+            {
+                var response = await Mediator.Send(command);
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+
+                    return BadRequest(ErrorMapperHelper.ListError(errors));
+                }
+
+                if (response.Status == "Fallido")
+                {
+                    return BadRequest(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ErrorMapperHelper.Error(ErrorMessages.InternalServer, e.Message));
+            }
+        }
+
+        [Authorize(Roles = "Administrator")]
+        [HttpPost("register-client")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegisterResponse))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RegisterResponse))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(RegisterResponse))]
+        [SwaggerOperation(
+           Summary = "Registro de clientes",
+           Description = "Cree usuarios clientes para hacer las solicitudes o los préstamos"
+        )]
+        public async Task<IActionResult> RegisterClient([FromForm] RegisterClientCommand command)
+        {
+            try
+            {
+                var response = await Mediator.Send(command);
+
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+
+                    return BadRequest(ErrorMapperHelper.ListError(errors));
+                }
+
+                if (response.Status == "Fallido")
+                {
+                    return BadRequest(response);
                 }
 
                 return Ok(response);
