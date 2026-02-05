@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Credio.Infrastructure.Persistence.Extensions;
 
-public static partial class InfrastructureExtensions
+public static partial class PersistenceExtensions
 {
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
