@@ -4,7 +4,8 @@
 	{
 		SuperAdmin,
 		Administrator,
-		Analyst,
-		Guest
+        Client,
+        Collector,
+		Officer
 	}
 }

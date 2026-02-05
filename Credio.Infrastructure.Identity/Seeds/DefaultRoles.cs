@@ -10,8 +10,9 @@ namespace Credio.Infrastructure.Identity.Seeds
 		{
 			await roleManager.CreateAsync(new IdentityRole(Roles.SuperAdmin.ToString()));
 			await roleManager.CreateAsync(new IdentityRole(Roles.Administrator.ToString()));
-			await roleManager.CreateAsync(new IdentityRole(Roles.Analyst.ToString()));
-			await roleManager.CreateAsync(new IdentityRole(Roles.Guest.ToString()));
+			await roleManager.CreateAsync(new IdentityRole(Roles.Client.ToString()));
+			await roleManager.CreateAsync(new IdentityRole(Roles.Collector.ToString()));
+			await roleManager.CreateAsync(new IdentityRole(Roles.Officer.ToString()));
 		}
 	}
 }
