@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Credio.Core.Application\Credio.Core.Application.csproj" />
     <ProjectReference Include="..\Credio.Core.Domain\Credio.Core.Domain.csproj" />
+    <ProjectReference Include="..\Credio.Infrastructure.Shared\Credio.Infrastructure.Shared.csproj" />
   </ItemGroup>
 
 </Project>
