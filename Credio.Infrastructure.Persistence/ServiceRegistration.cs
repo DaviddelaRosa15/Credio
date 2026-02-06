@@ -1,6 +1,6 @@
-﻿using Credio.Core.Application.Interfaces.Repositories;
-using Credio.Infrastructure.Persistence.Contexts;
-using Credio.Infrastructure.Persistence.Repositories;
+﻿using Credio.Infrastructure.Persistence.Contexts;
+using Credio.Infrastructure.Persistence.Extensions;
+using Credio.Infrastructure.Persistence.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +11,10 @@ namespace Credio.Infrastructure.Persistence
     {
         public static void AddPersistenceInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services
+                .AddRepositories()
+                .AddInterceptors();
+            
             #region Vaciar tablas
             /*var optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();
             optionsBuilder.EnableSensitiveDataLogging();
@@ -30,19 +34,16 @@ namespace Credio.Infrastructure.Persistence
                 var parameters = configuration["POSTGRESQL"];
                 connection = connection.Replace("%POSTGRESQL%", parameters);
 
-                services.AddDbContextFactory<ApplicationContext>(options =>
+                services.AddDbContextFactory<ApplicationContext>((provider, options) =>
                 {
                     options.EnableSensitiveDataLogging();
                     options.UseNpgsql(connection,
-                    m => m.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName));
+                        builder => builder.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName))
+                        .AddInterceptors(
+                            provider.GetRequiredService<AuditableEntityInterceptor>(),
+                            provider.GetRequiredService<SoftDeleteInterceptor>());
                 });
             }
-            #endregion
-
-            #region Repositories
-            services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddTransient<IClientRepository, ClientRepository>();
-            services.AddTransient<IEmployeeRepository, EmployeeRepository>();
             #endregion
         }
     }
