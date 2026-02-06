@@ -9,11 +9,13 @@ namespace Credio.Infrastructure.Persistence
 {
     public static class ServiceRegistration
     {
-        public static void AddPersistenceInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddPersistenceInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services
+                .AddServices()
                 .AddRepositories()
-                .AddInterceptors();
+                .AddInterceptors()
+                .AddWorkers();
             
             #region Vaciar tablas
             /*var optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();
@@ -45,6 +47,8 @@ namespace Credio.Infrastructure.Persistence
                 });
             }
             #endregion
+
+            return services;
         }
     }
 }
