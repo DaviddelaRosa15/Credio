@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Avalanche.Core.Application.Helpers;
+using Credio.Core.Application.Constants;
 using Credio.Core.Application.Dtos.Account;
 using Credio.Core.Application.Dtos.Common;
 using Credio.Core.Application.Dtos.Email;
@@ -20,6 +22,14 @@ namespace Credio.Core.Application.Features.Account.Commands.RegisterClient
         [SwaggerParameter(Description = "Apellido")]
         [Required(ErrorMessage = "Debe de ingresar su apellido")]
         public string LastName { get; set; }
+
+        [SwaggerParameter(Description = "Tipo de documento")]
+        [Required(ErrorMessage = "Debe de ingresar su tipo de documento")]
+        public string DocumentType { get; set; }
+
+        [SwaggerParameter(Description = "Número de documento")]
+        [Required(ErrorMessage = "Debe de ingresar su número de documento")]
+        public string DocumentNumber { get; set; }
 
         [SwaggerParameter(Description = "Teléfono")]
         [Required(ErrorMessage = "Debe de ingresar su telefono")]
@@ -59,8 +69,48 @@ namespace Credio.Core.Application.Features.Account.Commands.RegisterClient
         {
             try
             {
-                RegisterResponse response = new();
-                /*Lógica para implementar guardado*/
+                var request = _mapper.Map<RegisterRequest>(command);
+                if (command.Image != null)
+                {
+                    request.UrlImage = ImageUpload.UploadImage(command.Image, StorageConstants.Clients);
+                }
+                else
+                {
+                    request.UrlImage = "";
+                }
+                request.Address = $"{command.Address.City} {command.Address.AddressLine1} {command.Address.AddressLine2}";
+                request.UserName = command.DocumentNumber;
+                request.Password = "Credio@" + Guid.NewGuid().ToString().Substring(0, 4);
+
+                var response = await _accountService.RegisterClientAsync(request);
+
+                if (response.Status == "Fallido")
+                {
+                    ImageUpload.DeleteFile(request.UrlImage);
+                    return response;
+                }
+
+                /*Envío de correo electrónico
+                try
+                {
+                    UserWelcomeEmail dto = new()
+                    {
+                        FullName = response.FirstName + " " + response.LastName,
+                        UserName = request.UserName,
+                        Password = request.Password
+                    };
+
+                    await _emailService.SendAsync(new EmailRequest()
+                    {
+                        To = response.Email,
+                        Body = _emailHelper.MakeEmailForAdmin(dto),
+                        Subject = "¡Bienvenido/a como Administrador en Avalanche!"
+                    });
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Hubo un error enviando el correo al administrador");
+                }*/
 
                 return response;
             }
@@ -69,6 +119,5 @@ namespace Credio.Core.Application.Features.Account.Commands.RegisterClient
                 throw;
             }
         }
-
     }
 }

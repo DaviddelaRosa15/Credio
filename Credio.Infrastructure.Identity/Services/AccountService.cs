@@ -123,7 +123,6 @@ namespace Credio.Infrastructure.Identity.Services
             try
             {
                 var result = await _userManager.CreateAsync(user, request.Password);
-                string userRole = "";
                 if (result.Succeeded)
                 {
                     response.Id = user.Id;
@@ -135,19 +134,6 @@ namespace Credio.Infrastructure.Identity.Services
                     response.UrlImage = user.UrlImage;
 
                     await _userManager.AddToRoleAsync(user, role.ToString());
-
-                    switch (role)
-                    {
-                        case Roles.Officer:
-                            userRole = "analista";
-                            break;
-                        case Roles.Administrator:
-                            userRole = "administrador";
-                            break;
-                        case Roles.Client:
-                            userRole = "hospital";
-                            break;
-                    }
                 }
                 else
                 {
@@ -165,21 +151,21 @@ namespace Credio.Infrastructure.Identity.Services
                 }
 
                 response.Status = "Exitoso";
-                response.Details = [new ErrorDetailsDTO { Code = "000", Message = $"Se insertó correctamente el {userRole}"}];
+                response.Details = [new ErrorDetailsDTO { Code = "000", Message = $"Se insertó correctamente el usuario"}];
 
-                _logger.LogInformation($"La contraseña del usuario {request.UserName} es {request.Password}");
+                //_logger.LogInformation($"La contraseña del usuario {request.UserName} es {request.Password}");
                 return response;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.InnerException, "Error al crear usuario");
                 response.Status = "Fallido";
-                response.Details = [new ErrorDetailsDTO { Code = "000", Message = "Ocurrió algo mientras se creaba el usuario" }];
+                response.Details = [new ErrorDetailsDTO { Code = ErrorMessages.InternalServer, Message = "Ocurrió algo mientras se creaba el usuario" }];
                 return response;
             }
         }
 
-        public async Task<RegisterResponse> RegisterClientAsync(RegisterRequest request, Roles role)
+        public async Task<RegisterResponse> RegisterClientAsync(RegisterRequest request)
         {
             RegisterResponse response = await ValidateUserBeforeRegistrationAsync(request);
 
@@ -205,7 +191,6 @@ namespace Credio.Infrastructure.Identity.Services
             try
             {
                 var result = await _userManager.CreateAsync(user, request.Password);
-                string userRole = "";
                 if (result.Succeeded)
                 {
                     response.Id = user.Id;
@@ -216,20 +201,7 @@ namespace Credio.Infrastructure.Identity.Services
                     response.Address = user.Address;
                     response.UrlImage = user.UrlImage;
 
-                    await _userManager.AddToRoleAsync(user, role.ToString());
-
-                    switch (role)
-                    {
-                        case Roles.Officer:
-                            userRole = "analista";
-                            break;
-                        case Roles.Administrator:
-                            userRole = "administrador";
-                            break;
-                        case Roles.Client:
-                            userRole = "hospital";
-                            break;
-                    }
+                    await _userManager.AddToRoleAsync(user, Roles.Client.ToString());
                 }
                 else
                 {
@@ -247,16 +219,16 @@ namespace Credio.Infrastructure.Identity.Services
                 }
 
                 response.Status = "Exitoso";
-                response.Details = [new ErrorDetailsDTO { Code = "000", Message = $"Se insertó correctamente el {userRole}" }];
+                response.Details = [new ErrorDetailsDTO { Code = "000", Message = $"Se insertó correctamente el cliente" }];
 
-                _logger.LogInformation($"La contraseña del usuario {request.UserName} es {request.Password}");
+                //_logger.LogInformation($"La contraseña del usuario {request.UserName} es {request.Password}");
                 return response;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.InnerException, "Error al crear usuario");
                 response.Status = "Fallido";
-                response.Details = [new ErrorDetailsDTO { Code = "000", Message = "Ocurrió algo mientras se creaba el usuario" }];
+                response.Details = [new ErrorDetailsDTO { Code = ErrorMessages.InternalServer, Message = "Ocurrió algo mientras se creaba el usuario" }];
                 return response;
             }
         }
