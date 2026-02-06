@@ -21,9 +21,7 @@
     <Folder Include="Dtos\Account\" />
     <Folder Include="Dtos\Email\" />
     <Folder Include="Enums\" />
-    <Folder Include="Helpers\" />
     <Folder Include="Interfaces\Services\" />
-    <Folder Include="Constants\" />
     <Folder Include="Services\" />
     <Folder Include="Seeds\" />
   </ItemGroup>
