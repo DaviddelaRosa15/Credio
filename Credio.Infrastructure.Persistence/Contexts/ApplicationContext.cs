@@ -21,7 +21,9 @@ namespace Credio.Infrastructure.Persistence.Contexts
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationContext).Assembly);
             
             modelBuilder.ApplyGlobalQueryFilter<AuditableBaseEntity>(x => !x.IsDeleted);
-            
+
+            modelBuilder.ConfigurePostgreSqlTypes();
+
             //FLUENT API
             base.OnModelCreating(modelBuilder);
         }
