@@ -8,7 +8,7 @@ namespace Credio.Infrastructure.Shared
 {
     public static class ServiceRegistration
 	{
-		public static void AddSharedInfrastructure(this IServiceCollection services, IConfiguration configuration)
+		public static IServiceCollection AddSharedInfrastructure(this IServiceCollection services, IConfiguration configuration)
 		{
             // Access to replace placeholders
             var mailSettingsSection = configuration.GetSection("MailSettings");
@@ -32,6 +32,10 @@ namespace Credio.Infrastructure.Shared
 
             services.AddTransient<IEmailService, EmailService>();
             services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+            services.AddHttpContextAccessor();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+            
+            return services;
 		}
 	}
 }

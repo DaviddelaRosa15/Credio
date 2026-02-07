@@ -14,12 +14,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.Text;
+using Credio.Infrastructure.Identity.Workers;
 
 namespace Credio.Infrastructure.Identity
 {
     public static class ServiceRegistration
     {
-        public static void AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             #region Vaciar tablas
             /*var optionsBuilder = new DbContextOptionsBuilder<IdentityContext>();
@@ -131,6 +132,12 @@ namespace Credio.Infrastructure.Identity
             #region Services
             services.AddTransient<IAccountService, AccountService>();
             #endregion
+
+            #region Workers
+            services.AddHostedService<IdentitySeederWorker>();
+            #endregion
+
+            return services;
         }
     }
 }
