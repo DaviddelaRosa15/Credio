@@ -1,6 +1,7 @@
 ﻿using Credio.Core.Application.Interfaces.Services;
 using Credio.Core.Domain.Settings;
 using Credio.Infrastructure.Shared.Services;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,6 +11,9 @@ namespace Credio.Infrastructure.Shared
 	{
 		public static IServiceCollection AddSharedInfrastructure(this IServiceCollection services, IConfiguration configuration)
 		{
+			// Memory cache
+			services.AddMemoryCache();
+			
             // Access to replace placeholders
             var mailSettingsSection = configuration.GetSection("MailSettings");
             var mailSettings = mailSettingsSection.Get<MailSettings>();
@@ -32,6 +36,7 @@ namespace Credio.Infrastructure.Shared
 
             services.AddTransient<IEmailService, EmailService>();
             services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+            services.AddSingleton<ICacheService, CacheService>();
             
             return services;
 		}
