@@ -36,12 +36,11 @@ WebApplication app = builder.Build();
     }
     else
     {
-        app.UseExceptionHandler("/Error");
+        app.UseExceptionHandler();
         app.UseHsts();
     }
     
     app.UseHttpsRedirection();
-    app.UseExceptionHandler();
     app.UseCors("AllowSpecificDomain");
     app.UseMiddleware<FallBackRouteMiddleware>();
     app.UseStaticFiles();
