@@ -22,6 +22,8 @@ namespace Credio.Infrastructure.Identity
     {
         public static IServiceCollection AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddHttpContextAccessor();
+            
             #region Vaciar tablas
             /*var optionsBuilder = new DbContextOptionsBuilder<IdentityContext>();
             optionsBuilder.EnableSensitiveDataLogging();
@@ -131,6 +133,7 @@ namespace Credio.Infrastructure.Identity
 
             #region Services
             services.AddTransient<IAccountService, AccountService>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
             #endregion
 
             #region Workers

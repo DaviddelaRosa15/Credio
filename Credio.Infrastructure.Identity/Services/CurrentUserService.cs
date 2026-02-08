@@ -1,7 +1,8 @@
+using System.IdentityModel.Tokens.Jwt;
 using Credio.Core.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 
-namespace Credio.Infrastructure.Shared.Services;
+namespace Credio.Infrastructure.Identity.Services;
 
 public class CurrentUserService : ICurrentUserService
 {
@@ -14,7 +15,6 @@ public class CurrentUserService : ICurrentUserService
     
     public string? GetCurrentUserName()
     {
-        // TODO: Replace with the corresponding claim.
-        return _httpContext?.HttpContext?.User.Claims.FirstOrDefault(claim => claim.Type == "Name")?.Value;
+        return _httpContext?.HttpContext?.User.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Name)?.Value;
     }
 }

@@ -32,8 +32,6 @@ namespace Credio.Infrastructure.Shared
 
             services.AddTransient<IEmailService, EmailService>();
             services.AddScoped<IEmailTemplateService, EmailTemplateService>();
-            services.AddHttpContextAccessor();
-            services.AddScoped<ICurrentUserService, CurrentUserService>();
             
             return services;
 		}
