@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Credio.Core.Application.Enums;
 
 namespace Credio.Core.Application.Common.Primitives;
@@ -10,6 +11,7 @@ public class Error
 
     public ErrorType Type { get; }
 
+    [JsonConstructor]
     protected Error(
         string errorCode,
         string description,
@@ -19,6 +21,19 @@ public class Error
         Description = description;
         Type = type;
     }
+    
+    // Check the value not the reference
+    public override bool Equals(object? obj)
+    {
+        if (obj is not Error other) return false;
+        return ErrorCode == other.ErrorCode && Description == other.Description && Type == other.Type;
+    }
+    
+    public override int GetHashCode() => HashCode.Combine(ErrorCode, Description, Type); // Need to be implemented
+
+    public static bool operator ==(Error a, Error b) => a?.Equals(b) ?? b is null;
+
+    public static bool operator !=(Error a, Error b) => !(a == b);
 
     public static Error None = new Error(string.Empty, string.Empty, ErrorType.None);
 
