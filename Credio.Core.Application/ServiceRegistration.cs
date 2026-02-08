@@ -1,6 +1,5 @@
 ﻿using Credio.Core.Application.Helpers;
 using Credio.Core.Application.Interfaces.Helpers;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Credio.Core.Application.Common.Pipelines;
 using FluentValidation;
@@ -25,6 +24,7 @@ namespace Credio.Core.Application
                 options.AddOpenBehavior(typeof(RequestLoggingPipelineBehavior<,>));
                 options.AddOpenBehavior(typeof(RequestPerformancePipelineBehavior<,>));
                 options.AddOpenBehavior(typeof(RequestExceptionHandlingPipelineBehavior<,>));
+                options.AddOpenBehavior(typeof(QueryCachingPipelineBehavior<,>));
             });
 
             #region Services
