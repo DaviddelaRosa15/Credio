@@ -13,8 +13,7 @@ public static class InterfaceExtensions
             .AddProblemDetails()
             .AddLogging()
             .AddMiddlewares()
-            .AddEndpointsApiExplorer()
-            .AddSwaggerGen();
+            .AddEndpointsApiExplorer();
         
         services.AddControllers(options =>
             {
