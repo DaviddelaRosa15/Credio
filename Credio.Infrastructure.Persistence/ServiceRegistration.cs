@@ -32,9 +32,9 @@ namespace Credio.Infrastructure.Persistence
             }
             else
             {
-                var connection = configuration.GetConnectionString("PostgreSQL");
-                var parameters = configuration["POSTGRESQL"];
-                connection = connection.Replace("%POSTGRESQL%", parameters);
+                var connection = configuration.GetConnectionString("DBCredioCore");
+                var parameters = configuration["DBCREDIOCORE"];
+                connection = connection.Replace("%DBCREDIOCORE%", parameters);
 
                 services.AddDbContextFactory<ApplicationContext>((provider, options) =>
                 {
