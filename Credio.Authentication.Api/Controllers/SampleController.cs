@@ -38,4 +38,14 @@ public class SampleController : ControllerBase
             onSuccess: () => CustomResult.Success(result),
             onFailure:CustomResult.Problem);
     }
+    
+    [HttpGet("caching")]
+    public async Task<IResult> GetCaching(CancellationToken cancellationToken)
+    {
+        Result<string> result = await _sender.Send(new SampleQueryCaching(), cancellationToken);
+        
+        return result.Match(
+            onSuccess: () => CustomResult.Success(result),
+            onFailure:CustomResult.Problem);
+    }
 }
