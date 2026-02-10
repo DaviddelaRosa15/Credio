@@ -3,7 +3,7 @@ using Credio.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace Credio    .Infrastructure.Persistence.Repositories
+namespace Credio.Infrastructure.Persistence.Repositories
 {
     public class GenericRepository<Entity> : IGenericRepository<Entity> where Entity : class
     {

@@ -6,7 +6,8 @@ namespace Credio.Core.Application.Interfaces.Services
     public interface IAccountService
 	{
 		Task<AuthenticationResponse> AuthenticateAsync(AuthenticationRequest request);
-		Task<RegisterResponse> RegisterUserAsync(RegisterRequest request, Roles role);
+		Task<RegisterResponse> RegisterEmployeeAsync(RegisterRequest request, Roles role);
+		Task<RegisterResponse> RegisterClientAsync(RegisterRequest request);
         Task<ConfirmEmailResponse> ConfirmEmailAsync(string userId, string token);
 		Task<ResetPasswordResponse> ResetPasswordAsync(string email);
 		ConfirmCodeResponse ConfirmCode(string code);

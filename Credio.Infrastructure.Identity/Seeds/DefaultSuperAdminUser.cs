@@ -19,10 +19,11 @@ namespace Credio.Infrastructure.Identity.Seeds
             defaultUser.PhoneNumberConfirmed = true;
 
             await userManager.CreateAsync(defaultUser, "1505Pa@@word");
-            await userManager.AddToRoleAsync(defaultUser, Roles.Analyst.ToString());
             await userManager.AddToRoleAsync(defaultUser, Roles.SuperAdmin.ToString());
             await userManager.AddToRoleAsync(defaultUser, Roles.Administrator.ToString());
-            await userManager.AddToRoleAsync(defaultUser, Roles.Guest.ToString());
+            await userManager.AddToRoleAsync(defaultUser, Roles.Client.ToString());
+            await userManager.AddToRoleAsync(defaultUser, Roles.Collector.ToString());
+            await userManager.AddToRoleAsync(defaultUser, Roles.Officer.ToString());
 
         }
     }
