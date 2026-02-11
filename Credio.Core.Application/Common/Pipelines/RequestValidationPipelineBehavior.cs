@@ -68,5 +68,5 @@ public class RequestValidationPipelineBehavior<TRequest, TResponse>
         return validationFailures;
     }
     private static ValidationError CreateValidationError(ValidationFailure[] failures)
-            => new(failures.Select(x => Error.Validation(x.ErrorMessage)).ToArray());
+            => new(failures.Select(x => Error.BadRequest(x.ErrorMessage)).ToArray());
 }
