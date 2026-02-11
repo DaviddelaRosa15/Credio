@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36623.8
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Credio.Core.Domain", "Credio.Core.Domain\Credio.Core.Domain.csproj", "{301BCC6F-5C14-4E19-A777-51CA9126346F}"
 EndProject
@@ -20,6 +20,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Credio.Authentication.Api", "Credio.Authentication.Api\Credio.Authentication.Api.csproj", "{A89BCC14-7070-40E4-B221-7B742F7E7889}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interface", "Interface", "{CBF1B2A5-7017-4E16-B9F0-4559EF93FACC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Credio.Lending.Api", "Credio.Lending.Api\Credio.Lending.Api.csproj", "{3F90E7C1-AA81-4FD1-9086-07BCD63A4867}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{A89BCC14-7070-40E4-B221-7B742F7E7889}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A89BCC14-7070-40E4-B221-7B742F7E7889}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A89BCC14-7070-40E4-B221-7B742F7E7889}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F90E7C1-AA81-4FD1-9086-07BCD63A4867}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F90E7C1-AA81-4FD1-9086-07BCD63A4867}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F90E7C1-AA81-4FD1-9086-07BCD63A4867}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F90E7C1-AA81-4FD1-9086-07BCD63A4867}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +68,7 @@ Global
 		{121D9B65-F470-4A64-89DB-C605C74E30A2} = {2458486E-8E6F-4CA6-8E3E-FFB3652A2959}
 		{AD6A4E5B-1290-431B-B396-AFBBCED7FC54} = {2458486E-8E6F-4CA6-8E3E-FFB3652A2959}
 		{A89BCC14-7070-40E4-B221-7B742F7E7889} = {CBF1B2A5-7017-4E16-B9F0-4559EF93FACC}
+		{3F90E7C1-AA81-4FD1-9086-07BCD63A4867} = {CBF1B2A5-7017-4E16-B9F0-4559EF93FACC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {834F6AFD-56D9-491E-A5E1-8277981B90D6}
