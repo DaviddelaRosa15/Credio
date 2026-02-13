@@ -1,5 +1,9 @@
 ﻿using AutoMapper;
+using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Account;
+using Credio.Core.Application.Dtos.Common;
+using Credio.Core.Application.Helpers;
+using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Services;
 using MediatR;
 using Swashbuckle.AspNetCore.Annotations;
@@ -7,7 +11,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Credio.Core.Application.Features.Account.Commands.Authenticate
 {
-    public class AuthenticateCommand : IRequest<AuthenticationResponse>
+    public record AuthenticateCommand : ICommand<AuthenticationResponse>
 	{
 		[SwaggerParameter(Description = "Nombre de usuario")]
 		[Required(ErrorMessage = "Debe de ingresar su nombre de usuario")]
@@ -18,7 +22,7 @@ namespace Credio.Core.Application.Features.Account.Commands.Authenticate
 		public string Password { get; set; }
 	}
 
-	public class AuthenticateCommandHandler : IRequestHandler<AuthenticateCommand, AuthenticationResponse>
+	public class AuthenticateCommandHandler : ICommandHandler<AuthenticateCommand, AuthenticationResponse>
 	{
 		private readonly IAccountService _accountService;
 		private readonly IMapper _mapper;
@@ -30,19 +34,26 @@ namespace Credio.Core.Application.Features.Account.Commands.Authenticate
 		}
 
 
-		public async Task<AuthenticationResponse> Handle(AuthenticateCommand command, CancellationToken cancellationToken)
+		public async Task<Result<AuthenticationResponse>> Handle(AuthenticateCommand command, CancellationToken cancellationToken)
 		{
+
 			try
 			{
-				var request = _mapper.Map<AuthenticationRequest>(command);
-				var response = await _accountService.AuthenticateAsync(request);
-				return response;
-			}
-			catch (Exception)
+                var request = _mapper.Map<AuthenticationRequest>(command);
+                var response = await _accountService.AuthenticateAsync(request);
+
+                if (response.HasError)
+                {
+                    return Result<AuthenticationResponse>.Failure(Error.BadRequest(response.Error));
+                }
+
+                return Result<AuthenticationResponse>.Success(response);
+            }
+            catch (Exception ex)
 			{
-				throw new Exception("Ocurrió un error tratando de autenticar el usuario.");
-			}
-		}
+				return Result<AuthenticationResponse>.Failure(Error.InternalServerError("Ocurrió un error tratando de autenticar el usuario."));
+            }
+        }
 
 	}
 }

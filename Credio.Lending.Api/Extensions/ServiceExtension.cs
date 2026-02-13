@@ -1,7 +1,7 @@
 ﻿using Asp.Versioning;
 using Microsoft.OpenApi.Models;
 
-namespace Credio.Interface.Authentication.Extensions
+namespace Credio.Interface.Lending.Extensions
 {
     public static class ServiceExtension
     {
@@ -15,11 +15,11 @@ namespace Credio.Interface.Authentication.Extensions
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",
-                    Title = "Credio Authentication API",
-                    Description = "This Api will be responsible for authenticate the users in the system",
+                    Title = "Credio Lending API",
+                    Description = "This Api will be responsible for manage the core of application in the system",
                     Contact = new OpenApiContact
                     {
-                        Name = "Credio Authentication",
+                        Name = "Credio Lending",
                         Email = "baseapp@gmail.com"
                     }
                 });

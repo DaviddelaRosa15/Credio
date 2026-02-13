@@ -1,8 +1,8 @@
 using System.Text.Json.Serialization;
-using Credio.Authentication.Api.ExceptionHandler;
+using Credio.Lending.Api.ExceptionHandler;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Credio.Interface.Authentication.Extensions;
+namespace Credio.Interface.Lending.Extensions;
 
 public static class InterfaceExtensions
 {

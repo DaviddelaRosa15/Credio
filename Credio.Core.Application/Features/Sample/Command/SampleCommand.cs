@@ -11,7 +11,7 @@ public class SampleCommandHandler : ICommandHandler<SampleCommand, string>
     {
         await Task.Delay(1000, cancellationToken);
 
-        if (request.username == "admin") return Result<string>.Failure(Error.Validation("The username 'admin' is reserved."));
+        if (request.username == "admin") return Result<string>.Failure(Error.BadRequest("The username 'admin' is reserved."));
 
         return Result<string>.Success("Hello world");
     }

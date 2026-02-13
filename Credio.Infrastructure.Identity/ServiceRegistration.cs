@@ -39,9 +39,9 @@ namespace Credio.Infrastructure.Identity
             }
             else
             {
-                var connection = configuration.GetConnectionString("PostgreSQL");
-                var parameters = configuration["POSTGRESQL"];
-                connection = connection.Replace("%POSTGRESQL%", parameters);
+                var connection = configuration.GetConnectionString("DBCredioIdentity");
+                var parameters = configuration["DBCREDIOIDENTITY"];
+                connection = connection.Replace("%DBCREDIOIDENTITY%", parameters);
 
                 services.AddDbContext<IdentityContext>(options =>
                 {

@@ -2,7 +2,7 @@ using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Response;
 using Credio.Core.Application.Enums;
 
-namespace Credio.Authentication.Api.Common;
+namespace Credio.Lending.Api.Common;
 
 public static class CustomResult
 {

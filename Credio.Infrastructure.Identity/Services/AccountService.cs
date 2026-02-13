@@ -58,7 +58,7 @@ namespace Credio.Infrastructure.Identity.Services
                 if (user == null)
                 {
                     response.HasError = true;
-                    response.Error = $"No existe una cuenta registrada con este usuario: {request.UserName}";
+                    response.Error = $"Usuario o contraseña inválidos";
                     return response;
                 }
 
@@ -91,9 +91,7 @@ namespace Credio.Infrastructure.Identity.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Un error ocurrió tratando de autenticar al usuario");
-                response.HasError = true;
-                response.Error = ex.Message;
-                return response;
+                throw;
             }
         }
 
