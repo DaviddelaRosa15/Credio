@@ -23,6 +23,7 @@ namespace Credio.Core.Application
                 options.AddOpenBehavior(typeof(RequestValidationPipelineBehavior<,>));
                 options.AddOpenBehavior(typeof(RequestLoggingPipelineBehavior<,>));
                 options.AddOpenBehavior(typeof(RequestPerformancePipelineBehavior<,>));
+                options.AddOpenBehavior(typeof(RequestTransactionHandlingBehavior<,>));
                 options.AddOpenBehavior(typeof(RequestExceptionHandlingPipelineBehavior<,>));
                 options.AddOpenBehavior(typeof(QueryCachingPipelineBehavior<,>));
             });
