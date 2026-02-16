@@ -8,6 +8,7 @@ public static partial class PersistenceExtensions
     public static IServiceCollection AddWorkers(this IServiceCollection services)
     {
         services.AddHostedService<DatabaseInitializerWorker>();
+        services.AddHostedService<PersistenceSeederWorker>();
 
         return services;
     }
