@@ -7,9 +7,9 @@ namespace Credio.Infrastructure.Persistence.Interceptors;
 
 public class AuditableEntityInterceptor : SaveChangesInterceptor
 {
-    public override ValueTask<int> SavedChangesAsync(
-        SaveChangesCompletedEventData eventData,
-        int result,
+    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+        DbContextEventData eventData,
+        InterceptionResult<int> result,
         CancellationToken cancellationToken = new CancellationToken())
     {
         if (eventData.Context is not null)
@@ -17,7 +17,7 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
             UpdateAuditableEntity(eventData.Context);
         }
 
-        return base.SavedChangesAsync(eventData, result, cancellationToken);
+        return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
     private void UpdateAuditableEntity(DbContext dbContext)
@@ -31,11 +31,11 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
             switch (entity.State)
             {
                 case EntityState.Added:
-                    entity.Entity.Created = DateTime.UtcNow;
+                    entity.Entity.Created = DateTime.Now;
                     entity.Entity.CreatedBy = "DefaultBaseUser";
                     break;
                 case EntityState.Modified:
-                    entity.Entity.LastModified = DateTime.UtcNow;
+                    entity.Entity.LastModified = DateTime.Now;
                     entity.Entity.LastModifiedBy = "DefaultBaseUser";
                     break;
             }

@@ -14,11 +14,9 @@ namespace Credio.Core.Application.Features.Account.Commands.Authenticate
     public record AuthenticateCommand : ICommand<AuthenticationResponse>
 	{
 		[SwaggerParameter(Description = "Nombre de usuario")]
-		[Required(ErrorMessage = "Debe de ingresar su nombre de usuario")]
 		public string UserName { get; set; }
 
 		[SwaggerParameter(Description = "Contraseña")]
-		[Required(ErrorMessage = "Debe de ingresar su contraseña")]
 		public string Password { get; set; }
 	}
 

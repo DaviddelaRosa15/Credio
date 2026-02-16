@@ -17,7 +17,7 @@ public class IdentitySeederWorker: BaseWorker<IdentitySeederWorker>
     {
         _scopeFactory = scopeFactory;
     }
-    
+
     public override async Task RunAsync(CancellationToken cancellationToken)
     {
         using IServiceScope scope = _scopeFactory.CreateScope();
@@ -25,12 +25,28 @@ public class IdentitySeederWorker: BaseWorker<IdentitySeederWorker>
         UserManager<ApplicationUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
         RoleManager<IdentityRole> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        
+
         // TODO: Uncomment when roles are ready
         // This will enable automatic seeding on startup.
-        
-        /*await DefaultRoles.SeedAsync(userManager, roleManager);
-        
-        await DefaultSuperAdminUser.SeedAsync(userManager, roleManager);*/
+
+        if (!roleManager.Roles.Any())
+        {
+            _logger.LogInformation("Roles doesn't exist. Seeding.");
+            await DefaultRoles.SeedAsync(userManager, roleManager);
+        }
+        else
+        {
+            _logger.LogInformation("Roles already exist. Skipping seeding.");
+        }
+
+        if (!userManager.Users.Any())
+        {
+            _logger.LogInformation("Users doesn't exist. Seeding.");
+            await DefaultSuperAdminUser.SeedAsync(userManager, roleManager);
+        }
+        else
+        {
+            _logger.LogInformation("Users already exist. Skipping seeding.");
+        }
     }
 }

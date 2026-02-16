@@ -13,5 +13,16 @@ namespace Credio.Infrastructure.Persistence.Repositories
         {
             _dbContext = dbContext;
         }
+
+        public async Task<int> GetLastEmployeeCodeAsync()
+        {
+            using var db = _dbContext.CreateDbContext();
+
+            // Obtener el último código de empleado registrado
+            var lastEmployee = db.Employee.Max(e => e.EmployeeCode);
+            int lastCode = string.IsNullOrEmpty(lastEmployee) ? 0 : int.Parse(lastEmployee.Replace("U", ""));
+
+            return lastCode;
+        }
     }
 }
