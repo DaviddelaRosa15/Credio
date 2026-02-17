@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using Credio.Core.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
 
@@ -15,6 +16,11 @@ public class CurrentUserService : ICurrentUserService
     
     public string? GetCurrentUserName()
     {
-        return _httpContext?.HttpContext?.User.Claims.FirstOrDefault(claim => claim.Type == JwtRegisteredClaimNames.Name)?.Value;
+        return _httpContext?.HttpContext?.User.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.NameIdentifier)?.Value;
+    }
+
+    public string? GetCurrentUserId()
+    {
+        return _httpContext.HttpContext?.User.Claims.FirstOrDefault(claim => claim.Type == "uid")?.Value;
     }
 }
