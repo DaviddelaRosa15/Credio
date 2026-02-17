@@ -21,12 +21,9 @@ public class DatabaseInitializerWorker : BaseWorker<DatabaseInitializerWorker>
         using IServiceScope scope = _scopeFactory.CreateScope();
         
         IDatabaseInitializerService initializerService = scope.ServiceProvider.GetRequiredService<IDatabaseInitializerService>();
-        
-        // TODO: Uncomment when migrations are ready.
-        // This will enable automatic connection checks and apply pending migrations on startup.
 
-        /*await initializerService.CanConnectAsync(cancellationToken);
+        await initializerService.CanConnectAsync(cancellationToken);
 
-        await initializerService.MigrateAsync(cancellationToken);*/
+        await initializerService.MigrateAsync(cancellationToken);
     }
 }
