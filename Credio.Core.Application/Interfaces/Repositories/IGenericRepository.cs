@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using Credio.Core.Application.Dtos.Common;
+using System.Linq.Expressions;
 
 namespace Credio.Core.Application.Interfaces.Repositories
 {
@@ -20,5 +21,7 @@ namespace Credio.Core.Application.Interfaces.Repositories
 		Task<List<Entity>> GetAllByPropertyAsync(Expression<Func<Entity, bool>> predicate);
         Task<List<Entity>> GetAllByPropertyWithIncludeAsync(Expression<Func<Entity, bool>> predicate,
             List<Expression<Func<Entity, object>>> properties);
-	}
+        
+        Task<PagedResult<Entity>> GetPagedAsync(int pageNumber, int pageSize, List<Expression<Func<Entity, object>>>? properties);
+        }
 }
