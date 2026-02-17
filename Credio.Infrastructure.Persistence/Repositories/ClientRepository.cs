@@ -13,5 +13,12 @@ namespace Credio.Infrastructure.Persistence.Repositories
         {
             _dbContext = dbContext;
         }
+
+        public async Task<bool> IsDocumentNumberRegister(string documentNumber,CancellationToken cancellationToken)
+        {
+            await using ApplicationContext context = await _dbContext.CreateDbContextAsync(cancellationToken);
+
+            return await context.Client.AsNoTracking().AnyAsync(x => x.DocumentNumber == documentNumber, cancellationToken);
+        }
     }
 }

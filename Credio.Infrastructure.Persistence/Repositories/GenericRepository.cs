@@ -31,11 +31,10 @@ namespace Credio.Infrastructure.Persistence.Repositories
             return entities;
         }
 
-        public virtual async Task UpdateAsync(Entity entity, string id)
+        public virtual async Task UpdateAsync(Entity entity)
         {
             using var dbContext = _dbContextFactory.CreateDbContext();
-            var entry = await dbContext.Set<Entity>().FindAsync(id);
-            dbContext.Entry(entry).CurrentValues.SetValues(entity);
+            dbContext.Set<Entity>().Update(entity);
             await dbContext.SaveChangesAsync();
         }
 

@@ -31,12 +31,23 @@ public class RequestTransactionHandlingBehavior<TRequest, TResponse>
         try
         {
             TResponse response = await next(cancellationToken);
-            
-            _logger.LogInformation(
-                "The command {commandName} was completed succesfully, committing the transaction.",
-                commandName);
 
-            transaction.Commit();
+            if (response.IsSuccess)
+            {
+                _logger.LogInformation(
+                    "The command {commandName} was completed successfully, committing the transaction.",
+                    commandName);
+                
+                transaction.Commit();
+            }
+            else
+            {
+                _logger.LogWarning(
+                    "The command {commandName} failed logically. Transaction rolled back.",
+                    commandName);
+                
+                transaction.Rollback();
+            }
 
             return response;
         }
