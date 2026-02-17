@@ -1,9 +1,12 @@
-﻿using FluentValidation;
+﻿using Credio.Core.Application.Enums;
+using FluentValidation;
 
 namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
 {
     public class RegisterEmployeeCommandValidator : AbstractValidator<RegisterEmployeeCommand>
     {
+        private static readonly string[] ValidRoles = { Roles.Administrator.ToString(), Roles.Officer.ToString(), Roles.Collector.ToString()};
+
         public RegisterEmployeeCommandValidator()
         {
             RuleFor(command => command.FirstName)
@@ -36,7 +39,9 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
 
             RuleFor(command => command.Role)
                 .NotNull().WithMessage("The role can't be null")
-                .NotEmpty().WithMessage("The role can't be empty");
+                .NotEmpty().WithMessage("The role can't be empty")
+                .Must(role => ValidRoles.Any(validRole => 
+                validRole.Equals(role, StringComparison.OrdinalIgnoreCase))).WithMessage("The role specified is not valid");
         }
     }
 }
