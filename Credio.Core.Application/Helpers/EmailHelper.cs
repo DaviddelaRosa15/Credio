@@ -1,4 +1,5 @@
-﻿using Credio.Core.Application.Interfaces.Helpers;
+﻿using Credio.Core.Application.Dtos.Email;
+using Credio.Core.Application.Interfaces.Helpers;
 using Credio.Core.Application.Interfaces.Services;
 
 namespace Credio.Core.Application.Helpers
@@ -78,6 +79,16 @@ namespace Credio.Core.Application.Helpers
             return _service.RenderTemplate("PasswordChanged", new Dictionary<string, string>
             {
                 { "FullName", fullName },
+            });
+        }
+
+        public string MakeEmailForEmployee(EmployeeWelcomeEmail employee)
+        {
+            return _service.RenderTemplate("EmployeeWelcome", new Dictionary<string, string>
+            {
+                { "FullName", employee.FullName },
+                { "UserName", employee.UserName },
+                { "Password", employee.Password }
             });
         }
 
