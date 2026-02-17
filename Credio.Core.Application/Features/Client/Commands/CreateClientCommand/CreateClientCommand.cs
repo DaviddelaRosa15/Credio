@@ -94,7 +94,7 @@ public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand>
         {
             FirstName =  request.FirstName,
             LastName =  request.LastName,
-            UserName = $"Credio@{request.FirstName}{request.LastName}",
+            UserName = request.DocumentNumber,
             Email = request.Email,
             Address = $"{request.AddressDto.City} {request.AddressDto.AddressLine1} {request.AddressDto.AddressLine2}",
             PhoneNumber = request.Phone,
