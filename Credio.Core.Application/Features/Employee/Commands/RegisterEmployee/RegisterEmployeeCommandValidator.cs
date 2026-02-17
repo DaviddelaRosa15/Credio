@@ -20,7 +20,8 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
 
             RuleFor(command => command.DocumentNumber)
                 .NotNull().WithMessage("The document number can't be null")
-                .NotEmpty().WithMessage("The document number can't be empty");
+                .NotEmpty().WithMessage("The document number can't be empty")
+                .Length(11).WithMessage("The document number must be 11 digits");
 
             RuleFor(command => command.Phone)
                 .NotNull().WithMessage("The phone number can't be null")

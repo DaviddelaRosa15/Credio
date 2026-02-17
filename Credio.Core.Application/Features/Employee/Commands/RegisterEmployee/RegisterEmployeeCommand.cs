@@ -10,6 +10,7 @@ using Credio.Core.Application.Interfaces.Helpers;
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Application.Interfaces.Services;
 using Credio.Core.Domain.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -75,52 +76,32 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
             {
                 RegisterEmployeeCommandResponse result = new();
                 var employee = _mapper.Map<Domain.Entities.Employee>(command);
-                var request = _mapper.Map<RegisterRequest>(command);
+                
+
+                //Validar que no exista otro empleado con el mismo número de documento
+                var existingDocument = await _employeeRepository.GetByPropertyAsync(e => e.DocumentNumber == command.DocumentNumber);
+                if (existingDocument != null)
+                {
+                    return Result<RegisterEmployeeCommandResponse>.Failure(Error.Conflict("Ya existe un empleado registrado con el número de documento proporcionado."));
+                }
+
+                //Validar que no exista otro empleado con el mismo correo electrónico
+                var existingEmail = await _employeeRepository.GetByPropertyAsync(e => e.Email == command.Email);
+                if (existingEmail != null)
+                {
+                    return Result<RegisterEmployeeCommandResponse>.Failure(Error.Conflict("Ya existe un empleado registrado con el correo electrónico proporcionado."));
+                }
 
                 //Obtener el último código de empleado registrado para generar el nuevo código
                 var lastEmployeeCode = await _employeeRepository.GetLastEmployeeCodeAsync();
                 employee.EmployeeCode = $"U{lastEmployeeCode + 1}";
 
-                //Generar nombre de usuario y contraseña temporal
-                request.UserName = employee.EmployeeCode;
-                request.Password = "Credio@" + Guid.NewGuid().ToString().Substring(0, 4);
-                request.Address = $"{command.Address.City} {command.Address.AddressLine1} {command.Address.AddressLine2}";
-                if (command.Image != null)
-                {
-                    request.UrlImage = ImageUpload.UploadImage(command.Image, StorageConstants.Employees);
-                }
-                else
-                {
-                    request.UrlImage = "";
-                }
-
-                //Asignar rol
-                var role = Roles.Officer;
-                switch(command.Role.ToLower())
-                {
-                    case "administrator":
-                        role = Roles.Administrator;
-                        break;
-                    case "collector":
-                        role = Roles.Collector;
-                        break;
-                    case "officer":
-                        role = Roles.Officer;
-                        break;
-                }
-
                 //Registro de usuario en Identity
-                var response = await _accountService.RegisterEmployeeAsync(request, role);
-                if (response.Status == "Fallido")
-                {
-                    ImageUpload.DeleteFile(request.UrlImage);
-                    return Result<RegisterEmployeeCommandResponse>.Failure(Error.BadRequest(response.Details[0].Message));
-                }
+                var response = await RegisterUser(command, employee.EmployeeCode);
                 employee.UserId = response.Id;
 
                 //Registro de dirección
                 var employeeAddress = _mapper.Map<Address>(command.Address);
-                //var address = await _addressRepository.AddAsync(employeeAddress);
                 employee.Address = employeeAddress;
 
                 //Validar que el tipo de documento exista
@@ -135,7 +116,7 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
 
                 result = _mapper.Map<RegisterEmployeeCommandResponse>(employeeCreated);
                 result.DocumentType = command.DocumentType;
-                result.UserName = request.UserName;
+                result.UserName = employee.EmployeeCode;
                 result.Address = command.Address;
                 result.Role = command.Role;
                 result.UrlImage = response.UrlImage;
@@ -170,5 +151,48 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
             }
         }
 
+        private async Task<RegisterResponse> RegisterUser(RegisterEmployeeCommand command, string employeeCode)
+        {
+            var request = _mapper.Map<RegisterRequest>(command);
+
+            //Generar nombre de usuario y contraseña temporal
+            request.UserName = employeeCode;
+            request.Password = "Credio@" + Guid.NewGuid().ToString().Substring(0, 4);
+            request.Address = $"{command.Address.City} {command.Address.AddressLine1} {command.Address.AddressLine2}";
+            if (command.Image != null)
+            {
+                request.UrlImage = ImageUpload.UploadImage(command.Image, StorageConstants.Employees);
+            }
+            else
+            {
+                request.UrlImage = "";
+            }
+
+            //Asignar rol
+            var role = Roles.Officer;
+            switch (command.Role.ToLower())
+            {
+                case "administrator":
+                    role = Roles.Administrator;
+                    break;
+                case "collector":
+                    role = Roles.Collector;
+                    break;
+                case "officer":
+                    role = Roles.Officer;
+                    break;
+            }
+
+            //Registro de usuario en Identity
+            var response = await _accountService.RegisterEmployeeAsync(request, role);
+
+            if (response.Status == "Fallido")
+            {
+                ImageUpload.DeleteFile(request.UrlImage);
+                throw new Exception(response.Details[0].Message);
+            }
+
+            return response;
+        }
     }
 }
