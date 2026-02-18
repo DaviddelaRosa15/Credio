@@ -20,12 +20,19 @@ public class DeleteClientCommandHandler : ICommandHandler<DeleteClientCommand>
     }
     public async Task<Result> Handle(DeleteClientCommand request, CancellationToken cancellationToken)
     {
-        Client? foundClient = await _clientRepository.GetByIdAsync(request.cliendId);
+        try
+        {
+            Client? foundClient = await _clientRepository.GetByIdAsync(request.cliendId);
 
-        if (foundClient is null) return Result.Failure(Error.NotFound("No se encontro el empleado con el id proporcionado"));
+            if (foundClient is null) return Result.Failure(Error.NotFound("No se encontro el empleado con el id proporcionado"));
         
-        await _clientRepository.DeleteAsync(foundClient);
+            await _clientRepository.DeleteAsync(foundClient);
         
-        return Result.Success();
+            return Result.Success();
+        }
+        catch 
+        {
+            return Result.Failure(Error.InternalServerError("Ocurrio un error al eliminar el cliente"));
+        }
     }
 }
