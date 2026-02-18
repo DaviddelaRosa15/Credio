@@ -14,46 +14,46 @@ using RegisterRequest = Credio.Core.Application.Dtos.Account.RegisterRequest;
 
 namespace Credio.Core.Application.Features.Clients.Commands.CreateClientCommand;
 
-public class CreateClientCommand : ICommand
+public class CreateClientCommand : ICommand<CreateClientCommandResponse>
 {
     [SwaggerParameter(Description = "Primer Nombre")]
-    public string FirstName { get; set; } 
-    
+    public string FirstName { get; set; }
+
     [SwaggerParameter(Description = "Apellido")]
     public string LastName { get; set; }
 
     [SwaggerParameter(Description = "Edad")]
     public int Age { get; set; }
-    
+
     [SwaggerParameter(Description = "Email")]
     public string Email { get; set; }
-    
+
     [SwaggerParameter(Description = "Tipo de documento")]
     public string DocumentType { get; set; }
-    
+
     [SwaggerParameter(Description = "Teléfono")]
     public string Phone { get; set; }
-    
+
     [SwaggerParameter(Description = "Numero del documento")]
     public string DocumentNumber { get; set; }
 
     [SwaggerParameter(Description = "Dirección")]
     public AddressDTO AddressDto { get; set; }
-    
+
     [SwaggerParameter(Description = "Id del empleado")]
     public string EmployeeId { get; set; }
-    
+
     [SwaggerParameter(Description = "Latitud")]
     public decimal HomeLatitude { get; set; }
-    
+
     [SwaggerParameter(Description = "Longitud")]
     public decimal HomeLongitude { get; set; }
-    
+
     [SwaggerParameter(Description = "Foto de perfil")]
     public IFormFile? Image { get; set; }
 }
 
-public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand>
+public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, CreateClientCommandResponse>
 {
     private readonly IDocumentTypeRepository _documentTypeRepository;
     private readonly IClientRepository _clientRepository;
@@ -65,7 +65,7 @@ public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand>
         IDocumentTypeRepository documentTypeRepository,
         IClientRepository clientRepository,
         IEmployeeRepository employeeRepository,
-        IMapper mapper, 
+        IMapper mapper,
         IAccountService accountService)
     {
         _documentTypeRepository = documentTypeRepository;
@@ -74,60 +74,97 @@ public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand>
         _mapper = mapper;
         _accountService = accountService;
     }
-    
-    public async Task<Result> Handle(CreateClientCommand request, CancellationToken cancellationToken)
+
+    public async Task<Result<CreateClientCommandResponse>> Handle(
+        CreateClientCommand request,
+        CancellationToken cancellationToken)
     {
-        DocumentType? documentType = await _documentTypeRepository.GetByPropertyAsync(x => x.Name == request.DocumentType);
-
-        if (documentType is null) return Result.Failure(Error.BadRequest("El tipo de documento proporcionado no existe."));
-        
-        var currentEmployee = await _employeeRepository.GetByIdAsync(request.EmployeeId);
-
-        if (currentEmployee is null) return Result.Failure(Error.BadRequest("El empleado no fue encontrado"));
-
-        if (await _clientRepository.IsDocumentNumberRegister(request.DocumentNumber, cancellationToken))
+        try
         {
-            return Result.Failure(Error.Conflict("El numero de documento ya existe."));
+            DocumentType? documentType = await _documentTypeRepository.GetByPropertyAsync(x => x.Name == request.DocumentType);
+
+            if (documentType is null) return Result<CreateClientCommandResponse>.Failure(Error.BadRequest("El tipo de documento proporcionado no existe."));
+
+            var currentEmployee = await _employeeRepository.GetByIdAsync(request.EmployeeId);
+
+            if (currentEmployee is null) return Result<CreateClientCommandResponse>.Failure(Error.BadRequest("El empleado no fue encontrado"));
+
+            if (await _clientRepository.IsDocumentNumberRegister(request.DocumentNumber, cancellationToken))
+            {
+                return Result<CreateClientCommandResponse>.Failure(Error.Conflict("El numero de documento ya existe."));
+            }
+
+            RegisterRequest clientRequest = new RegisterRequest
+            {
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                UserName = request.DocumentNumber,
+                Email = request.Email,
+                Address =
+                    $"{request.AddressDto.City} {request.AddressDto.AddressLine1} {request.AddressDto.AddressLine2}",
+                PhoneNumber = request.Phone,
+                Password = "Credio@" + Guid.NewGuid().ToString().Substring(0, 4),
+                UrlImage = request.Image is not null
+                    ? ImageUpload.UploadImage(request.Image, StorageConstants.Clients)
+                    : ""
+            };
+
+            RegisterResponse response = await _accountService.RegisterClientAsync(clientRequest);
+
+            if (response.Status == "Fallido")
+            {
+                ImageUpload.DeleteFile(clientRequest.UrlImage);
+                return Result<CreateClientCommandResponse>.Failure(Error.BadRequest(response.Details[0].Message));
+            }
+
+            Client client = new Client
+            {
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                Age = request.Age,
+                DocumentNumber = request.DocumentNumber,
+                DocumentTypeId = documentType.Id,
+                EmployeeId = currentEmployee.Id,
+                HomeLatitude = request.HomeLatitude,
+                HomeLongitude = request.HomeLongitude,
+                Address = _mapper.Map<Address>(request.AddressDto),
+                UserId = response.Id,
+                Email = request.Email,
+                Phone = request.Phone,
+            };
+
+            Client createdClient = await _clientRepository.AddAsync(client);
+
+            CreateClientCommandResponse result = new CreateClientCommandResponse
+            {
+                Id = createdClient.Id,
+                FirstName = createdClient.FirstName,
+                LastName = createdClient.LastName,
+                Age = createdClient.Age,
+                DocumentNumber = createdClient.DocumentNumber,
+                PhoneNumber = createdClient.Phone,
+                Email = createdClient.Email,
+                UrlImage = response.UrlImage,
+                Address = new AddressDTO()
+                {
+                    AddressLine1 = createdClient.Address.AddressLine1,
+                    AddressLine2 = createdClient.Address.AddressLine2,
+                    City = createdClient.Address.City,
+                    PostalCode = createdClient.Address.PostalCode,
+                    Region = createdClient.Address.Region,
+                    StreetNumber = createdClient.Address.StreetNumber,
+                },
+                DocumentType = request.DocumentType,
+                UserName = createdClient.DocumentNumber,
+                HomeLatitude = createdClient.HomeLatitude,
+                HomeLongitude = createdClient.HomeLongitude,
+            };
+
+            return Result<CreateClientCommandResponse>.Success(result);
         }
-        
-        RegisterRequest clientRequest = new RegisterRequest
+        catch
         {
-            FirstName =  request.FirstName,
-            LastName =  request.LastName,
-            UserName = request.DocumentNumber,
-            Email = request.Email,
-            Address = $"{request.AddressDto.City} {request.AddressDto.AddressLine1} {request.AddressDto.AddressLine2}",
-            PhoneNumber = request.Phone,
-            Password = "Credio@" + Guid.NewGuid().ToString().Substring(0, 4),
-            UrlImage = request.Image is not null ? ImageUpload.UploadImage(request.Image, StorageConstants.Clients) : ""
-        };
-        
-        RegisterResponse response = await _accountService.RegisterClientAsync(clientRequest);
-
-        if (response.Status == "Fallido")
-        {
-            ImageUpload.DeleteFile(clientRequest.UrlImage);
-            return Result.Failure(Error.BadRequest(response.Details[0].Message));
+            return Result<CreateClientCommandResponse>.Failure(Error.InternalServerError("Ocurrió un error tratando de registrar el cliente."));
         }
-
-        Client client = new Client
-        {
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            Age = request.Age,
-            DocumentNumber = request.DocumentNumber,
-            DocumentTypeId = documentType.Id,
-            EmployeeId = currentEmployee.Id,
-            HomeLatitude = request.HomeLatitude,
-            HomeLongitude = request.HomeLongitude,
-            Address = _mapper.Map<Address>(request.AddressDto),
-            UserId = response.Id,
-            Email = request.Email,
-            Phone = request.Phone,
-        };
-        
-         await _clientRepository.AddAsync(client);
-
-        return Result.Success();
     }
 }
