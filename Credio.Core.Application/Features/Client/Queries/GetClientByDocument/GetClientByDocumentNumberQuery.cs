@@ -2,6 +2,7 @@
 using Credio.Core.Application.Dtos.User;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
+using Credio.Core.Domain.Entities;
 
 
 namespace Credio.Core.Application.Features.Clients.Queries 
@@ -29,13 +30,26 @@ namespace Credio.Core.Application.Features.Clients.Queries
         
         public async Task<Result<ClientDto>> Handle(GetClientByDocumentNumberQuery request, CancellationToken cancellationToken)
         {
+            if (string.IsNullOrEmpty(request.DocumentNumber) || string.IsNullOrWhiteSpace(request.DocumentNumber))
+            {
+                return Result<ClientDto>.Failure(Error.BadRequest("The document number can't be null or empty"));
+            }
+            
             string document = request.DocumentNumber.Trim();
             
-            ClientDto? client = await _clientRepository.GetByDocumentNumberAsync(document, cancellationToken);
+            Client? foundClient = await _clientRepository.GetByPropertyWithIncludeAsync(x => x.DocumentNumber == document, [x=> x.Address]);
 
-            if (client is null) return Result<ClientDto>.Failure(Error.NotFound("No se encontro el cliente con el numero de documento dado"));
+            if (foundClient is null) return Result<ClientDto>.Failure(Error.NotFound("No se encontro el cliente con el numero de documento dado"));
             
-            return Result<ClientDto>.Success(client);
+            return Result<ClientDto>.Success(new ClientDto
+            {
+                Id =  foundClient.Id,
+                FullName = $"{foundClient.FirstName} {foundClient.LastName}",
+                DocumentNumber =  foundClient.DocumentNumber,
+                City = foundClient.Address.City,
+                Phone = foundClient.Phone,
+                State = foundClient.Address.Region
+            });
         }
     }
 }
