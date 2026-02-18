@@ -57,4 +57,36 @@ public class ClientController : ControllerBase
          onSuccess: Results.NoContent,
          onFailure: CustomResult.Problem);
    }
+
+   [Authorize(Roles = "Administrator")]
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [SwaggerOperation(
+    Summary = "Listado de clientes",
+    Description = "Obtiene la lista paginada de clientes"
+    )]
+    public async Task<IResult> GetClients(
+    [FromQuery] GetClientsQuery query,
+    CancellationToken cancellationToken)
+    {
+        Result<PagedResponse<ClientListDto>> result =
+            await _sender.Send(query, cancellationToken);
+
+        return result.Match(
+            onSuccess: response =>
+            {
+                Response.Headers.Append("X-Pagination",
+                    JsonSerializer.Serialize(new
+                    {
+                        response.TotalPages,
+                        response.HasNext
+                    }));
+
+                return Results.Ok(response.Data);
+            },
+            onFailure: CustomResult.Problem
+        );
+    }
 }
