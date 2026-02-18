@@ -1,8 +1,8 @@
-using System.Data;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Credio.Core.Application.Interfaces.Persintence;
 
 public interface IApplicationContext
 {
-    Task<IDbTransaction> GetDbTransactionAsync(CancellationToken cancellationToken = default);
+    Task<IDbContextTransaction> GetDbTransactionAsync(CancellationToken cancellationToken = default);
 }

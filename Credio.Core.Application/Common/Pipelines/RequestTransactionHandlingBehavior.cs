@@ -1,8 +1,8 @@
-using System.Data;
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Persintence;
 using MediatR;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace Credio.Core.Application.Common.Pipelines;
@@ -24,7 +24,7 @@ public class RequestTransactionHandlingBehavior<TRequest, TResponse>
     }
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        using IDbTransaction transaction = await _applicationContext.GetDbTransactionAsync(cancellationToken);
+        await using IDbContextTransaction transaction = await _applicationContext.GetDbTransactionAsync(cancellationToken);
         
         string commandName = typeof(TRequest).Name;
         
@@ -38,7 +38,7 @@ public class RequestTransactionHandlingBehavior<TRequest, TResponse>
                     "The command {commandName} was completed successfully, committing the transaction.",
                     commandName);
                 
-                transaction.Commit();
+                await transaction.CommitAsync(cancellationToken);
             }
             else
             {
@@ -46,7 +46,7 @@ public class RequestTransactionHandlingBehavior<TRequest, TResponse>
                     "The command {commandName} failed logically. Transaction rolled back.",
                     commandName);
                 
-                transaction.Rollback();
+                await transaction.RollbackAsync(cancellationToken);
             }
 
             return response;
@@ -57,7 +57,7 @@ public class RequestTransactionHandlingBehavior<TRequest, TResponse>
                 "An unexpected error happen while trying to complete the command {commandName}, rollying back the transaction.",
                 commandName);
             
-            transaction.Rollback();
+            await transaction.RollbackAsync(cancellationToken);
             
             throw;
         }

@@ -1,5 +1,4 @@
-﻿using System.Data;
-using Credio.Core.Application.Interfaces.Persintence;
+﻿using Credio.Core.Application.Interfaces.Persintence;
 using Credio.Core.Domain.Common;
 using Credio.Core.Domain.Entities;
 using Credio.Infrastructure.Persistence.Extensions;
@@ -71,11 +70,9 @@ namespace Credio.Infrastructure.Persistence.Contexts
 		
         public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();	
         
-        public async Task<IDbTransaction> GetDbTransactionAsync(CancellationToken cancellationToken = default)
+        public async Task<IDbContextTransaction> GetDbTransactionAsync(CancellationToken cancellationToken = default)
         {
-	        IDbContextTransaction transaction = await Database.BeginTransactionAsync(cancellationToken);
-	        
-	        return transaction.GetDbTransaction();
+	        return await Database.BeginTransactionAsync(cancellationToken);
         }
 
         public void TruncateTables()
