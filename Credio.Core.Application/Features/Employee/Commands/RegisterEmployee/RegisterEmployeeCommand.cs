@@ -4,13 +4,13 @@ using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Constants;
 using Credio.Core.Application.Dtos.Account;
 using Credio.Core.Application.Dtos.Common;
+using Credio.Core.Application.Dtos.Email;
 using Credio.Core.Application.Enums;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Helpers;
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Application.Interfaces.Services;
 using Credio.Core.Domain.Entities;
-using MediatR;
 using Microsoft.AspNetCore.Http;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -55,6 +55,7 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
         private readonly IEmailService _emailService;
         private readonly IEmailHelper _emailHelper;
         private readonly IMapper _mapper;
+        private string _generatedPassword;
 
         public RegisterEmployeeCommandHandler(IAccountService accountService, IAddressRepository addressRepository, IEmployeeRepository employeeRepository,
             IDocumentTypeRepository documentTypeRepository, IEmailService emailService, IEmailHelper emailHelper,
@@ -76,7 +77,7 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
             {
                 RegisterEmployeeCommandResponse result = new();
                 var employee = _mapper.Map<Domain.Entities.Employee>(command);
-                
+
 
                 //Validar que no exista otro empleado con el mismo número de documento
                 var existingDocument = await _employeeRepository.GetByPropertyAsync(e => e.DocumentNumber == command.DocumentNumber);
@@ -121,27 +122,7 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
                 result.Role = command.Role;
                 result.UrlImage = response.UrlImage;
 
-                /*Envío de correo electrónico
-                try
-                {
-                    UserWelcomeEmail dto = new()
-                    {
-                        FullName = response.FirstName + " " + response.LastName,
-                        UserName = request.UserName,
-                        Password = request.Password
-                    };
-
-                    await _emailService.SendAsync(new EmailRequest()
-                    {
-                        To = response.Email,
-                        Body = _emailHelper.MakeEmailForAdmin(dto),
-                        Subject = "¡Bienvenido/a como Administrador en Avalanche!"
-                    });
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception("Hubo un error enviando el correo al administrador");
-                }*/
+                await SendEmployeeWelcomeEmail(result);
 
                 return Result<RegisterEmployeeCommandResponse>.Success(result);
             }
@@ -158,6 +139,7 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
             //Generar nombre de usuario y contraseña temporal
             request.UserName = employeeCode;
             request.Password = "Credio@" + Guid.NewGuid().ToString().Substring(0, 4);
+            _generatedPassword = request.Password;
             request.Address = $"{command.Address.City} {command.Address.AddressLine1} {command.Address.AddressLine2}";
             if (command.Image != null)
             {
@@ -194,5 +176,39 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
 
             return response;
         }
+
+        private async Task SendEmployeeWelcomeEmail(RegisterEmployeeCommandResponse result)
+        {
+            try
+            {
+                // Traducir el rol al español para el correo
+                string roleInSpanish = result.Role.ToLower() switch
+                {
+                    "administrator" => "Administrador",
+                    "collector" => "Cobrador",
+                    "officer" => "Oficial",
+                    _ => result.Role
+                };
+
+                EmployeeWelcomeEmail dto = new()
+                {
+                    FullName = $"{result.FirstName} {result.LastName}",
+                    UserName = result.UserName,
+                    Password = _generatedPassword,
+                    Role = roleInSpanish
+                };
+
+                await _emailService.SendAsync(new EmailRequest()
+                {
+                    To = result.Email,
+                    Body = _emailHelper.MakeEmailForEmployee(dto),
+                    Subject = $"¡Bienvenido/a como {roleInSpanish} en Credio!"
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Hubo un error enviando el correo al administrador");
+            }
+        } 
     }
 }

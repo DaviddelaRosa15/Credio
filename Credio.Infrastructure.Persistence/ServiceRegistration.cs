@@ -17,6 +17,7 @@ namespace Credio.Infrastructure.Persistence
                 .AddInterceptors()
                 .AddWorkers();
             
+            
             #region Vaciar tablas
             /*var optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();
             optionsBuilder.EnableSensitiveDataLogging();

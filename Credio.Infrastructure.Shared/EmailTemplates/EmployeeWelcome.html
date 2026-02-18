@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Registro de Administrador en ARS Avalanche!</title>
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            line-height: 1.6;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .email-header {
+            background: linear-gradient(135deg, #193cb8 0%, #155dfc 100%);
+            padding: 40px 30px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .ars-logo {
+            height: 48px;
+            width: 48px;
+            object-fit: contain;
+            display: inline-block;
+            background: white;
+            border-radius: 8px;
+            padding: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+  
+
+        .brand-name {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 2px px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+            position: relative;
+            z-index: 2;
+            display: inline-block;
+            vertical-align: middle;
+            padding-left: 8px;
+        }
+        
+        .brand-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 12px;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+            padding-left: 8px;
+        }
+        
+        .email-body {
+            padding: 40px 30px;
+            background: white;
+        }
+        
+        .welcome-title {
+            color: #193cb8;
+            font-size: 26px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .welcome-message {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .user-name {
+            color: #155dfc;
+            font-weight: bold;
+        }
+
+        .password-section {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .password-label {
+            color: #666;
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .generated-password {
+            display: inline-block;
+            background: #f8f9fa;
+            color: #193cb8;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 8px 18px;
+            border-radius: 6px;
+            letter-spacing: 1px;
+            margin-top: 5px;
+            border: 1px dashed #155dfc;
+        }
+        
+        .support-section {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .support-text {
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+            margin: 0;
+        }
+        
+        .email-footer {
+            background: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .footer-text {
+            color: #999;
+            font-size: 12px;
+            margin: 5px 0;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+            
+            .email-header {
+                padding: 30px 20px;
+                flex-direction: column;
+                gap: 8px;
+                align-items: flex-start;
+            }
+            
+            .email-body {
+                padding: 30px 20px;
+            }
+            
+            .brand-name {
+                font-size: 24px;
+                padding-left: 8px;
+            }
+            
+            .welcome-title {
+                font-size: 22px;
+            }
+
+            .ars-logo {
+                height: 36px;
+                width: 36px;
+            }
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="email-header">
+            <img class="ars-logo" src="cid:logoCid" alt="ARS Avalanche Logo" />
+            <div>
+                <h1 class="brand-name">ARS AVALANCHE</h1>
+                <p class="brand-subtitle">Sistema de Administración ARS</p>
+            </div>
+        </div>
+        
+        <!-- Body -->
+        <div class="email-body">
+            <h2 class="welcome-title">¡Registro de Administrador Exitoso!</h2>
+            
+            <p class="welcome-message">
+                Hola <span class="user-name">{{FullName}}</span>,
+            </p>
+            
+            <p class="welcome-message">
+                Te damos la bienvenida como <strong>Administrador</strong> al sistema ARS Avalanche. Ahora tienes acceso total para gestionar usuarios, hospitales, analistas y todas las configuraciones del sistema. Tu rol es fundamental para mantener la operatividad y seguridad de la plataforma.
+            </p>
+
+            <!-- Sección de credenciales generadas -->
+            <div class="password-section">
+                <div class="password-label">Estas son tus credenciales temporales para ingresar al sistema:</div>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 24px; flex-wrap: wrap; margin-top: 10px;">
+                    <div>
+                        <span style="color:#193cb8;font-weight:500;">Usuario:</span>
+                        <span class="generated-password">{{UserName}}</span>
+                    </div>
+                    <div style="padding-left: 8px;">
+                        <span style="color:#193cb8;font-weight:500;">Contraseña:</span>
+                        <span class="generated-password">{{Password}}</span>
+                    </div>
+                </div>
+                <div class="password-label" style="margin-top:12px;font-size:13px;font-weight:400;">
+                    Por seguridad, te recomendamos cambiar la contraseña después de tu primer ingreso.
+                </div>
+            </div>
+            
+            <div class="support-section">
+                <p class="support-text">
+                    <strong>¿Tienes dudas o necesitas soporte?</strong> Nuestro equipo está disponible 24/7 para ayudarte en lo que necesites. No dudes en contactarnos ante cualquier consulta.
+                </p>
+            </div>
+            
+            <p class="welcome-message">
+                ¡Gracias por asumir este rol! Tu gestión es clave para el éxito y la seguridad de ARS Avalanche.
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="email-footer">
+            <p class="footer-text">
+                Atentamente,<br>
+                <strong>El equipo de ARS Avalanche</strong>
+            </p>
+            <p class="footer-text">
+                © 2025 ARS Avalanche. Todos los derechos reservados.
+            </p>
+            <p class="footer-text">
+                Este es un correo automático, por favor no respondas a este mensaje.
+            </p>
+        </div>
+    </div>

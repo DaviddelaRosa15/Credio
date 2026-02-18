@@ -1,7 +1,10 @@
+using System.Text.Json;
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Requests;
+using Credio.Core.Application.Dtos.User;
 using Credio.Core.Application.Features.Clients.Commands.CreateClientCommand;
 using Credio.Core.Application.Features.Clients.Commands.DeleteClientCommand;
+using Credio.Core.Application.Features.Clients.Queries;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -76,4 +79,24 @@ public class ClientController : ControllerBase
          onSuccess: Results.NoContent,
          onFailure:CustomResult.Problem);
    }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpGet("{documentNumber}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [SwaggerOperation(
+    Summary = "Obtiene el cliente por numero de documento",
+    Description = "Obtiene al cliente segun el numero de documento"
+    )]
+    public async Task<IResult> GetClientByDocumentNumber(
+    string documentNumber,
+    CancellationToken cancellationToken)
+    {
+       Result<ClientDto> result = await _sender.Send(new GetClientByDocumentNumberQuery(documentNumber), cancellationToken);
+       
+       return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure:CustomResult.Problem);
+    }
 }

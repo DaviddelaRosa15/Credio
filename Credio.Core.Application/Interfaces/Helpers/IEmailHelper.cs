@@ -5,6 +5,7 @@ namespace Credio.Core.Application.Interfaces.Helpers
     public interface IEmailHelper
     {
         string MakeEmailForChange(string fullName);
+        string MakeEmailForEmployee(EmployeeWelcomeEmail employee);
         string MakeEmailForReset(string fullName, string code);
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Credio.Core.Application.Dtos.User
 {
-    public class ClientListDto
+    public class ClientDto
     {
         public string Id { get; set; }
 
