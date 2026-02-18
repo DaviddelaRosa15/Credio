@@ -1,6 +1,10 @@
+using System.Text.Json;
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Requests;
+using Credio.Core.Application.Dtos.User;
 using Credio.Core.Application.Features.Clients.Commands.CreateClientCommand;
+using Credio.Core.Application.Features.Clients.Commands.DeleteClientCommand;
+using Credio.Core.Application.Features.Clients.Queries;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -33,10 +37,10 @@ public class ClientController : ControllerBase
    )]
    public async Task<IResult> CreateClient([FromForm] CreateClientCommand command, CancellationToken cancellationToken)
    {
-      Result result = await _sender.Send(command, cancellationToken);
+      Result<CreateClientCommandResponse> result = await _sender.Send(command, cancellationToken);
 
       return result.Match(
-         onSuccess: Results.Created,
+         onSuccess: () => CustomResult.Success(result),
          onFailure: CustomResult.Problem);
    }
    
@@ -57,36 +61,42 @@ public class ClientController : ControllerBase
          onSuccess: Results.NoContent,
          onFailure: CustomResult.Problem);
    }
+   
+   [Authorize(Roles =  "Administrator")]
+   [HttpDelete("delete/{clientId}")]
+   [ProducesResponseType(StatusCodes.Status204NoContent)]
+   [ProducesResponseType(StatusCodes.Status404NotFound)]
+   [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+   [SwaggerOperation(
+      Summary = "Eliminacion de clientes",
+      Description = "Elimine clientes que esten registrados en el sistema"
+   )]
+   public async Task<IResult> DeleteClient(string clientId, CancellationToken cancellationToken)
+   {
+      Result result = await _sender.Send(new DeleteClientCommand(clientId), cancellationToken);
 
-   [Authorize(Roles = "Administrator")]
-    [HttpGet]
+      return result.Match(
+         onSuccess: Results.NoContent,
+         onFailure:CustomResult.Problem);
+   }
+
+    [Authorize(Roles = "Administrator")]
+    [HttpGet("{documentNumber}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [SwaggerOperation(
-    Summary = "Listado de clientes",
-    Description = "Obtiene la lista paginada de clientes"
+    Summary = "Obtiene el cliente por numero de documento",
+    Description = "Obtiene al cliente segun el numero de documento"
     )]
-    public async Task<IResult> GetClients(
-    [FromQuery] GetClientsQuery query,
+    public async Task<IResult> GetClientByDocumentNumber(
+    string documentNumber,
     CancellationToken cancellationToken)
     {
-        Result<PagedResponse<ClientListDto>> result =
-            await _sender.Send(query, cancellationToken);
-
-        return result.Match(
-            onSuccess: response =>
-            {
-                Response.Headers.Append("X-Pagination",
-                    JsonSerializer.Serialize(new
-                    {
-                        response.TotalPages,
-                        response.HasNext
-                    }));
-
-                return Results.Ok(response.Data);
-            },
-            onFailure: CustomResult.Problem
-        );
+       Result<ClientDto> result = await _sender.Send(new GetClientByDocumentNumberQuery(documentNumber), cancellationToken);
+       
+       return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure:CustomResult.Problem);
     }
 }

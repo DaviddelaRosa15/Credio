@@ -4,8 +4,6 @@ using Credio.Infrastructure.Persistence.Interceptors;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Credio.Core.Application.Interfaces.Clients;
-using Credio.Infrastructure.Persistence.Repositories;
 
 namespace Credio.Infrastructure.Persistence
 {
@@ -18,8 +16,7 @@ namespace Credio.Infrastructure.Persistence
                 .AddRepositories()
                 .AddInterceptors()
                 .AddWorkers();
-
-            services.AddScoped<IClientQueryRepository, ClientQueryRepository>();    
+            
             
             #region Vaciar tablas
             /*var optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();

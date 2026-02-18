@@ -59,18 +59,25 @@ public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand>
     }
     public async Task<Result> Handle(UpdateClientCommand request, CancellationToken cancellationToken)
     {
-        Client? foundClient = await _clientRepository
-            .GetByIdWithIncludeAsync(x => x.Id == request.clientId, [(x => x.Address)]);
-
-        if (foundClient is null)
+        try
         {
-            return Result.Failure(Error.BadRequest("El cliente no fue encontrado"));
-        }
-    
-        request.Apply(foundClient);
-        
-        await _clientRepository.UpdateAsync(foundClient);
+            Client? foundClient = await _clientRepository
+                .GetByIdWithIncludeAsync(x => x.Id == request.clientId, [(x => x.Address)]);
 
-        return Result.Success();
+            if (foundClient is null)
+            {
+                return Result.Failure(Error.BadRequest("El cliente no fue encontrado"));
+            }
+    
+            request.Apply(foundClient);
+        
+            await _clientRepository.UpdateAsync(foundClient);
+
+            return Result.Success();
+        }
+        catch
+        {
+            return Result.Failure(Error.InternalServerError("Ocurrio un error al momento del actualizar el cliente"));
+        }
     }
 }
