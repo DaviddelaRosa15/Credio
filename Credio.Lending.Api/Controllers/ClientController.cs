@@ -1,6 +1,7 @@
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Requests;
 using Credio.Core.Application.Features.Clients.Commands.CreateClientCommand;
+using Credio.Core.Application.Features.Clients.Commands.DeleteClientCommand;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -33,10 +34,10 @@ public class ClientController : ControllerBase
    )]
    public async Task<IResult> CreateClient([FromForm] CreateClientCommand command, CancellationToken cancellationToken)
    {
-      Result result = await _sender.Send(command, cancellationToken);
+      Result<CreateClientCommandResponse> result = await _sender.Send(command, cancellationToken);
 
       return result.Match(
-         onSuccess: Results.Created,
+         onSuccess: () => CustomResult.Success(result),
          onFailure: CustomResult.Problem);
    }
    
@@ -56,5 +57,23 @@ public class ClientController : ControllerBase
       return result.Match(
          onSuccess: Results.NoContent,
          onFailure: CustomResult.Problem);
+   }
+   
+   [Authorize(Roles =  "Administrator")]
+   [HttpDelete("delete/{clientId}")]
+   [ProducesResponseType(StatusCodes.Status204NoContent)]
+   [ProducesResponseType(StatusCodes.Status404NotFound)]
+   [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+   [SwaggerOperation(
+      Summary = "Eliminacion de clientes",
+      Description = "Elimine clientes que esten registrados en el sistema"
+   )]
+   public async Task<IResult> DeleteClient(string clientId, CancellationToken cancellationToken)
+   {
+      Result result = await _sender.Send(new DeleteClientCommand(clientId), cancellationToken);
+
+      return result.Match(
+         onSuccess: Results.NoContent,
+         onFailure:CustomResult.Problem);
    }
 }
