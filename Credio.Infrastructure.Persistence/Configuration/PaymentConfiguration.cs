@@ -19,5 +19,6 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder
             .Property(x => x.GpsLongitude)
             .HasPrecision(11, 8);
+
     }
 }

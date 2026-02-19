@@ -23,5 +23,17 @@ public class ClientConfiguration : IEntityTypeConfiguration<Client>
         builder
             .Property(x => x.HomeLongitude)
             .HasPrecision(11, 8);
+
+        builder
+            .HasIndex(x => x.LastName)
+            .HasDatabaseName("IX_Client_LastName");
+
+        builder
+            .HasIndex(x => x.FirstName)
+            .HasDatabaseName("IX_Client_FirstName");
+
+        builder
+            .HasIndex(x => new { x.FirstName, x.LastName })
+            .HasDatabaseName("IX_Client_FullName");
     }
 }

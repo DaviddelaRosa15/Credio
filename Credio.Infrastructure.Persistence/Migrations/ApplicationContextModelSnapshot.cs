@@ -277,6 +277,12 @@ namespace Credio.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("EmployeeId");
 
+                    b.HasIndex("FirstName")
+                        .HasDatabaseName("IX_Client_FirstName");
+
+                    b.HasIndex("LastName")
+                        .HasDatabaseName("IX_Client_LastName");
+
                     b.HasIndex("RouteId");
 
                     b.HasIndex("UserId")
