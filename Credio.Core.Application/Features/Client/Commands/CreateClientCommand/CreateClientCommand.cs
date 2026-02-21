@@ -117,7 +117,7 @@ public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, C
                 return Result<CreateClientCommandResponse>.Failure(Error.BadRequest(response.Details[0].Message));
             }
 
-            Client client = new Client
+            Domain.Entities.Client client = new()
             {
                 FirstName = request.FirstName,
                 LastName = request.LastName,
@@ -133,7 +133,7 @@ public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, C
                 Phone = request.Phone,
             };
 
-            Client createdClient = await _clientRepository.AddAsync(client);
+            var createdClient = await _clientRepository.AddAsync(client);
 
             CreateClientCommandResponse result = new CreateClientCommandResponse
             {
