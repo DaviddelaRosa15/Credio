@@ -1,7 +1,7 @@
-using System.Text.Json;
 using Credio.Core.Application.Common.Primitives;
+using Credio.Core.Application.Dtos.Client;
 using Credio.Core.Application.Dtos.Requests;
-using Credio.Core.Application.Dtos.User;
+using Credio.Core.Application.Features.Client.Queries.GetAll;
 using Credio.Core.Application.Features.Clients.Commands.CreateClientCommand;
 using Credio.Core.Application.Features.Clients.Commands.DeleteClientCommand;
 using Credio.Core.Application.Features.Clients.Queries;
@@ -25,7 +25,7 @@ public class ClientController : ControllerBase
       _sender = sender;
    }
    
-   [Authorize(Roles =  "Administrator")]
+   [Authorize(Roles =  "Administrator, Officer")]
    [HttpPost("create")]
    [ProducesResponseType(StatusCodes.Status200OK)]
    [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -44,7 +44,7 @@ public class ClientController : ControllerBase
          onFailure: CustomResult.Problem);
    }
    
-   [Authorize(Roles =  "Administrator")]
+   [Authorize(Roles =  "Administrator, Officer")]
    [HttpPut("update/{clientId}")]
    [ProducesResponseType(StatusCodes.Status204NoContent)]
    [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -80,22 +80,40 @@ public class ClientController : ControllerBase
          onFailure:CustomResult.Problem);
    }
 
-    [Authorize(Roles = "Administrator")]
-    [HttpGet("{documentNumber}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [Authorize(Roles = "Administrator, Officer, Collector")]
+    [HttpGet("all")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<ClientDTO>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    [SwaggerOperation(
+    Summary = "Obtiene los clientes",
+    Description = "Obtiene al cliente segun el numero de documento"
+    )]
+    public async Task<IResult> GetClients([FromQuery] GetAllClientQuery query, CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(query, cancellationToken);
+
+        return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure: CustomResult.Problem);
+    }
+
+    [Authorize(Roles = "Administrator, Officer, Collector")]
+    [HttpGet("by-document/{documentNumber}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClientDTO))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
     [SwaggerOperation(
     Summary = "Obtiene el cliente por numero de documento",
     Description = "Obtiene al cliente segun el numero de documento"
     )]
-    public async Task<IResult> GetClientByDocumentNumber(
-    string documentNumber,
-    CancellationToken cancellationToken)
+    public async Task<IResult> GetClientByDocumentNumber(string documentNumber, CancellationToken cancellationToken)
     {
-       Result<ClientDto> result = await _sender.Send(new GetClientByDocumentNumberQuery(documentNumber), cancellationToken);
-       
-       return result.Match(
+        Result<ClientDTO> result = await _sender.Send(new GetClientByDocumentNumberQuery(documentNumber), cancellationToken);
+
+        return result.Match(
           onSuccess: () => CustomResult.Success(result),
           onFailure:CustomResult.Problem);
     }

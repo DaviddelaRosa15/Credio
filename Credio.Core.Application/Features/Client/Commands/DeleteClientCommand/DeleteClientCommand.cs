@@ -22,7 +22,7 @@ public class DeleteClientCommandHandler : ICommandHandler<DeleteClientCommand>
     {
         try
         {
-            Client? foundClient = await _clientRepository.GetByIdAsync(request.cliendId);
+            var foundClient = await _clientRepository.GetByIdAsync(request.cliendId);
 
             if (foundClient is null) return Result.Failure(Error.NotFound("No se encontro el empleado con el id proporcionado"));
         

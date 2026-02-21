@@ -27,7 +27,7 @@ public record UpdateClientCommand(
     [SwaggerParameter(Description = "Longitud", Required = false)]
     decimal? homeLongitude) : ICommand
 {
-    public void Apply(Client client)
+    public void Apply(Domain.Entities.Client client)
     {
         client.FirstName = firstName ?? client.FirstName;
         client.LastName  = lastName  ?? client.LastName;
@@ -61,7 +61,7 @@ public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand>
     {
         try
         {
-            Client? foundClient = await _clientRepository
+            var foundClient = await _clientRepository
                 .GetByIdWithIncludeAsync(x => x.Id == request.clientId, [(x => x.Address)]);
 
             if (foundClient is null)

@@ -25,8 +25,8 @@ namespace Credio.Lending.Api.Controllers
         [Authorize(Roles = "Administrator")]
         [HttpPost("register")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegisterEmployeeCommandResponse))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Error))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(Error))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         [SwaggerOperation(
            Summary = "Registro de empleados",
            Description = "Cree usuarios empleados para usar el sistema"
@@ -43,8 +43,8 @@ namespace Credio.Lending.Api.Controllers
         [Authorize(Roles = "Administrator")]
         [HttpGet("all")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EmployeeDTO))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(Error))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(Error))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         [SwaggerOperation(
            Summary = "Consulta de empleados",
            Description = "Consulta todos los empleados con paginación"
