@@ -117,4 +117,23 @@ public class ClientController : ControllerBase
           onSuccess: () => CustomResult.Success(result),
           onFailure:CustomResult.Problem);
     }
+
+    [Authorize(Roles = "Administrator, Officer, Collector")]
+    [HttpGet("by-id/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClientDetailDTO))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    [SwaggerOperation(
+    Summary = "Obtiene el cliente por numero de id",
+    Description = "Obtiene al cliente segun el numero de id"
+    )]
+    public async Task<IResult> GetClientByIdNumber(Guid id, CancellationToken cancellationToken)
+    {
+        Result<ClientDetailDTO> result = await _sender.Send(new GetClientByIdQuery(id), cancellationToken);
+
+        return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure: CustomResult.Problem);
+    }
 }
