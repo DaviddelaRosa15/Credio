@@ -10,12 +10,12 @@ namespace Credio.Core.Application.Features.Clients.Queries
 {
     public sealed class GetClientByIdQuery : ICachedQuery<ClientDetailDTO>
     {
-        public GetClientByIdQuery(Guid Id)
+        public GetClientByIdQuery(string Id)
         {
             this.Id = Id;
         }
 
-        public Guid Id { get; set; }
+        public string Id { get; set; }
 
         public string CachedKey => $"client-{Id}";
     }
@@ -33,34 +33,33 @@ namespace Credio.Core.Application.Features.Clients.Queries
 
         public async Task<Result<ClientDetailDTO>> Handle(GetClientByIdQuery request, CancellationToken cancellationToken)
         {
-            if (request.Id == Guid.Empty)
+            try
             {
-                return Result<ClientDetailDTO>.Failure(
-                    Error.BadRequest("El campo id no puede estar vacio")
+                if (string.IsNullOrEmpty(request.Id))
+                {
+                    return Result<ClientDetailDTO>.Failure(
+                        Error.BadRequest("El campo id no puede estar vacio")
+                    );
+                }
+
+                var foundClient = await _clientRepository.GetByIdWithIncludeAsync(x => x.Id == request.Id,
+                    [
+                        x => x.Address,
+                    x => x.DocumentType
+                    ]
                 );
+
+
+                if (foundClient is null) return Result<ClientDetailDTO>.Failure(Error.NotFound("No se encontro el cliente con el id dado"));
+
+                var clientDTO = _mapper.Map<ClientDetailDTO>(foundClient);
+
+                return Result<ClientDetailDTO>.Success(clientDTO);
             }
-
-            Guid Id = request.Id;
-
-            var foundClient = await _clientRepository
-            .GetByPropertyWithIncludeAsync(
-                x => x.Id == Id.ToString(),
-                [
-                    x => x.Address,
-                    x => x.DocumentType,
-                    x => x.Loans,
-                    x => x.LoanApplications,
-                    x => x.HomeLatitude,
-                    x => x.HomeLongitude
-                ]
-            );
-
-
-            if (foundClient is null) return Result<ClientDetailDTO>.Failure(Error.NotFound("No se encontro el cliente con el id dado"));
-
-            var clientDTO = _mapper.Map<ClientDetailDTO>(foundClient);
-
-            return Result<ClientDetailDTO>.Success(clientDTO);
+            catch (Exception ex)
+            {
+                return Result<ClientDetailDTO>.Failure(Error.InternalServerError($"Ocurrio un error inesperado consultando el cliente"));
+            }
         }
     }
 }

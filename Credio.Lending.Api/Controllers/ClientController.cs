@@ -128,7 +128,7 @@ public class ClientController : ControllerBase
     Summary = "Obtiene el cliente por numero de id",
     Description = "Obtiene al cliente segun el numero de id"
     )]
-    public async Task<IResult> GetClientByIdNumber(Guid id, CancellationToken cancellationToken)
+    public async Task<IResult> GetClientByIdNumber(string id, CancellationToken cancellationToken)
     {
         Result<ClientDetailDTO> result = await _sender.Send(new GetClientByIdQuery(id), cancellationToken);
 
