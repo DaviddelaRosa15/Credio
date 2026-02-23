@@ -87,8 +87,9 @@ namespace Credio.Core.Application.Helpers
             return _service.RenderTemplate("EmployeeWelcome", new Dictionary<string, string>
             {
                 { "FullName", employee.FullName },
-                { "UserName", employee.UserName },
-                { "Password", employee.Password }
+                { "Username", employee.UserName },
+                { "TemporaryPassword", employee.TemporaryPassword },
+                { "Role", employee.Role }
             });
         }
 

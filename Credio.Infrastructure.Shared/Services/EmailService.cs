@@ -32,7 +32,7 @@ namespace Credio.Infrastructure.Shared.Services
                 var builder = new BodyBuilder { HtmlBody = request.Body };
 
                 // Ejemplo: añadir logo siempre que el template lo requiera
-                var logoPath = Path.Combine(AppContext.BaseDirectory, "EmailTemplates", "logo.png");
+                var logoPath = Path.Combine(AppContext.BaseDirectory, "EmailTemplates", "logo.jpeg");
                 if (File.Exists(logoPath) && request.Body.Contains("cid:logoCid"))
                 {
                     var image = builder.LinkedResources.Add(logoPath);

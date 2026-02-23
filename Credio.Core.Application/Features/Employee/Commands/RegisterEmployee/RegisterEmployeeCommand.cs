@@ -194,7 +194,7 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
                 {
                     FullName = $"{result.FirstName} {result.LastName}",
                     UserName = result.UserName,
-                    Password = _generatedPassword,
+                    TemporaryPassword = _generatedPassword,
                     Role = roleInSpanish
                 };
 
