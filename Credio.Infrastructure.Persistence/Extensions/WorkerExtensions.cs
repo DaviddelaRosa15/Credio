@@ -9,6 +9,7 @@ public static partial class PersistenceExtensions
     {
         services.AddHostedService<DatabaseInitializerWorker>();
         services.AddHostedService<PersistenceSeederWorker>();
+        services.AddHostedService<DomainEventDispatcherWorker>();
 
         return services;
     }
