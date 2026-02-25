@@ -1,4 +1,5 @@
-﻿using Credio.Infrastructure.Persistence.Contexts;
+﻿using Credio.Infrastructure.Persistence.Channels;
+using Credio.Infrastructure.Persistence.Contexts;
 using Credio.Infrastructure.Persistence.Extensions;
 using Credio.Infrastructure.Persistence.Interceptors;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,8 @@ namespace Credio.Infrastructure.Persistence
     {
         public static IServiceCollection AddPersistenceInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddSingleton<DomainEventChannel>();
+            
             services
                 .AddServices()
                 .AddRepositories()
@@ -44,7 +47,8 @@ namespace Credio.Infrastructure.Persistence
                         builder => builder.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName))
                         .AddInterceptors(
                             provider.GetRequiredService<AuditableEntityInterceptor>(),
-                            provider.GetRequiredService<SoftDeleteInterceptor>());
+                            provider.GetRequiredService<SoftDeleteInterceptor>(),
+                            provider.GetRequiredService<DomainEventInterceptor>());
                 });
             }
             #endregion
