@@ -7,14 +7,15 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AutoMapper" Version="14.0.0" />
-		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
-		<PackageReference Include="MediatR" Version="12.5.0" />
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
-		<PackageReference Include="Nanoid" Version="3.1.0" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.1" />
-		<PackageReference Include="System.Collections" Version="4.3.0" />
+		<PackageReference Include="AutoMapper"/>
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
+		<PackageReference Include="MediatR"/>
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
+		<PackageReference Include="Nanoid"/>
+		<PackageReference Include="Newtonsoft.Json"/>
+		<PackageReference Include="Swashbuckle.AspNetCore.Annotations"/>
+		<PackageReference Include="System.Collections"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore"/>
 	</ItemGroup>
 	
   <ItemGroup>
@@ -25,11 +26,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Credio.Core.Domain\Credio.Core.Domain.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.EntityFrameworkCore">
-      <HintPath>..\..\..\.nuget\packages\microsoft.entityframeworkcore\8.0.16\lib\net8.0\Microsoft.EntityFrameworkCore.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
