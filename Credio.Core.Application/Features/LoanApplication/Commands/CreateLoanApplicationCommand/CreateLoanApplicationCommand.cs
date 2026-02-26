@@ -5,19 +5,25 @@ using Credio.Core.Application.Helpers;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Domain.Entities;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Credio.Core.Application.Features.LoanApplications.Commands.CreateLoanApplicationCommand;
 
 public class CreateLoanApplicationCommand : ICommand<LoanApplicationDto>
 {
+    [SwaggerParameter(Description = "Tasa de interés solicitada")]
     public double RequestedInterestRate { get; set; } 
     
+    [SwaggerParameter(Description = "Cantidad solicitada")]
     public double RequestedAmount { get; set; }
     
+    [SwaggerParameter(Description = "Termino solicitado")]
     public int RequestedTerm { get; set; }
 
+    [SwaggerParameter(Description = "Id del cliente")]
     public string ClientId { get; set; } = string.Empty;
-
+    
+    [SwaggerParameter(Description = "Id del empleado")]
     public string EmployeeId { get; set; } = string.Empty;
 }
 
