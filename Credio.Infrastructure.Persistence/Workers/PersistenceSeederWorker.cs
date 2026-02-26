@@ -1,5 +1,6 @@
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Application.Seeds;
+using Credio.Core.Domain.Entities;
 using Credio.Infrastructure.Shared;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +35,23 @@ public class PersistenceSeederWorker: BaseWorker<PersistenceSeederWorker>
         {
             _logger.LogInformation("Document types already exist. Skipping seeding.");
         }
+        #endregion
+        
+        #region Application Status Seeding
+        IApplicationStatusRepository applicationStatusRepository = scope.ServiceProvider.GetRequiredService<IApplicationStatusRepository>();
+
+        List<ApplicationStatus> anyApplicationStatus = await applicationStatusRepository.GetAllAsync();
+        
+        if (anyApplicationStatus is null || anyApplicationStatus.Count == 0)
+        {
+            _logger.LogInformation("Seeding application status...");
+            await DefaultApplicationStatus.Seed(applicationStatusRepository);
+        }
+        else
+        {
+            _logger.LogInformation("Application status already exists. Skipping seeding.");
+        }
+
         #endregion
     }
 }
