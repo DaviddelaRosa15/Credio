@@ -164,5 +164,14 @@ namespace Credio.Infrastructure.Persistence.Repositories
 
             return new PagedResult<Entity>(items, totalCount, pageNumber, pageSize);
         }
+
+        public async Task<bool> ExistsAsync(Expression<Func<Entity, bool>> predicate, CancellationToken cancellationToken = default)
+        {
+            await using ApplicationContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+            
+            IQueryable<Entity> query = context.Set<Entity>().AsQueryable();
+            
+            return await query.AnyAsync(predicate, cancellationToken);
+        }
     }
 }
