@@ -2,7 +2,7 @@
 
 namespace Credio.Core.Application.Dtos.Client
 {
-    public class ClientDetailDto
+    public class ClientDetailDTO
     {
         public string Id { get; set; }
         public string FirstName { get; set; }
@@ -25,12 +25,9 @@ namespace Credio.Core.Application.Dtos.Client
 
         public AddressDTO Address { get; set; }
 
-        public decimal HomeLatitude { get; set; }
+        public string HomeLatitude { get; set; }
 
-        public decimal HomeLongitude { get; set; }
-
-
-        
+        public string HomeLongitude { get; set; }
     }
 }
 

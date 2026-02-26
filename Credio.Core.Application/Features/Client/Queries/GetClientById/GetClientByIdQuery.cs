@@ -4,24 +4,23 @@ using Credio.Core.Application.Dtos.Client;
 using Credio.Core.Application.Dtos.Common;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
-using Credio.Core.Application.Interfaces.Services;
 
 
 namespace Credio.Core.Application.Features.Clients.Queries
 {
-    public sealed class GetClientByIdQuery : ICachedQuery<ClientDetailDto>
+    public sealed class GetClientByIdQuery : ICachedQuery<ClientDetailDTO>
     {
-        public GetClientByIdQuery(Guid Id)
+        public GetClientByIdQuery(string Id)
         {
             this.Id = Id;
         }
 
-        public Guid Id { get; set; }
+        public string Id { get; set; }
 
         public string CachedKey => $"client-{Id}";
     }
 
-    public sealed class GetClientByIdQueryHandler : IQueryHandler<GetClientByIdQuery, ClientDetailDto>
+    public sealed class GetClientByIdQueryHandler : IQueryHandler<GetClientByIdQuery, ClientDetailDTO>
     {
         private readonly IClientRepository _clientRepository;
         private readonly IMapper _mapper;
@@ -32,32 +31,35 @@ namespace Credio.Core.Application.Features.Clients.Queries
             _mapper = mapper;
         }
 
-        public async Task<Result<ClientDetailDto>> Handle(GetClientByIdQuery request, CancellationToken cancellationToken)
+        public async Task<Result<ClientDetailDTO>> Handle(GetClientByIdQuery request, CancellationToken cancellationToken)
         {
-            if (request.Id == Guid.Empty)
+            try
             {
-                return Result<ClientDetailDto>.Failure(Error.BadRequest("El campo id no puede estar vacio"));
-            }
+                if (string.IsNullOrEmpty(request.Id))
+                {
+                    return Result<ClientDetailDTO>.Failure(
+                        Error.BadRequest("El campo id no puede estar vacio")
+                    );
+                }
 
-            Guid Id = request.Id;
-    
-            var foundClient = await _clientRepository
-                .GetByPropertyWithIncludeAsync(
-                    x => x.Id == Id.ToString(),
+                var foundClient = await _clientRepository.GetByIdWithIncludeAsync(x => x.Id == request.Id,
                     [
                         x => x.Address,
-                        x => x.DocumentType,
-                        x => x.DocumentNumber,
-                        x => x.HomeLatitude,
-                        x => x.HomeLongitude
+                    x => x.DocumentType
                     ]
                 );
 
-            if (foundClient is null) return Result<ClientDetailDto>.Failure(Error.NotFound("No se encontro el cliente con el id dado"));
 
-            var ClientDetailDto = _mapper.Map<ClientDetailDto>(foundClient);
+                if (foundClient is null) return Result<ClientDetailDTO>.Failure(Error.NotFound("No se encontro el cliente con el id dado"));
 
-            return Result<ClientDetailDto>.Success(ClientDetailDto);
+                var clientDTO = _mapper.Map<ClientDetailDTO>(foundClient);
+
+                return Result<ClientDetailDTO>.Success(clientDTO);
+            }
+            catch (Exception ex)
+            {
+                return Result<ClientDetailDTO>.Failure(Error.InternalServerError($"Ocurrio un error inesperado consultando el cliente"));
+            }
         }
     }
 }
