@@ -14,5 +14,5 @@ public class ValidationException : Exception
     }
 
     private static Error[] CreateValidationError(IEnumerable<ValidationFailure> failures)
-        => failures.Select(x => Error.Validation(x.ErrorMessage)).ToArray();
+        => failures.Select(x => Error.BadRequest    (x.ErrorMessage)).ToArray();
 }

@@ -36,9 +36,9 @@ namespace Credio.Core.Domain.Entities
 
         public Employee Employee { get; set; } = null!;
         
-        public string RouteId { get; set; }
+        public string? RouteId { get; set; }
         
-        public Route Route { get; set; } = null!;
+        public Route? Route { get; set; }
         
         public decimal HomeLatitude { get; set; }
         

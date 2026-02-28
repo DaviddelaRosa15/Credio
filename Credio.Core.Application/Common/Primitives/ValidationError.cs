@@ -5,9 +5,9 @@ namespace Credio.Core.Application.Common.Primitives;
 public class ValidationError : Error
 {
     public ValidationError(Error[] errors)
-        : base("Validation.Error",
+        : base("Validation Error",
             "One or more validation errors occurred.",
-            ErrorType.Validation)
+            ErrorType.BadRequest)
     {
         Errors = errors;
     }

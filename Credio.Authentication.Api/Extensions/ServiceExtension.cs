@@ -11,7 +11,7 @@ namespace Credio.Interface.Authentication.Extensions
             {
                 List<string> xmlFiles = Directory.GetFiles(AppContext.BaseDirectory, "*.xml", searchOption: SearchOption.TopDirectoryOnly).ToList();
                 xmlFiles.ForEach(xmlFile => options.IncludeXmlComments(xmlFile));
-
+                
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Version = "v1",

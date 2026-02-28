@@ -260,7 +260,6 @@ namespace Credio.Infrastructure.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("RouteId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("UserId")
@@ -278,10 +277,19 @@ namespace Credio.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("EmployeeId");
 
+                    b.HasIndex("FirstName")
+                        .HasDatabaseName("IX_Client_FirstName");
+
+                    b.HasIndex("LastName")
+                        .HasDatabaseName("IX_Client_LastName");
+
                     b.HasIndex("RouteId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
+
+                    b.HasIndex("FirstName", "LastName")
+                        .HasDatabaseName("IX_Client_FullName");
 
                     b.ToTable("Client");
                 });
@@ -945,9 +953,7 @@ namespace Credio.Infrastructure.Persistence.Migrations
 
                     b.HasOne("Credio.Core.Domain.Entities.Route", "Route")
                         .WithMany("Clients")
-                        .HasForeignKey("RouteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RouteId");
 
                     b.Navigation("Address");
 

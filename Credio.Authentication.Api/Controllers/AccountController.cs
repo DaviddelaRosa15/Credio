@@ -1,25 +1,23 @@
+using Credio.Authentication.Api.Common;
+using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Constants;
 using Credio.Core.Application.Dtos.Account;
-using Credio.Core.Application.Dtos.Common;
-using Credio.Core.Application.Enums;
 using Credio.Core.Application.Features.Account.Commands.Authenticate;
 using Credio.Core.Application.Features.Account.Commands.ChangePassword;
 using Credio.Core.Application.Features.Account.Commands.ConfirmCode;
 using Credio.Core.Application.Features.Account.Commands.ConfirmEmail;
 using Credio.Core.Application.Features.Account.Commands.RegisterClient;
-using Credio.Core.Application.Features.Account.Commands.RegisterEmployee;
 using Credio.Core.Application.Features.Account.Commands.ResetPassword;
 using Credio.Core.Application.Features.Account.Queries.GetRefreshAccessToken;
 using Credio.Core.Application.Features.Account.Queries.GetValidationRefreshToken;
 using Credio.Core.Application.Helpers;
 using Credio.Core.Domain.Settings;
+using Credio.Interface.Authentication.Extensions;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net.Mime;
-using System.Text.Json;
 
 namespace Credio.Interface.Authentication.Controllers
 {
@@ -30,17 +28,19 @@ namespace Credio.Interface.Authentication.Controllers
     {
         private IMediator _mediator;
         protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetService<IMediator>();
+        private readonly ISender _sender;
 
         private readonly IHostEnvironment env;
 
         private readonly RefreshJWTSettings _refreshSettings;
         private readonly ILogger<AccountController> _logger;
 
-        public AccountController(IHostEnvironment hostEnvironment, IOptions<RefreshJWTSettings> refreshSettings, ILogger<AccountController> logger)
+        public AccountController(IHostEnvironment hostEnvironment, IOptions<RefreshJWTSettings> refreshSettings, ILogger<AccountController> logger, ISender sender)
         {
             env = hostEnvironment;
             _refreshSettings = refreshSettings.Value;
             _logger = logger;
+            _sender = sender;
         }
 
         [HttpPost("login")]
@@ -53,57 +53,35 @@ namespace Credio.Interface.Authentication.Controllers
            Description = "Autentica al usuario y devuelve un JWT Token"
         )]
         [Consumes(MediaTypeNames.Application.Json)]
-        public async Task<IActionResult> Authenticate([FromBody] AuthenticateCommand command)
+        public async Task<IResult> Authenticate([FromBody] AuthenticateCommand command, CancellationToken cancellationToken)
         {
-            try
+            /*
+            string jsonString = JsonSerializer.Serialize(command, new JsonSerializerOptions
             {
-                string jsonString = JsonSerializer.Serialize(command, new JsonSerializerOptions
-                {
-                    WriteIndented = true // Optional: for pretty-printing
-                });
+                WriteIndented = true // Optional: for pretty-printing
+            });
 
-                // Log the JSON string
-                _logger.LogInformation("Object as JSON: {JsonString}", jsonString);
-                var response = await Mediator.Send(command);
+            // Log the JSON string
+            _logger.LogInformation("Object as JSON: {JsonString}", jsonString);
+            var response = await Mediator.Send(command);
+            */
 
-                if (!ModelState.IsValid)
-                {
-                    var errors = ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage)
-                        .ToList();
+            Result<AuthenticationResponse> result = await _sender.Send(command, cancellationToken);
 
-                    return BadRequest(ErrorMapperHelper.ListError(errors));
-                }
-
-                if (response.HasError)
-                {
-                    if (response.Error.Contains("No existe una cuenta registrada con este usuario"))
-                    {
-                        return BadRequest(ErrorMapperHelper.Error(ErrorMessages.BadRequest, ErrorMessages.LoginError));
-                    }
-                    if (response.Error.Contains("correo"))
-                    {
-                        return StatusCode(StatusCodes.Status401Unauthorized, new ErrorDTO() { Status = "Fallido", Details = [new ErrorDetailsDTO { Code = "E002", Message = response.Error }] });
-                    }
-                    return BadRequest(ErrorMapperHelper.Error(ErrorMessages.InternalServer, response.Error));
-                }
-
-                Response.Cookies.Append("refreshToken", response.RefreshToken, new CookieOptions
+            if (result.IsSuccess)
+            {
+                Response.Cookies.Append("refreshToken", result.Value.RefreshToken, new CookieOptions
                 {
                     HttpOnly = true,
                     Secure = true,
                     Expires = DateTime.Now.AddMinutes(_refreshSettings.DurationInMinutes),
                     SameSite = SameSiteMode.None
                 });
-
-                return Ok(response);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ErrorMapperHelper.Error(ErrorMessages.InternalServer, e.Message));
             }
 
+            return result.Match(
+            onSuccess: () => CustomResult.Success(result),
+            onFailure: CustomResult.Problem);
         }
 
         [HttpGet("refresh-access-token")]
@@ -122,44 +100,6 @@ namespace Credio.Interface.Authentication.Controllers
                 if (response.HasError)
                 {
                     return StatusCode(StatusCodes.Status500InternalServerError, ErrorMapperHelper.Error(ErrorMessages.InternalServer, response.Error));
-                }
-
-                return Ok(response);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ErrorMapperHelper.Error(ErrorMessages.InternalServer, e.Message));
-            }
-        }
-
-        //[Authorize(Roles = "Administrator")]
-        [HttpPost("register-employee")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RegisterResponse))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RegisterResponse))]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(RegisterResponse))]
-        [SwaggerOperation(
-           Summary = "Registro de empleados",
-           Description = "Cree usuarios empleados para usar el sistema"
-        )]
-        public async Task<IActionResult> RegisterAdmin([FromForm] RegisterEmployeeCommand command)
-        {
-            try
-            {
-                var response = await Mediator.Send(command);
-
-                if (!ModelState.IsValid)
-                {
-                    var errors = ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage)
-                        .ToList();
-
-                    return BadRequest(ErrorMapperHelper.ListError(errors));
-                }
-
-                if (response.Status == "Fallido")
-                {
-                    return BadRequest(response);
                 }
 
                 return Ok(response);

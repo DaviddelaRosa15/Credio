@@ -1,4 +1,5 @@
-﻿using Credio.Core.Application.Interfaces.Repositories;
+﻿using Credio.Core.Application.Dtos.Common;
+using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -30,11 +31,10 @@ namespace Credio.Infrastructure.Persistence.Repositories
             return entities;
         }
 
-        public virtual async Task UpdateAsync(Entity entity, string id)
+        public virtual async Task UpdateAsync(Entity entity)
         {
             using var dbContext = _dbContextFactory.CreateDbContext();
-            var entry = await dbContext.Set<Entity>().FindAsync(id);
-            dbContext.Entry(entry).CurrentValues.SetValues(entity);
+            dbContext.Set<Entity>().Update(entity);
             await dbContext.SaveChangesAsync();
         }
 
@@ -139,6 +139,30 @@ namespace Credio.Infrastructure.Persistence.Repositories
             }
 
             return await query.Where(predicate).ToListAsync();
+        }
+
+        public async Task<PagedResult<Entity>> GetPagedAsync(int pageNumber, int pageSize,
+            List<Expression<Func<Entity, object>>>? properties)
+        {
+            using var dbContext = _dbContextFactory.CreateDbContext();
+
+            var query = dbContext.Set<Entity>().AsQueryable();
+
+            if (properties != null)
+            {
+                foreach (var include in properties)
+                {
+                    query = query.Include(include);
+                }
+            }
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<Entity>(items, totalCount, pageNumber, pageSize);
         }
     }
 }

@@ -1,11 +1,13 @@
-﻿using Credio.Core.Domain.Common;
+﻿using Credio.Core.Application.Interfaces.Persintence;
+using Credio.Core.Domain.Common;
 using Credio.Core.Domain.Entities;
 using Credio.Infrastructure.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Credio.Infrastructure.Persistence.Contexts
 {
-    public class ApplicationContext : DbContext
+    public class ApplicationContext : DbContext, IApplicationContext
     {
         public ApplicationContext(DbContextOptions<ApplicationContext> options) : base(options) { }
         
@@ -67,6 +69,11 @@ namespace Credio.Infrastructure.Persistence.Contexts
         public DbSet<Route> Route => Set<Route>();
 		
         public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();	
+        
+        public async Task<IDbContextTransaction> GetDbTransactionAsync(CancellationToken cancellationToken = default)
+        {
+	        return await Database.BeginTransactionAsync(cancellationToken);
+        }
 
         public void TruncateTables()
         {

@@ -19,13 +19,17 @@
 	
   <ItemGroup>
     <Folder Include="Dtos\Account\" />
-    <Folder Include="Dtos\Email\" />
     <Folder Include="Services\" />
-    <Folder Include="Seeds\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Credio.Core.Domain\Credio.Core.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.EntityFrameworkCore">
+      <HintPath>..\..\..\.nuget\packages\microsoft.entityframeworkcore\8.0.16\lib\net8.0\Microsoft.EntityFrameworkCore.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
