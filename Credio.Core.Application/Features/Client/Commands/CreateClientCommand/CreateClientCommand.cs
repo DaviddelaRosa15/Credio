@@ -8,6 +8,7 @@ using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Application.Interfaces.Services;
 using Credio.Core.Domain.Entities;
+using Credio.Core.Domain.Events;
 using Microsoft.AspNetCore.Http;
 using Swashbuckle.AspNetCore.Annotations;
 using RegisterRequest = Credio.Core.Application.Dtos.Account.RegisterRequest;
@@ -132,6 +133,8 @@ public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, C
                 Email = request.Email,
                 Phone = request.Phone,
             };
+            
+            client.AddEvent(new ClientWelcomeEvent($"{request.FirstName} {request.LastName}"));
 
             var createdClient = await _clientRepository.AddAsync(client);
 
@@ -162,7 +165,7 @@ public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, C
 
             return Result<CreateClientCommandResponse>.Success(result);
         }
-        catch
+        catch(Exception ex)
         {
             return Result<CreateClientCommandResponse>.Failure(Error.InternalServerError("Ocurrió un error tratando de registrar el cliente."));
         }

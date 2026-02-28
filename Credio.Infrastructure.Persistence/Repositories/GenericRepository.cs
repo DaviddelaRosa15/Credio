@@ -142,11 +142,17 @@ namespace Credio.Infrastructure.Persistence.Repositories
         }
 
         public async Task<PagedResult<Entity>> GetPagedAsync(int pageNumber, int pageSize,
-            List<Expression<Func<Entity, object>>>? properties)
+            List<Expression<Func<Entity, object>>>? properties,
+            Expression<Func<Entity, bool>>? predicate = null)
         {
             using var dbContext = _dbContextFactory.CreateDbContext();
 
             var query = dbContext.Set<Entity>().AsQueryable();
+
+            if (predicate != null)
+            {
+                query = query.Where(predicate);
+            }
 
             if (properties != null)
             {

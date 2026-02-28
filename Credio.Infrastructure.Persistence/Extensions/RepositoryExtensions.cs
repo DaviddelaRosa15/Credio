@@ -13,6 +13,8 @@ public static partial class PersistenceExtensions
         services.AddTransient<IClientRepository, ClientRepository>();
         services.AddTransient<IDocumentTypeRepository, DocumentTypeRepository>();
         services.AddTransient<IEmployeeRepository, EmployeeRepository>();
+        services.AddTransient<IApplicationStatusRepository, ApplicationStatusRepository>();
+        services.AddTransient<ILoanApplicationRepository, LoanApplicationRepository>();
 
         return services;
     }

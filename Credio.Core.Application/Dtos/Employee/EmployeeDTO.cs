@@ -20,7 +20,5 @@ namespace Credio.Core.Application.Dtos.Employee
         public string EmployeeCode { get; set; }
 
         public string? AddressId { get; set; }
-
-        public AddressDTO Address { get; set; }
     }
 }
