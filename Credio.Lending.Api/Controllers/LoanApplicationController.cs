@@ -59,4 +59,23 @@ public class LoanApplicationController : ControllerBase
             onSuccess: Results.NoContent,
             onFailure: CustomResult.Problem);
     }
+    
+    [SwaggerOperation(
+        Summary = "Rechazo de solicitud de prestamos",
+        Description = "Rechazar solicitud de prestamos"
+    )]
+    [Authorize(Roles = "Administrator,Officer")]
+    [HttpPut("reject/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IResult> RejectLoanApplication(string id,[FromBody] RejectLoanApplicationRequest request, CancellationToken cancellationToken)
+    {
+        Result result = await _sender.Send(request.ToCommand(id), cancellationToken);
+
+        return result.Match(
+            onSuccess: Results.NoContent,
+            onFailure: CustomResult.Problem);
+    }
 }
