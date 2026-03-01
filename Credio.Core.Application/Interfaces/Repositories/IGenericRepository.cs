@@ -22,6 +22,7 @@ namespace Credio.Core.Application.Interfaces.Repositories
         Task<List<Entity>> GetAllByPropertyWithIncludeAsync(Expression<Func<Entity, bool>> predicate,
             List<Expression<Func<Entity, object>>> properties);
         
-        Task<PagedResult<Entity>> GetPagedAsync(int pageNumber, int pageSize, List<Expression<Func<Entity, object>>>? properties);
+        Task<PagedResult<Entity>> GetPagedAsync(int pageNumber, int pageSize, List<Expression<Func<Entity, object>>>? properties,
+			Expression<Func<Entity, bool>>? predicate = null);
         }
 }
