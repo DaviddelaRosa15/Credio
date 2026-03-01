@@ -7,15 +7,15 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AutoMapper"/>
-		<PackageReference Include="FluentValidation.DependencyInjectionExtensions"/>
-		<PackageReference Include="MediatR"/>
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
-		<PackageReference Include="Nanoid"/>
-		<PackageReference Include="Newtonsoft.Json"/>
-		<PackageReference Include="Swashbuckle.AspNetCore.Annotations"/>
-		<PackageReference Include="System.Collections"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore"/>
+		<PackageReference Include="AutoMapper" />
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+		<PackageReference Include="MediatR" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+		<PackageReference Include="Nanoid" />
+		<PackageReference Include="Newtonsoft.Json" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" />
+		<PackageReference Include="System.Collections" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" />
 	</ItemGroup>
 	
   <ItemGroup>

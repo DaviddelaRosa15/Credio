@@ -45,7 +45,7 @@ namespace Credio.Core.Application.Features.Clients.Queries
                 var foundClient = await _clientRepository.GetByIdWithIncludeAsync(x => x.Id == request.Id,
                     [
                         x => x.Address,
-                    x => x.DocumentType
+                        x => x.DocumentType
                     ]
                 );
 

@@ -1,7 +1,11 @@
 ﻿using Credio.Core.Application.Common.Primitives;
+using Credio.Core.Application.Dtos.Client;
 using Credio.Core.Application.Dtos.Employee;
+using Credio.Core.Application.Features.Clients.Queries;
 using Credio.Core.Application.Features.Employee.Commands.RegisterEmployee;
 using Credio.Core.Application.Features.Employee.Queries.GetAll;
+using Credio.Core.Application.Features.Employee.Queries.GetEmployeeByCode;
+using Credio.Core.Application.Features.Employee.Queries.GetEmployeeById;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -56,6 +60,44 @@ namespace Credio.Lending.Api.Controllers
             return result.Match(
             onSuccess: () => CustomResult.Success(result),
             onFailure: CustomResult.Problem);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        [HttpGet("by-code/{employeeCode}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EmployeeDetailDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(EmployeeDetailDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        [SwaggerOperation(
+            Summary = "Obtiene el empleado por codigo de empleado",
+            Description = "Obtiene al empleado segun el codigo dado"
+        )]
+        public async Task<IResult> GetEmployeeByCode(string EmployeeCode, CancellationToken cancellationToken)
+        {
+            Result<EmployeeDetailDTO> result = await _sender.Send(new GetEmployeeByCodeQuery(EmployeeCode), cancellationToken);
+
+            return result.Match(
+              onSuccess: () => CustomResult.Success(result),
+              onFailure: CustomResult.Problem);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        [HttpGet("by-id/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EmployeeDetailDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(EmployeeDetailDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        [SwaggerOperation(
+            Summary = "Obtiene el empleado por id",
+            Description = "Obtiene al empleado segun el id dado"
+        )]
+        public async Task<IResult> GetEmployeeById(string id, CancellationToken cancellationToken)
+        {
+            Result<EmployeeDetailDTO> result = await _sender.Send(new GetEmployeeByIdQuery(id), cancellationToken);
+
+            return result.Match(
+              onSuccess: () => CustomResult.Success(result),
+              onFailure: CustomResult.Problem);
         }
     }
 }

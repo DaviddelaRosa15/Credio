@@ -80,6 +80,24 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(x => x.LastModifiedBy, opt => opt.Ignore())
                 .ForMember(x => x.IsDeleted, opt => opt.Ignore())
                 .ForMember(x => x.Deleted, opt => opt.Ignore());
+
+            CreateMap<Client, ClientBasicDTO>()
+                .ForMember(x => x.DocumentType, opt => opt.MapFrom(y => y.DocumentType.Name))
+                .ForMember(x => x.FullName, opt => opt.MapFrom(y => y.FirstName + y.LastName))
+                .ReverseMap()
+                .ForMember(x => x.DocumentType, opt => opt.Ignore())
+                .ForMember(x => x.Loans, opt => opt.Ignore())
+                .ForMember(x => x.LoanApplications, opt => opt.Ignore())
+                .ForMember(x => x.Route, opt => opt.Ignore())
+                .ForMember(x => x.UserId, opt => opt.Ignore())
+                .ForMember(x => x.Created, opt => opt.Ignore())
+                .ForMember(x => x.CreatedBy, opt => opt.Ignore())
+                .ForMember(x => x.LastModified, opt => opt.Ignore())
+                .ForMember(x => x.LastModifiedBy, opt => opt.Ignore())
+                .ForMember(x => x.IsDeleted, opt => opt.Ignore())
+                .ForMember(x => x.Deleted, opt => opt.Ignore());
+
+
             #endregion
 
             #region Employee
@@ -124,6 +142,23 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(x => x.Deleted, opt => opt.Ignore());
 
             CreateMap<Employee, EmployeeDTO>()
+                .ForMember(x => x.DocumentType, opt => opt.MapFrom(y => y.DocumentType.Name))
+                .ReverseMap()
+                .ForMember(x => x.Clients, opt => opt.Ignore())
+                .ForMember(x => x.DocumentType, opt => opt.Ignore())
+                .ForMember(x => x.Loans, opt => opt.Ignore())
+                .ForMember(x => x.LoanApplications, opt => opt.Ignore())
+                .ForMember(x => x.Routes, opt => opt.Ignore())
+                .ForMember(x => x.UserId, opt => opt.Ignore())
+                .ForMember(x => x.Payments, opt => opt.Ignore())
+                .ForMember(x => x.Created, opt => opt.Ignore())
+                .ForMember(x => x.CreatedBy, opt => opt.Ignore())
+                .ForMember(x => x.LastModified, opt => opt.Ignore())
+                .ForMember(x => x.LastModifiedBy, opt => opt.Ignore())
+                .ForMember(x => x.IsDeleted, opt => opt.Ignore())
+                .ForMember(x => x.Deleted, opt => opt.Ignore());
+
+            CreateMap<Employee, EmployeeDetailDTO>()
                 .ForMember(x => x.DocumentType, opt => opt.MapFrom(y => y.DocumentType.Name))
                 .ReverseMap()
                 .ForMember(x => x.Clients, opt => opt.Ignore())

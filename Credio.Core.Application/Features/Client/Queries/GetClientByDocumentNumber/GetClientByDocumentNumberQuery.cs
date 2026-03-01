@@ -35,7 +35,7 @@ namespace Credio.Core.Application.Features.Clients.Queries
         {
             if (string.IsNullOrEmpty(request.DocumentNumber) || string.IsNullOrWhiteSpace(request.DocumentNumber))
             {
-                return Result<ClientDTO>.Failure(Error.BadRequest("The document number can't be null or empty"));
+                return Result<ClientDTO>.Failure(Error.BadRequest("El numero de documento no puede estar vacio"));
             }
 
             string document = request.DocumentNumber.Trim();
