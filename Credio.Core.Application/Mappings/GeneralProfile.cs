@@ -178,10 +178,10 @@ namespace Credio.Core.Application.Mappings
 
             #region LoanApplication
             CreateMap<LoanApplication, LoanApplicationDto>()
-                .ForMember(dest => dest.ClientName,
-                    opt => opt.MapFrom(src => src.Client.FirstName + " " + src.Client.LastName))
-                .ForMember(dest => dest.ApplicationStatusName,
-                    opt => opt.MapFrom(src => src.ApplicationStatus.Name));
+                .ForMember(x => x.ClientName,
+                    opt => opt.MapFrom(y => y.Client.FirstName + " " + y.Client.LastName))
+                .ForMember(x => x.ApplicationStatusName,
+                    opt => opt.MapFrom(y => y.ApplicationStatus.Name));
             #endregion
         }
     }

@@ -88,7 +88,7 @@ public class ClientController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
     [SwaggerOperation(
     Summary = "Obtiene los clientes",
-    Description = "Obtiene al cliente segun el numero de documento"
+    Description = "Obtiene todos los clientes, o filtra por oficial"
     )]
     public async Task<IResult> GetClients([FromQuery] GetAllClientQuery query, CancellationToken cancellationToken)
     {

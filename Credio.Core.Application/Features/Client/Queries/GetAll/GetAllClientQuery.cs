@@ -12,6 +12,8 @@ namespace Credio.Core.Application.Features.Client.Queries.GetAll
 {
     public class GetAllClientQuery : PaginationRequest, ICachedQuery<List<ClientDTO>>
     {
+        public string? OfficerId { get; set; }
+
         [JsonIgnore]
         [SwaggerIgnore]
         public string CachedKey => $"GetAllClientQuery_{PageNumber}_{PageSize}_{OfficerId}";
