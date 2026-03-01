@@ -46,7 +46,7 @@ public class LoanApplicationController : ControllerBase
         Description = "Aprobar solicitud de prestamos"
     )]
     [Authorize(Roles = "Administrator,Officer")]
-    [HttpPost("approve/{id}")]
+    [HttpPut("approve/{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
