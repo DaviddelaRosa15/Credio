@@ -10,11 +10,15 @@ public static partial class PersistenceExtensions
     {
         services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddTransient<IAddressRepository, AddressRepository>();
+        services.AddTransient<IAmortizationMethodRepository, AmortizationMethodRepository>();
+        services.AddTransient<IAmortizationStatusRepository, AmortizationStatusRepository>();
         services.AddTransient<IClientRepository, ClientRepository>();
         services.AddTransient<IDocumentTypeRepository, DocumentTypeRepository>();
         services.AddTransient<IEmployeeRepository, EmployeeRepository>();
         services.AddTransient<IApplicationStatusRepository, ApplicationStatusRepository>();
         services.AddTransient<ILoanApplicationRepository, LoanApplicationRepository>();
+        services.AddTransient<ILoanStatusRepository, LoanStatusRepository>();
+        services.AddTransient<IPaymentFrequencyRepository, PaymentFrequencyRepository>();
 
         return services;
     }
