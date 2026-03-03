@@ -25,7 +25,7 @@ public class LoanApplicationController : ControllerBase
         Summary = "Creacion de solicitud de prestamos",
         Description = "Crear solicitud de prestamo"
     )]
-    [Authorize(Roles = "Administrator,Officer")]
+    [Authorize(Roles = "Officer")]
     [HttpPost("create")]
     [ProducesResponseType(StatusCodes.Status200OK, Type =  typeof(LoanApplicationDto))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
