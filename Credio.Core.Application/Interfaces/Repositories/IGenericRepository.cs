@@ -24,5 +24,7 @@ namespace Credio.Core.Application.Interfaces.Repositories
         
         Task<PagedResult<Entity>> GetPagedAsync(int pageNumber, int pageSize, List<Expression<Func<Entity, object>>>? properties,
 			Expression<Func<Entity, bool>>? predicate = null);
+        
+        Task<bool> ExistsAsync(Expression<Func<Entity, bool>> predicate, CancellationToken cancellationToken = default);
         }
 }
