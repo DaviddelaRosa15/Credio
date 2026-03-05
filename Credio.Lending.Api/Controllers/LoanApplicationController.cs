@@ -25,12 +25,12 @@ public class LoanApplicationController : ControllerBase
         Summary = "Creacion de solicitud de prestamos",
         Description = "Crear solicitud de prestamo"
     )]
-    [Authorize(Roles = "Administrator,Officer")]
+    [Authorize(Roles = "Officer")]
     [HttpPost("create")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type =  typeof(LoanApplicationDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
     public async Task<IResult> CreateLoanApplication([FromBody] CreateLoanApplicationCommand command, CancellationToken cancellationToken)
     {
         Result<LoanApplicationDto> result = await _sender.Send(command, cancellationToken);
