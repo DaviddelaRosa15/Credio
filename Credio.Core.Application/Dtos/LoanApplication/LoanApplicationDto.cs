@@ -10,7 +10,7 @@ public class LoanApplicationDto
 
     public string ClientName { get; set; }
     
-    public string EmployeeId { get; set; }
+    public string? EmployeeId { get; set; }
 
     public double RequestedAmount { get; set; }
     

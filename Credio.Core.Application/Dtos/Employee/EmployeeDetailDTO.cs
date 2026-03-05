@@ -1,8 +1,14 @@
-﻿using Credio.Core.Application.Dtos.Common;
+﻿using Credio.Core.Application.Dtos.Client;
+using Credio.Core.Application.Dtos.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Credio.Core.Application.Dtos.Employee
 {
-    public class EmployeeDTO
+    public class EmployeeDetailDTO
     {
         public string Id { get; set; }
         public string FirstName { get; set; }
@@ -19,6 +25,8 @@ namespace Credio.Core.Application.Dtos.Employee
 
         public string EmployeeCode { get; set; }
 
-        public string? AddressId { get; set; }
+        public AddressDTO Address { get; set; }
+
+        public List<ClientBasicDTO> Clients { get; set; }
     }
 }
