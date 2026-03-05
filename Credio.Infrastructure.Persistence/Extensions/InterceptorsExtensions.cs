@@ -9,6 +9,7 @@ public static partial class PersistenceExtensions
     {
         services.AddSingleton<AuditableEntityInterceptor>();
         services.AddSingleton<SoftDeleteInterceptor>();
+        services.AddSingleton<DomainEventInterceptor>();
 
         return services;
     }

@@ -35,8 +35,7 @@ namespace Credio.Core.Application.Features.Employee.Queries.GetAll
                 var employees = await _employeeRepository.GetPagedAsync(query.PageNumber, query.PageSize,
                     new List<Expression<Func<Domain.Entities.Employee, object>>>
                     {
-                        m => m.DocumentType,
-                        m => m.Address
+                        m => m.DocumentType
                     }
                 );
 

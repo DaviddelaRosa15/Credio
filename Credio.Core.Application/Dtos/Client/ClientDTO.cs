@@ -22,8 +22,6 @@ namespace Credio.Core.Application.Dtos.Client
         public string? Email { get; set; }
 
         public string? AddressId { get; set; }
-
-        public AddressDTO Address { get; set; }
     }
 }
 
