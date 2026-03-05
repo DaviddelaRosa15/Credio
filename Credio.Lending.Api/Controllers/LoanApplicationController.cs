@@ -1,6 +1,8 @@
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.LoanApplication;
 using Credio.Core.Application.Features.LoanApplications.Commands.CreateLoanApplicationCommand;
+using Credio.Core.Application.Features.LoanApplications.Queries.GetAll;
+using Credio.Core.Application.Features.LoanApplications.Queries.GetById;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -38,5 +40,43 @@ public class LoanApplicationController : ControllerBase
         return result.Match(
             onSuccess: () => CustomResult.Success(result),
             onFailure: CustomResult.Problem);
+    }
+
+    [Authorize(Roles = "Administrator, Officer")]
+    [HttpGet("all")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LoanApplicationDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    [SwaggerOperation(
+            Summary = "Obtiene todos las solicitudes, o filtra por numero de empleado",
+            Description = "Obtiene las solicitudes registrados, o filtra por id de empleado"
+        )]
+    public async Task<IResult> GetAllApplications([FromQuery] GetAllLoanApplicationsQuery query, CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(query, cancellationToken);
+
+        return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure: CustomResult.Problem);
+    }
+
+    [Authorize(Roles = "Administrator, Officer")]
+    [HttpGet("by-id/{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LoanApplicationDto))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    [SwaggerOperation(
+        Summary = "Obtiene una solicitud por id",
+        Description = "Obtiene una solicitud segun el id"
+    )]
+    public async Task<IResult> GetApplicationById(string id, CancellationToken cancellationToken)
+    {
+        Result<LoanApplicationDto> result = await _sender.Send(new GetByIdLoanApplicationQuery(id), cancellationToken);
+
+        return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure: CustomResult.Problem);
     }
 }
