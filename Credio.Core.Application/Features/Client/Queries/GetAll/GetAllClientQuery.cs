@@ -12,9 +12,11 @@ namespace Credio.Core.Application.Features.Client.Queries.GetAll
 {
     public class GetAllClientQuery : PaginationRequest, ICachedQuery<List<ClientDTO>>
     {
+        public string? OfficerId { get; set; }
+
         [JsonIgnore]
         [SwaggerIgnore]
-        public string CachedKey => $"GetAllClientQuery_{PageNumber}_{PageSize}";
+        public string CachedKey => $"GetAllClientQuery_{PageNumber}_{PageSize}_{OfficerId}";
     }
 
     public class GetAllClientQueryHandler : IQueryHandler<GetAllClientQuery, List<ClientDTO>>
@@ -35,9 +37,11 @@ namespace Credio.Core.Application.Features.Client.Queries.GetAll
                 var clients = await _clientRepository.GetPagedAsync(query.PageNumber, query.PageSize,
                     new List<Expression<Func<Domain.Entities.Client, object>>>
                     {
-                        m => m.DocumentType,
-                        m => m.Address
-                    }
+                        m => m.DocumentType
+                    },
+                    !string.IsNullOrEmpty(query.OfficerId)
+                        ? (Expression<Func<Domain.Entities.Client, bool>>)(c => c.EmployeeId == query.OfficerId)
+                        : null
                 );
 
                 var clientDTOs = _mapper.Map<List<ClientDTO>>(clients.Items);
