@@ -20,7 +20,6 @@
 	
   <ItemGroup>
     <Folder Include="Dtos\Account\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
   <ItemGroup>
