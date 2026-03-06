@@ -1,4 +1,5 @@
 ﻿using Credio.Core.Application.Dtos.Common;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace Credio.Core.Application.Interfaces.Repositories
@@ -15,7 +16,9 @@ namespace Credio.Core.Application.Interfaces.Repositories
 		Task<Entity> GetByIdAsync(string id);
 		Task<List<Entity>> GetAllWithIncludeAsync(List<Expression<Func<Entity, object>>> properties);
 		Task<Entity> GetByIdWithIncludeAsync(Expression<Func<Entity, bool>> predicate, List<Expression<Func<Entity, object>>> properties);
-		Task<Entity> GetByPropertyAsync(Expression<Func<Entity, bool>> predicate);
+		Task<Entity> GetByIdWithIncludeAsync(Expression<Func<Entity, bool>> predicate, Func<IQueryable<Entity>, IIncludableQueryable<Entity, object>> includeFunc);
+
+        Task<Entity> GetByPropertyAsync(Expression<Func<Entity, bool>> predicate);
 		Task<Entity> GetByPropertyWithIncludeAsync(Expression<Func<Entity, bool>> predicate,
 			List<Expression<Func<Entity, object>>> properties);
 		Task<List<Entity>> GetAllByPropertyAsync(Expression<Func<Entity, bool>> predicate);
@@ -24,5 +27,7 @@ namespace Credio.Core.Application.Interfaces.Repositories
         
         Task<PagedResult<Entity>> GetPagedAsync(int pageNumber, int pageSize, List<Expression<Func<Entity, object>>>? properties,
 			Expression<Func<Entity, bool>>? predicate = null);
+        
+        Task<bool> ExistsAsync(Expression<Func<Entity, bool>> predicate, CancellationToken cancellationToken = default);
         }
 }

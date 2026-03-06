@@ -2,6 +2,7 @@
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace Credio.Infrastructure.Persistence.Repositories
@@ -97,6 +98,15 @@ namespace Credio.Infrastructure.Persistence.Repositories
             return await query.FirstOrDefaultAsync(predicate);
         }
 
+        public virtual async Task<Entity> GetByIdWithIncludeAsync(
+        Expression<Func<Entity, bool>> predicate,
+        Func<IQueryable<Entity>, IIncludableQueryable<Entity, object>> includeFunc)
+        {
+            using var dbContext = _dbContextFactory.CreateDbContext();
+            var query = includeFunc(dbContext.Set<Entity>());
+            return await query.FirstOrDefaultAsync(predicate);
+        }
+
         public async Task<Entity> GetByPropertyAsync(Expression<Func<Entity, bool>> predicate)
         {
             using var dbContext = _dbContextFactory.CreateDbContext();
@@ -168,6 +178,15 @@ namespace Credio.Infrastructure.Persistence.Repositories
                 .ToListAsync();
 
             return new PagedResult<Entity>(items, totalCount, pageNumber, pageSize);
+        }
+
+        public async Task<bool> ExistsAsync(Expression<Func<Entity, bool>> predicate, CancellationToken cancellationToken = default)
+        {
+            await using ApplicationContext context = await _dbContextFactory.CreateDbContextAsync(cancellationToken);
+            
+            IQueryable<Entity> query = context.Set<Entity>().AsQueryable();
+            
+            return await query.AnyAsync(predicate, cancellationToken);
         }
     }
 }

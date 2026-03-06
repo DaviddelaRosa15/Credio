@@ -1,22 +1,15 @@
 ﻿using AutoMapper;
 using Credio.Core.Application.Common.Primitives;
-using Credio.Core.Application.Dtos.Client;
 using Credio.Core.Application.Dtos.Common;
 using Credio.Core.Application.Dtos.LoanApplication;
-using Credio.Core.Application.Features.Client.Queries.GetAll;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 
-namespace Credio.Core.Application.Features.LoanApplication
+namespace Credio.Core.Application.Features.LoanApplications.Queries.GetAll
 {
     public class GetAllLoanApplicationsQuery : PaginationRequest, ICachedQuery<List<LoanApplicationDto>>
     {
@@ -60,7 +53,7 @@ namespace Credio.Core.Application.Features.LoanApplication
             }
             catch (Exception ex)
             {
-                return Result<List<LoanApplicationDto>>.Failure(Error.InternalServerError("Hubo un error al intentar consultar los préstamos"));
+                return Result<List<LoanApplicationDto>>.Failure(Error.InternalServerError("Hubo un error al intentar consultar las solicitudes"));
             }
         }
     }
