@@ -3,6 +3,7 @@ using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Employee;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,10 +47,12 @@ namespace Credio.Core.Application.Features.Employee.Queries.GetEmployeeByCode
                 }
 
                 var foundEmployee = await _employeeRepository.GetByIdWithIncludeAsync(x => x.EmployeeCode == request.EmployeeCode,
-                [
-                    x => x.Address,
-                    x => x.Clients
-                ]);
+                    query => query
+                        .Include(x => x.Address)
+                        .Include(x => x.DocumentType)
+                        .Include(x => x.Clients)
+                            .ThenInclude(c => c.DocumentType)
+                );
 
                 if (foundEmployee is null)
                     return Result<EmployeeDetailDTO>.Failure(Error.NotFound("No se encontro el empleado con el codigo dado"));
