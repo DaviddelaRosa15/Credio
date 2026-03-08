@@ -5,8 +5,8 @@ namespace Credio.Core.Application.Services
 {
     public class AmortizationCalculatorService : IAmortizationCalculatorService
     {
-        public List<InstallmentDTO> Calculate(decimal approvedAmount, decimal interestRate, int termInInstallments, 
-            DateTime firstPaymentDate, int daysInterval)
+        public List<InstallmentDTO> Calculate(decimal approvedAmount, decimal interestRate, int termInInstallments,
+            DateOnly firstPaymentDate, int daysInterval = 30)
         {
             var schedule = new List<InstallmentDTO>(termInInstallments);
 
@@ -18,7 +18,7 @@ namespace Credio.Core.Application.Services
             decimal fixedDueAmount = CalculateFixedInstallment(approvedAmount, periodInterestRate, termInInstallments);
 
             decimal remainingBalance = approvedAmount;
-            DateTime currentPaymentDate = firstPaymentDate;
+            DateOnly currentPaymentDate = firstPaymentDate;
 
             // 3. Iterar para generar cada cuota
             for (int i = 1; i <= termInInstallments; i++)
@@ -55,7 +55,16 @@ namespace Credio.Core.Application.Services
                 ));
 
                 // Avanzar la fecha para la siguiente iteración
-                currentPaymentDate = currentPaymentDate.AddDays(daysInterval);
+                if (daysInterval == 30)
+                {
+                    // Para intervalos de 30 días, avanzamos al mismo día del mes siguiente
+                    currentPaymentDate = currentPaymentDate.AddMonths(1);
+                }
+                else
+                {
+                    // Para otros intervalos, simplemente sumamos los días
+                    currentPaymentDate = currentPaymentDate.AddDays(daysInterval);
+                }
             }
 
             return schedule;

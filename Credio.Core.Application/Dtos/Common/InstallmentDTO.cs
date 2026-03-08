@@ -2,7 +2,7 @@
 {
     public record InstallmentDTO(
         int InstallmentNumber,
-        DateTime DueDate,
+        DateOnly DueDate,
         decimal DueAmount,
         decimal PrincipalAmount,
         decimal InterestAmount,
