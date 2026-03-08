@@ -2,6 +2,7 @@
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
 
 namespace Credio.Infrastructure.Persistence.Repositories
@@ -94,6 +95,15 @@ namespace Credio.Infrastructure.Persistence.Repositories
                 query = query.Include(property);
             }
 
+            return await query.FirstOrDefaultAsync(predicate);
+        }
+
+        public virtual async Task<Entity> GetByIdWithIncludeAsync(
+        Expression<Func<Entity, bool>> predicate,
+        Func<IQueryable<Entity>, IIncludableQueryable<Entity, object>> includeFunc)
+        {
+            using var dbContext = _dbContextFactory.CreateDbContext();
+            var query = includeFunc(dbContext.Set<Entity>());
             return await query.FirstOrDefaultAsync(predicate);
         }
 
