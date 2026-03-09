@@ -15,7 +15,7 @@ public class AmortizationSchedule : AuditableBaseEntity
 
     public int InstallmentNumber { get; set; }
 
-    public DateTime DueDate { get; set; }
+    public DateOnly DueDate { get; set; }
 
     public decimal DueAmount { get; set; } 
 
@@ -27,7 +27,7 @@ public class AmortizationSchedule : AuditableBaseEntity
 
     public decimal? PaidAmount { get; set; } 
 
-    public DateTime? LastPaymentDate { get; set; }
+    public DateOnly? LastPaymentDate { get; set; }
 
     public string AmortizationStatusId { get; set; }
 
