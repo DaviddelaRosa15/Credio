@@ -43,6 +43,8 @@ public class Loan : AuditableBaseEntity
 
     public int Term { get; set; }
 
+    public DateOnly EffectiveDate { get; set; }
+
     public DateOnly? DisbursedDate { get; set; }
 
     public DateOnly FirstPaymentDate { get; set; }
