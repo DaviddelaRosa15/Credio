@@ -80,12 +80,9 @@ public class CreateLoanCommandHandler : ICommandHandler<CreateLoanCommand, LoanD
             // Obtener el último número de préstamo para asignar el siguiente número
             var lastNumber = await _loanRepository.GetLastLoanNumberAsync();
 
-            // Calcular el cronograma de pagos utilizando el servicio de amortización
-            var paymentSchedule = _calculatorService.Calculate((decimal)foundApplication.ApprovedAmount.Value, (decimal)foundApplication.ApprovedInterestRate.Value,
-                (int)foundApplication.ApprovedTerm, request.FirstPaymentDate, foundApplication.PaymentFrequency.DaysInterval);
-
             // Obtener la última fecha de pago del cronograma para establecer la fecha de vencimiento del préstamo
-            var lastPayment = paymentSchedule.LastOrDefault();
+            var lastPayment = _calculatorService.CalculateLastPaymentDate(request.FirstPaymentDate, (int)foundApplication.ApprovedTerm,
+                foundApplication.PaymentFrequency.DaysInterval);
 
             // Obtener el método de amortización por defecto (Cuota Fija) si no se proporciona uno en la solicitud
             var amortizationMethod = await _methodRepository.GetByPropertyAsync(x => x.Name == "Cuota Fija");
@@ -105,7 +102,7 @@ public class CreateLoanCommandHandler : ICommandHandler<CreateLoanCommand, LoanD
                 LoanApplicationId = foundApplication.Id,
                 LoanNumber = lastNumber + 1,
                 LoanStatusId = loanStatus.Id, // Estado inicial del préstamo
-                MaturityDate = lastPayment.DueDate,
+                MaturityDate = lastPayment,
                 PaymentFrequencyId = foundApplication.PaymentFrequencyId,
                 Term = foundApplication.ApprovedTerm ?? foundApplication.RequestTerm            
             };

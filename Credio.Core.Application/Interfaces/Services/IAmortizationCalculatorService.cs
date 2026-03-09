@@ -6,5 +6,7 @@ namespace Credio.Core.Application.Interfaces.Services
     {
         List<InstallmentDTO> Calculate(decimal approvedAmount, decimal interestRate, int termInInstallments,
             DateOnly firstPaymentDate, int daysInterval);
+
+        DateOnly CalculateLastPaymentDate(DateOnly firstPaymentDate, int termInInstallments, int daysInterval);
     }
 }

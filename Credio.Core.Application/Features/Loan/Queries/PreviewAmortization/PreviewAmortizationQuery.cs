@@ -44,21 +44,20 @@ namespace Credio.Core.Application.Features.Loan.Queries.PreviewAmortization
                 //Buscar la solicitud de préstamo para verificar su estado y obtener los datos necesarios
                 var application = await _loanApplicationRepository.GetByIdWithIncludeAsync(x => x.Id == query.LoanApplicationId,
                 [
-                    x => x.ApplicationStatus
+                    x => x.ApplicationStatus,
+                    x => x.PaymentFrequency
                 ]);
 
                 if (application is null) return Result<List<InstallmentDTO>>.Failure(Error.NotFound("No se encontro la solicitud con el id dado"));
 
                 if (application.ApplicationStatus.Name != "Aprobada") return Result<List<InstallmentDTO>>.Failure(Error.InternalServerError("La solicitud no está aprobada"));
 
-                var frequencyMonthly = await _paymentFrequencyRepository.GetByPropertyAsync(p => p.Name == "Mensual");
-
                 schedule = _amortizationCalculatorService.Calculate(
                     (decimal)application.ApprovedAmount.Value,
                     (decimal)application.ApprovedInterestRate.Value,
                     (int)application.ApprovedTerm,
                     query.FirstPaymentDate,
-                    frequencyMonthly.DaysInterval
+                    application.PaymentFrequency.DaysInterval
                 );
 
                 return Result<List<InstallmentDTO>>.Success(schedule);
