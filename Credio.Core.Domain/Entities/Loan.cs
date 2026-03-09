@@ -41,11 +41,13 @@ public class Loan : AuditableBaseEntity
 
     public double InterestRate { get; set; } 
 
-    public int TermMonths { get; set; }
+    public int Term { get; set; }
 
-    public DateTime? DisbursedDate { get; set; }
+    public DateOnly? DisbursedDate { get; set; }
 
-    public DateTime FirstPaymentDate { get; set; }
+    public DateOnly FirstPaymentDate { get; set; }
+
+    public DateOnly MaturityDate { get; set; }
 
     public List<LateFee> LateFees { get; set; }
 
