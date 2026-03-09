@@ -3,6 +3,7 @@ using Credio.Core.Application.Dtos.Account;
 using Credio.Core.Application.Dtos.Client;
 using Credio.Core.Application.Dtos.Common;
 using Credio.Core.Application.Dtos.Employee;
+using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Dtos.LoanApplication;
 using Credio.Core.Application.Features.Account.Commands.Authenticate;
 using Credio.Core.Application.Features.Account.Commands.RegisterClient;
@@ -172,6 +173,11 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(x => x.LastModifiedBy, opt => opt.Ignore())
                 .ForMember(x => x.IsDeleted, opt => opt.Ignore())
                 .ForMember(x => x.Deleted, opt => opt.Ignore());
+            #endregion
+
+            #region Loan
+            CreateMap<Loan, LoanDTO>()
+                .ReverseMap();
             #endregion
 
             #region LoanApplication

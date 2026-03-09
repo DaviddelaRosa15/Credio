@@ -1,6 +1,8 @@
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Common;
+using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Features.Loan.Queries.PreviewAmortization;
+using Credio.Core.Application.Features.LoanApplications.Commands.CreateLoan;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -34,6 +36,25 @@ public class LoanController : ControllerBase
     public async Task<IResult> GetPreviewAmortization([FromQuery] PreviewAmortizationQuery query, CancellationToken cancellationToken)
     {
         Result<List<InstallmentDTO>> result = await _sender.Send(query, cancellationToken);
+
+        return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure: CustomResult.Problem);
+    }
+
+    [Authorize(Roles = "Administrator, Officer")]
+    [HttpPost("create")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LoanDTO))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    [SwaggerOperation(
+        Summary = "Crea un nuevo prestamo a partir de una solicitud aprobada",
+        Description = "Crea un nuevo prestamo a partir de una solicitud aprobada"
+    )]
+    public async Task<IResult> CreateLoan([FromBody] CreateLoanCommand command, CancellationToken cancellationToken)
+    {
+        Result<LoanDTO> result = await _sender.Send(command, cancellationToken);
 
         return result.Match(
           onSuccess: () => CustomResult.Success(result),
