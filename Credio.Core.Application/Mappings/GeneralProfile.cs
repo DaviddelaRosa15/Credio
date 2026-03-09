@@ -179,7 +179,9 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(dest => dest.ClientName,
                     opt => opt.MapFrom(src => src.Client.FirstName + " " + src.Client.LastName))
                 .ForMember(dest => dest.ApplicationStatusName,
-                    opt => opt.MapFrom(src => src.ApplicationStatus.Name));
+                    opt => opt.MapFrom(src => src.ApplicationStatus.Name))
+                .ForMember(dest => dest.PaymentFrequency,
+                    opt => opt.MapFrom(src => src.PaymentFrequency.Name));
             #endregion
         }
     }

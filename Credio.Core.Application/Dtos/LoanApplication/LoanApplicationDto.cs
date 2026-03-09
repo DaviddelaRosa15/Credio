@@ -31,4 +31,7 @@ public class LoanApplicationDto
     public string ApplicationStatusName { get; set; }
     
     public string? RejectionReason { get; set; } = string.Empty;
+
+    public string PaymentFrequencyId { get; set; }
+    public string PaymentFrequency { get; set; }
 }
