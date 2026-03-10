@@ -112,8 +112,8 @@ namespace Credio.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
-                    b.Property<DateTime>("DueDate")
-                        .HasColumnType("timestamp without time zone");
+                    b.Property<DateOnly>("DueDate")
+                        .HasColumnType("date");
 
                     b.Property<int>("InstallmentNumber")
                         .HasColumnType("integer");
@@ -131,8 +131,8 @@ namespace Credio.Infrastructure.Persistence.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("LastPaymentDate")
-                        .HasColumnType("timestamp without time zone");
+                    b.Property<DateOnly?>("LastPaymentDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("LoanId")
                         .IsRequired()
@@ -492,15 +492,18 @@ namespace Credio.Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("Deleted")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<DateTime?>("DisbursedDate")
-                        .HasColumnType("timestamp without time zone");
+                    b.Property<DateOnly?>("DisbursedDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("EffectiveDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("EmployeeId")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("FirstPaymentDate")
-                        .HasColumnType("timestamp without time zone");
+                    b.Property<DateOnly>("FirstPaymentDate")
+                        .HasColumnType("date");
 
                     b.Property<double>("InterestRate")
                         .HasPrecision(18, 2)
@@ -526,11 +529,14 @@ namespace Credio.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateOnly>("MaturityDate")
+                        .HasColumnType("date");
+
                     b.Property<string>("PaymentFrequencyId")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("TermMonths")
+                    b.Property<int>("Term")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -601,6 +607,10 @@ namespace Credio.Infrastructure.Persistence.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
 
+                    b.Property<string>("PaymentFrequencyId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("Purpose")
                         .HasColumnType("text");
 
@@ -625,6 +635,8 @@ namespace Credio.Infrastructure.Persistence.Migrations
                     b.HasIndex("ClientId");
 
                     b.HasIndex("EmployeeId");
+
+                    b.HasIndex("PaymentFrequencyId");
 
                     b.ToTable("LoanApplication");
                 });
@@ -1079,11 +1091,19 @@ namespace Credio.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Credio.Core.Domain.Entities.PaymentFrequency", "PaymentFrequency")
+                        .WithMany("LoanApplications")
+                        .HasForeignKey("PaymentFrequencyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("ApplicationStatus");
 
                     b.Navigation("Client");
 
                     b.Navigation("Employee");
+
+                    b.Navigation("PaymentFrequency");
                 });
 
             modelBuilder.Entity("Credio.Core.Domain.Entities.LoanBalance", b =>
@@ -1223,6 +1243,8 @@ namespace Credio.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Credio.Core.Domain.Entities.PaymentFrequency", b =>
                 {
+                    b.Navigation("LoanApplications");
+
                     b.Navigation("Loans");
                 });
 

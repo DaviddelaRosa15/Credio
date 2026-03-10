@@ -10,7 +10,7 @@ public class LoanApplicationDto
 
     public string ClientName { get; set; }
     
-    public string EmployeeId { get; set; }
+    public string? EmployeeId { get; set; }
 
     public double RequestedAmount { get; set; }
     
@@ -31,4 +31,7 @@ public class LoanApplicationDto
     public string ApplicationStatusName { get; set; }
     
     public string? RejectionReason { get; set; } = string.Empty;
+
+    public string PaymentFrequencyId { get; set; }
+    public string PaymentFrequency { get; set; }
 }

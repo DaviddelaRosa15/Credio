@@ -2,7 +2,9 @@
 using Credio.Core.Application.Interfaces.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Credio.Core.Application.Common.Pipelines;
+using Credio.Core.Application.Interfaces.Services;
 using FluentValidation;
+using Credio.Core.Application.Services;
 
 namespace Credio.Core.Application
 {
@@ -30,6 +32,8 @@ namespace Credio.Core.Application
 
             #region Services
             services.AddScoped<IEmailHelper, EmailHelper>();
+            services.AddSingleton<IExponentialBackoffService, ExponentialBakOffService>();
+            services.AddSingleton<IAmortizationCalculatorService, AmortizationCalculatorService>();
             #endregion
 
             return services;
