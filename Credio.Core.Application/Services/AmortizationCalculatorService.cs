@@ -70,6 +70,20 @@ namespace Credio.Core.Application.Services
             return schedule;
         }
 
+        public DateOnly CalculateLastPaymentDate(DateOnly firstPaymentDate, int termInInstallments, int daysInterval = 30)
+        {
+            if (daysInterval == 30)
+            {
+                // Para intervalos de 30 días, el último pago es el mismo día del mes después de n meses
+                return firstPaymentDate.AddMonths(termInInstallments - 1);
+            }
+            else
+            {
+                // Para otros intervalos, sumamos los días correspondientes
+                return firstPaymentDate.AddDays(daysInterval * (termInInstallments - 1));
+            }
+        }
+
         /// Calcula la cuota fija mensual usando la fórmula de anualidad vencida.
         private decimal CalculateFixedInstallment(decimal principal, decimal periodRate, int periods)
         {
