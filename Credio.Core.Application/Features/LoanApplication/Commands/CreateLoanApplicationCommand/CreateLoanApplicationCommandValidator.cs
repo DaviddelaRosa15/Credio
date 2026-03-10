@@ -21,6 +21,10 @@ public class CreateLoanApplicationCommandValidator : AbstractValidator<CreateLoa
         
         RuleFor(x => x.EmployeeId)
             .NotNull().WithMessage("El id del empleado no puede estar nulo")
-            .NotEmpty().WithMessage("La id del empleado no puede estar vacio");
+            .NotEmpty().WithMessage("El id del empleado no puede estar vacio");
+
+        RuleFor(x => x.PaymentFrequencyId)
+            .NotNull().WithMessage("La frecuencia no puede estar nula")
+            .NotEmpty().WithMessage("La frecuencia no puede estar vacia");
     }
 }

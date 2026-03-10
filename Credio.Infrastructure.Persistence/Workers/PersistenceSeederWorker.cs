@@ -53,5 +53,69 @@ public class PersistenceSeederWorker: BaseWorker<PersistenceSeederWorker>
         }
 
         #endregion
+
+        #region Loan Status Seeding
+        ILoanStatusRepository loanStatusRepository = scope.ServiceProvider.GetRequiredService<ILoanStatusRepository>();
+
+        List<LoanStatus> anyLoanStatus = await loanStatusRepository.GetAllAsync();
+
+        if (anyLoanStatus is null || anyLoanStatus.Count == 0)
+        {
+            _logger.LogInformation("Seeding loan status...");
+            await DefaultLoanStatus.SeedAsync(loanStatusRepository);
+        }
+        else
+        {
+            _logger.LogInformation("Loan status already exists. Skipping seeding.");
+        }
+        #endregion
+
+        #region Amortization Status Seeding
+        IAmortizationStatusRepository amortizationStatusRepository = scope.ServiceProvider.GetRequiredService<IAmortizationStatusRepository>();
+
+        List<AmortizationStatus> anyAmortizationStatus = await amortizationStatusRepository.GetAllAsync();
+
+        if (anyAmortizationStatus is null || anyAmortizationStatus.Count == 0)
+        {
+            _logger.LogInformation("Seeding amortization status...");
+            await DefaultAmortizationStatus.SeedAsync(amortizationStatusRepository);
+        }
+        else
+        {
+            _logger.LogInformation("Amortization status already exists. Skipping seeding.");
+        }
+        #endregion
+
+        #region Payment Frequency Seeding
+        IPaymentFrequencyRepository paymentFrequencyRepository = scope.ServiceProvider.GetRequiredService<IPaymentFrequencyRepository>();
+
+        List<PaymentFrequency> anyPaymentFrequency = await paymentFrequencyRepository.GetAllAsync();
+
+        if (anyPaymentFrequency is null || anyPaymentFrequency.Count == 0)
+        {
+            _logger.LogInformation("Seeding payment frequency...");
+            await DefaultPaymentFrequency.SeedAsync(paymentFrequencyRepository);
+        }
+        else
+        {
+            _logger.LogInformation("Payment Frequency already exists. Skipping seeding.");
+        }
+        #endregion
+
+        #region Amortization Method Seeding
+        IAmortizationMethodRepository amortizationMethodRepository = scope.ServiceProvider.GetRequiredService<IAmortizationMethodRepository>();
+
+        List<AmortizationMethod> anyAmortizationMethod = await amortizationMethodRepository.GetAllAsync();
+
+        if (anyAmortizationMethod is null || anyAmortizationMethod.Count == 0)
+        {
+            _logger.LogInformation("Seeding amortization method...");
+            await DefaultAmortizationMethod.SeedAsync(amortizationMethodRepository);
+        }
+        else
+        {
+            _logger.LogInformation("Amortization Method already exists. Skipping seeding.");
+        }
+        #endregion
     }
 }
