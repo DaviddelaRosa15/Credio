@@ -49,6 +49,18 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(x => x.Deleted, opt => opt.Ignore());
             #endregion
 
+            #region AmortizationSchedule
+            CreateMap<AmortizationSchedule, InstallmentDTO>()
+                .ReverseMap()
+                .ForMember(x => x.Id, opt => opt.Ignore())
+                .ForMember(x => x.Created, opt => opt.Ignore())
+                .ForMember(x => x.CreatedBy, opt => opt.Ignore())
+                .ForMember(x => x.LastModified, opt => opt.Ignore())
+                .ForMember(x => x.LastModifiedBy, opt => opt.Ignore())
+                .ForMember(x => x.IsDeleted, opt => opt.Ignore())
+                .ForMember(x => x.Deleted, opt => opt.Ignore());
+            #endregion
+
             #region Client
             CreateMap<Client, ClientDTO>()
                 .ForMember(x => x.DocumentType, opt => opt.MapFrom(y => y.DocumentType.Name))

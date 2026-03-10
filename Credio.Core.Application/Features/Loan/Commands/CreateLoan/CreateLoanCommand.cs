@@ -4,6 +4,7 @@ using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Application.Interfaces.Services;
+using Credio.Core.Domain.Events;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Credio.Core.Application.Features.LoanApplications.Commands.CreateLoan;
@@ -55,7 +56,7 @@ public class CreateLoanCommandHandler : ICommandHandler<CreateLoanCommand, LoanD
                 [x => x.ApplicationStatus, x => x.Client, x => x.PaymentFrequency]);
             if (foundApplication is null || foundApplication.ApplicationStatus.Name != "Aprobada")
             {
-                return Result<LoanDTO>.Failure(Error.NotFound("Su solicitud no ha sido procesada"));
+                return Result<LoanDTO>.Failure(Error.BadRequest("Su solicitud no ha sido procesada"));
             }
 
             // Verificar si ya existe un préstamo asociado a la solicitud
@@ -90,7 +91,7 @@ public class CreateLoanCommandHandler : ICommandHandler<CreateLoanCommand, LoanD
             // Obtener el estado de préstamo "Activo" para asignarlo al nuevo préstamo
             var loanStatus = await _statusRepository.GetByPropertyAsync(x => x.Name == "Activo");
 
-            Domain.Entities.Loan newLoan = new()
+             Domain.Entities.Loan newLoan = new()
             {
                 AmortizationMethodId = string.IsNullOrEmpty(request.AmortizationMethodId) ? amortizationMethod.Id : request.AmortizationMethodId,
                 Amount = (double)foundApplication.ApprovedAmount,
@@ -107,14 +108,18 @@ public class CreateLoanCommandHandler : ICommandHandler<CreateLoanCommand, LoanD
                 Term = foundApplication.ApprovedTerm ?? foundApplication.RequestTerm            
             };
 
-            var result = await _loanRepository.AddAsync(newLoan);
+            // Agregar evento de dominio para generar el cronograma de amortización
+            newLoan.AddEvent(new LoanCreatedAmortizationEvent(newLoan.Id, newLoan.Amount, newLoan.Term, newLoan.InterestRate,
+                newLoan.FirstPaymentDate, foundApplication.PaymentFrequency.DaysInterval));
 
-            var loanResponse = _mapper.Map<LoanDTO>(result);
-            loanResponse.ClientName = foundApplication.Client.FirstName + " " + foundApplication.Client.LastName;
-            loanResponse.LoanStatus = loanStatus.Name;
-            loanResponse.Frequency = foundApplication.PaymentFrequency.Name;
+            var loan = await _loanRepository.AddAsync(newLoan);
 
-            return Result<LoanDTO>.Success(loanResponse);
+            var result = _mapper.Map<LoanDTO>(loan);
+            result.ClientName = foundApplication.Client.FirstName + " " + foundApplication.Client.LastName;
+            result.LoanStatus = loanStatus.Name;
+            result.Frequency = foundApplication.PaymentFrequency.Name;
+
+            return Result<LoanDTO>.Success(result);
         }
         catch 
         {
