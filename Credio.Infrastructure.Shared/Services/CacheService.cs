@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Credio.Core.Application.Interfaces.Services;
@@ -10,6 +11,7 @@ public class CacheService : ICacheService
 {
     private readonly IMemoryCache _memoryCache;
     private readonly ILogger<CacheService> _logger;
+    private readonly ConcurrentDictionary<string, byte> _cacheKeys = new();
     
     public CacheService(
         IMemoryCache memoryCache,
@@ -38,6 +40,8 @@ public class CacheService : ICacheService
             string serializedValue = JsonSerializer.Serialize(value, SerializerOptions);
             
             _memoryCache.Set(key, serializedValue, options ?? DefaultOptions);
+            
+            _cacheKeys.TryAdd(key, 0);
         }
         catch (Exception ex)
         {
@@ -49,7 +53,7 @@ public class CacheService : ICacheService
         }
     }
 
-    public T? Get<T>(string key)
+    public T? Get<T>(string key, JsonSerializerOptions? options = null)
     {
         try
         {
@@ -60,7 +64,7 @@ public class CacheService : ICacheService
                 return default;
             }
 
-            T? deserializedValue = JsonSerializer.Deserialize<T>(value);
+            T? deserializedValue = JsonSerializer.Deserialize<T>(value, options ?? SerializerOptions);
 
             return deserializedValue;
 
@@ -78,5 +82,20 @@ public class CacheService : ICacheService
     public void Remove(string key)
     {
         _memoryCache.Remove(key);
+
+         _cacheKeys.TryRemove(key, out _);
+    }
+
+    public void RemoveByPrefix(string prefix)
+    {
+        // Swallow copy 
+        List<string> keys = _cacheKeys.Keys.Where(key => key.StartsWith(prefix)).ToList();
+
+        foreach (string key in keys)
+        { 
+            _memoryCache.Remove(key);
+            
+            _cacheKeys.TryRemove(key, out _);
+        }
     }
 }
