@@ -1,6 +1,7 @@
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
+using Credio.Core.Application.Interfaces.Services;
 using Credio.Core.Domain.Entities;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -32,15 +33,18 @@ public class ApproveLoanApplicationCommandHandler : ICommandHandler<ApproveLoanA
 {
     private readonly ILoanApplicationRepository _loanApplicationRepository;
     private readonly IApplicationStatusRepository _applicationStatusRepository;
+    private readonly ICacheService _cacheService;
 
     private readonly List<string> _allowedStatuses = ["En Revision", "Pendiente"];
 
     public ApproveLoanApplicationCommandHandler(
         ILoanApplicationRepository loanApplicationRepository,
-        IApplicationStatusRepository applicationStatusRepository)
+        IApplicationStatusRepository applicationStatusRepository,
+        ICacheService cacheService)
     {
         _loanApplicationRepository = loanApplicationRepository;
         _applicationStatusRepository = applicationStatusRepository;
+        _cacheService = cacheService;
     }
     
     public async Task<Result> Handle(ApproveLoanApplicationCommand request, CancellationToken cancellationToken)
@@ -69,6 +73,10 @@ public class ApproveLoanApplicationCommandHandler : ICommandHandler<ApproveLoanA
             foundApplication.ApplicationStatus = approvedStatus;
         
             await _loanApplicationRepository.UpdateAsync(foundApplication);
+            
+            _cacheService.Remove($"loan-application-{foundApplication.Id}");
+            
+            _cacheService.RemoveByPrefix("GetAllLoanApplicationsQuery_");
 
             return Result.Success();
         }

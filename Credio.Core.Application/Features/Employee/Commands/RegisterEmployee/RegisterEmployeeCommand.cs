@@ -55,11 +55,13 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
         private readonly IEmailService _emailService;
         private readonly IEmailHelper _emailHelper;
         private readonly IMapper _mapper;
+        private readonly ICacheService _cacheService;
         private string _generatedPassword;
 
         public RegisterEmployeeCommandHandler(IAccountService accountService, IAddressRepository addressRepository, IEmployeeRepository employeeRepository,
             IDocumentTypeRepository documentTypeRepository, IEmailService emailService, IEmailHelper emailHelper,
-            IMapper mapper)
+            IMapper mapper,
+            ICacheService cacheService)
         {
             _accountService = accountService;
             _addressRepository = addressRepository;
@@ -68,6 +70,7 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
             _emailService = emailService;
             _emailHelper = emailHelper;
             _mapper = mapper;
+            _cacheService = cacheService;
         }
 
 
@@ -123,6 +126,8 @@ namespace Credio.Core.Application.Features.Employee.Commands.RegisterEmployee
                 result.UrlImage = response.UrlImage;
 
                 await SendEmployeeWelcomeEmail(result);
+                
+                _cacheService.RemoveByPrefix("GetAllEmployeeQuery_");
 
                 return Result<RegisterEmployeeCommandResponse>.Success(result);
             }

@@ -4,6 +4,7 @@ using Credio.Core.Application.Dtos.LoanApplication;
 using Credio.Core.Application.Helpers;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
+using Credio.Core.Application.Interfaces.Services;
 using Credio.Core.Domain.Entities;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -37,6 +38,7 @@ public class CreateLoanApplicationCommandHandler : ICommandHandler<CreateLoanApp
     private readonly IClientRepository _clientRepository;
     private readonly IEmployeeRepository _employeeRepository;
     private readonly IMapper _mapper;
+    private readonly ICacheService _cacheService;
 
 
     public CreateLoanApplicationCommandHandler(
@@ -44,13 +46,15 @@ public class CreateLoanApplicationCommandHandler : ICommandHandler<CreateLoanApp
         IApplicationStatusRepository applicationStatusRepository,
         IClientRepository clientRepository,
         IEmployeeRepository employeeRepository,
-        IMapper mapper)
+        IMapper mapper,
+        ICacheService cacheService)
     {
         _loanApplicationRepository = loanApplicationRepository;
         _applicationStatusRepository = applicationStatusRepository;
         _clientRepository = clientRepository;
         _employeeRepository = employeeRepository;
         _mapper = mapper;
+        _cacheService = cacheService;
     }
     
     public async Task<Result<LoanApplicationDto>> Handle(CreateLoanApplicationCommand request, CancellationToken cancellationToken)
@@ -94,6 +98,8 @@ public class CreateLoanApplicationCommandHandler : ICommandHandler<CreateLoanApp
         
             LoanApplication result = await _loanApplicationRepository
                 .GetByIdWithIncludeAsync(x => x.Id  == createdLoanApplication.Id, [x => x.Client, x => x.ApplicationStatus, x => x.PaymentFrequency]);
+            
+            _cacheService.RemoveByPrefix("GetAllLoanApplicationsQuery_");
         
             return Result<LoanApplicationDto>.Success(_mapper.Map<LoanApplicationDto>(result));
         }
