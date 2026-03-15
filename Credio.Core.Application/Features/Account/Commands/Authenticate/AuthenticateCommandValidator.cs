@@ -9,7 +9,7 @@ namespace Credio.Core.Application.Features.Account.Commands.Authenticate
             RuleFor(command => command.UserName)
                 .NotNull().WithMessage("The username can't be null")
                 .NotEmpty().WithMessage("The username can't be empty")
-                .MinimumLength(3).WithMessage("The username must contain at least three characters.")
+                .MinimumLength(2).WithMessage("The username must contain at least two characters.")
                 .MaximumLength(20).WithMessage("The username must not exceed 20 characters.")
                 .Matches(@"^[a-zA-Z0-9_]+$").WithMessage("The username can only contain letters, numbers, and underscores.");
 
