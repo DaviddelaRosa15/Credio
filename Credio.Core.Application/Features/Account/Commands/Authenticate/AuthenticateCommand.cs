@@ -1,13 +1,9 @@
 ﻿using AutoMapper;
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Account;
-using Credio.Core.Application.Dtos.Common;
-using Credio.Core.Application.Helpers;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Services;
-using MediatR;
 using Swashbuckle.AspNetCore.Annotations;
-using System.ComponentModel.DataAnnotations;
 
 namespace Credio.Core.Application.Features.Account.Commands.Authenticate
 {
