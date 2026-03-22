@@ -20,10 +20,7 @@
 	
   <ItemGroup>
     <Folder Include="Dtos\Account\" />
-<<<<<<< HEAD
-    <Folder Include="Features\LoanStatus\Commands\" />
-=======
->>>>>>> cc7e67cfa465718cafa874ca711e84e45e55f896
+    <Folder Include="Features\Catalog\Command\" />
   </ItemGroup>
 
   <ItemGroup>

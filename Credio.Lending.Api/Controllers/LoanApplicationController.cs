@@ -5,10 +5,7 @@ using Credio.Core.Application.Dtos.Requests;
 using Credio.Core.Application.Features.LoanApplications.Commands.CreateLoanApplicationCommand;
 using Credio.Core.Application.Features.LoanApplications.Queries.GetAll;
 using Credio.Core.Application.Features.LoanApplications.Queries.GetById;
-<<<<<<< HEAD
-using Credio.Core.Application.Features.LoanStatus.Queries.GetLoanStatuses;
-=======
->>>>>>> 2c239f3fc932e797c1c44da1a966834ba4a6e5bd
+
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -124,8 +121,4 @@ public class LoanApplicationController : ControllerBase
           onSuccess: () => CustomResult.Success(result),
           onFailure: CustomResult.Problem);
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> 2c239f3fc932e797c1c44da1a966834ba4a6e5bd
 }

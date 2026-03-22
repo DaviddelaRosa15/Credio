@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using Credio.Core.Application.Dtos.Account;
+using Credio.Core.Application.Dtos.Catalog;
 using Credio.Core.Application.Dtos.Client;
 using Credio.Core.Application.Dtos.Common;
 using Credio.Core.Application.Dtos.Employee;
 using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Dtos.LoanApplication;
+using Credio.Core.Application.Dtos.LoanStatus;
 using Credio.Core.Application.Features.Account.Commands.Authenticate;
 using Credio.Core.Application.Features.Employee.Commands.RegisterEmployee;
 using Credio.Core.Domain.Entities;
@@ -183,14 +185,11 @@ namespace Credio.Core.Application.Mappings
             #region Loan
             CreateMap<Loan, LoanDTO>()
                 .ReverseMap();
-<<<<<<< HEAD
 
             CreateMap<Loan, LoanStatusDTO>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
                 .ForMember(x => x.Name, opt => opt.MapFrom(y => y.LoanStatus.Name))
                 .ForMember(x => x.Description, opt => opt.MapFrom(y => y.LoanStatus.Description));
-=======
->>>>>>> cc7e67cfa465718cafa874ca711e84e45e55f896
             #endregion
 
             #region LoanApplication
@@ -201,13 +200,12 @@ namespace Credio.Core.Application.Mappings
                     opt => opt.MapFrom(src => src.ApplicationStatus.Name))
                 .ForMember(dest => dest.PaymentFrequency,
                     opt => opt.MapFrom(src => src.PaymentFrequency.Name));
-<<<<<<< HEAD
             #endregion
 
-            #region LoanStatus
+            #region Catalog
             CreateMap<LoanStatus, LoanStatusDTO>();
-=======
->>>>>>> cc7e67cfa465718cafa874ca711e84e45e55f896
+
+            CreateMap<PaymentFrequency, PaymentFrequencyDTO>();
             #endregion
         }
     }

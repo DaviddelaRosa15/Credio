@@ -1,6 +1,6 @@
-﻿using Credio.Core.Application.Common.Primitives;
-using Credio.Core.Application.Dtos.Loan;
-using Credio.Core.Application.Features.LoanApplications.Commands.CreateLoan;
+﻿using Credio.Core.Application.Dtos.Catalog;
+using Credio.Core.Application.Dtos.LoanStatus;
+using Credio.Core.Application.Features.Catalog.Queries.GetPaymentFrequencies;
 using Credio.Core.Application.Features.LoanStatus.Queries.GetLoanStatuses;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
@@ -33,7 +33,26 @@ namespace Credio.Lending.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-        public async Task<IResult> GetAllStatusQuery([FromQuery] GetLoanStatusesQuery query, CancellationToken cancellationToken)
+        public async Task<IResult> GetAllStatus([FromQuery] GetLoanStatusesQuery query, CancellationToken cancellationToken)
+        {
+            var result = await _sender.Send(query, cancellationToken);
+
+            return result.Match(
+              onSuccess: () => CustomResult.Success(result),
+              onFailure: CustomResult.Problem);
+        }
+
+        [SwaggerOperation(
+        Summary = "Obtiene la periodicidad de las cuotas",
+        Description = "Obtiene la frecuencia de los pagos"
+        )]
+        [Authorize(Roles = "Administrator, Officer")]
+        [HttpGet("payment-frequencies")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaymentFrequencyDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<IResult> GetPaymentFrequencies([FromQuery] GetPaymentFrequenciesQuery query, CancellationToken cancellationToken)
         {
             var result = await _sender.Send(query, cancellationToken);
 

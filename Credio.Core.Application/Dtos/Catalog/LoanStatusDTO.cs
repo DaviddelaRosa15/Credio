@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Credio.Core.Application.Dtos.Loan
+namespace Credio.Core.Application.Dtos.LoanStatus
 {
     public class LoanStatusDTO
     {

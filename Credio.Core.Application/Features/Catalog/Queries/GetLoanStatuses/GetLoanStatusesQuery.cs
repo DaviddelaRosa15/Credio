@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Common;
-using Credio.Core.Application.Dtos.Loan;
+using Credio.Core.Application.Dtos.LoanStatus;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
