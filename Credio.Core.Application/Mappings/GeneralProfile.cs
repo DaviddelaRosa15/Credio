@@ -183,11 +183,14 @@ namespace Credio.Core.Application.Mappings
             #region Loan
             CreateMap<Loan, LoanDTO>()
                 .ReverseMap();
+<<<<<<< HEAD
 
             CreateMap<Loan, LoanStatusDTO>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
                 .ForMember(x => x.Name, opt => opt.MapFrom(y => y.LoanStatus.Name))
                 .ForMember(x => x.Description, opt => opt.MapFrom(y => y.LoanStatus.Description));
+=======
+>>>>>>> cc7e67cfa465718cafa874ca711e84e45e55f896
             #endregion
 
             #region LoanApplication
@@ -198,10 +201,13 @@ namespace Credio.Core.Application.Mappings
                     opt => opt.MapFrom(src => src.ApplicationStatus.Name))
                 .ForMember(dest => dest.PaymentFrequency,
                     opt => opt.MapFrom(src => src.PaymentFrequency.Name));
+<<<<<<< HEAD
             #endregion
 
             #region LoanStatus
             CreateMap<LoanStatus, LoanStatusDTO>();
+=======
+>>>>>>> cc7e67cfa465718cafa874ca711e84e45e55f896
             #endregion
         }
     }
