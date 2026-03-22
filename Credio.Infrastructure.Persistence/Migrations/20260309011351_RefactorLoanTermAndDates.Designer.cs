@@ -3,6 +3,7 @@ using System;
 using Credio.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Credio.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20260309011351_RefactorLoanTermAndDates")]
+    partial class RefactorLoanTermAndDates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,8 +115,8 @@ namespace Credio.Infrastructure.Persistence.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
 
-                    b.Property<DateOnly>("DueDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("InstallmentNumber")
                         .HasColumnType("integer");
@@ -131,8 +134,8 @@ namespace Credio.Infrastructure.Persistence.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
 
-                    b.Property<DateOnly?>("LastPaymentDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("LastPaymentDate")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("LoanId")
                         .IsRequired()
@@ -493,9 +496,6 @@ namespace Credio.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<DateOnly?>("DisbursedDate")
-                        .HasColumnType("date");
-
-                    b.Property<DateOnly>("EffectiveDate")
                         .HasColumnType("date");
 
                     b.Property<string>("EmployeeId")

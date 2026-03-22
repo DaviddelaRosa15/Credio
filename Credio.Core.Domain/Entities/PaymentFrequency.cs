@@ -17,4 +17,5 @@ public class PaymentFrequency
     public bool IsActive { get; set; }
     
     public List<Loan> Loans { get; set; }
+    public List<LoanApplication> LoanApplications { get; set; }
 }

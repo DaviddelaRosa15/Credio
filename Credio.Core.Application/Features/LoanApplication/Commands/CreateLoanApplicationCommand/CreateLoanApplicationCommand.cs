@@ -4,6 +4,7 @@ using Credio.Core.Application.Dtos.LoanApplication;
 using Credio.Core.Application.Helpers;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
+using Credio.Core.Application.Interfaces.Services;
 using Credio.Core.Domain.Entities;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -25,6 +26,9 @@ public class CreateLoanApplicationCommand : ICommand<LoanApplicationDto>
     
     [SwaggerParameter(Description = "Id del empleado")]
     public string EmployeeId { get; set; } = string.Empty;
+
+    [SwaggerParameter(Description = "Frecuencia de pago")]
+    public string PaymentFrequencyId { get; set; } = string.Empty;
 }
 
 public class CreateLoanApplicationCommandHandler : ICommandHandler<CreateLoanApplicationCommand, LoanApplicationDto>
@@ -34,6 +38,7 @@ public class CreateLoanApplicationCommandHandler : ICommandHandler<CreateLoanApp
     private readonly IClientRepository _clientRepository;
     private readonly IEmployeeRepository _employeeRepository;
     private readonly IMapper _mapper;
+    private readonly ICacheService _cacheService;
 
 
     public CreateLoanApplicationCommandHandler(
@@ -41,13 +46,15 @@ public class CreateLoanApplicationCommandHandler : ICommandHandler<CreateLoanApp
         IApplicationStatusRepository applicationStatusRepository,
         IClientRepository clientRepository,
         IEmployeeRepository employeeRepository,
-        IMapper mapper)
+        IMapper mapper,
+        ICacheService cacheService)
     {
         _loanApplicationRepository = loanApplicationRepository;
         _applicationStatusRepository = applicationStatusRepository;
         _clientRepository = clientRepository;
         _employeeRepository = employeeRepository;
         _mapper = mapper;
+        _cacheService = cacheService;
     }
     
     public async Task<Result<LoanApplicationDto>> Handle(CreateLoanApplicationCommand request, CancellationToken cancellationToken)
@@ -83,19 +90,22 @@ public class CreateLoanApplicationCommandHandler : ICommandHandler<CreateLoanApp
                 RequestedAmount = request.RequestedAmount,
                 RequestTerm = request.RequestedTerm,
                 ApplicationStatusId = foundApplicationStatus.Id,
-                RequestedInterestRate = request.RequestedInterestRate
+                RequestedInterestRate = request.RequestedInterestRate,
+                PaymentFrequencyId = request.PaymentFrequencyId
             };
         
             LoanApplication createdLoanApplication = await _loanApplicationRepository.AddAsync(newLoanApplication);
         
             LoanApplication result = await _loanApplicationRepository
-                .GetByIdWithIncludeAsync(x => x.Id  == createdLoanApplication.Id, [x => x.Client, x => x.ApplicationStatus]);
+                .GetByIdWithIncludeAsync(x => x.Id  == createdLoanApplication.Id, [x => x.Client, x => x.ApplicationStatus, x => x.PaymentFrequency]);
+            
+            _cacheService.RemoveByPrefix("GetAllLoanApplicationsQuery_");
         
             return Result<LoanApplicationDto>.Success(_mapper.Map<LoanApplicationDto>(result));
         }
         catch 
         {
-            return Result<LoanApplicationDto>.Failure(Error.NotFound("Ocurrio un error al momento de crear la solicitud de prestamo"));
+            return Result<LoanApplicationDto>.Failure(Error.InternalServerError("Ocurrio un error al momento de crear la solicitud de prestamo"));
         }
     }
 }

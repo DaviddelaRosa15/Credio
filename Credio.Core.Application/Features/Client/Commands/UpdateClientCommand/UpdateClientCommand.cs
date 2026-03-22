@@ -2,7 +2,9 @@ using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Common;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
+using Credio.Core.Application.Interfaces.Services;
 using Credio.Core.Domain.Entities;
+using Microsoft.Extensions.Caching.Memory;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Credio.Core.Application.Features.Clients.Commands.UpdateClientCommand;
@@ -52,10 +54,12 @@ public record UpdateClientCommand(
 public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand>
 {
     private readonly IClientRepository _clientRepository;
+    private readonly ICacheService _cacheService;
 
-    public UpdateClientCommandHandler(IClientRepository clientRepository)
+    public UpdateClientCommandHandler(IClientRepository clientRepository, ICacheService cacheService)
     {
         _clientRepository = clientRepository;
+        _cacheService = cacheService;
     }
     public async Task<Result> Handle(UpdateClientCommand request, CancellationToken cancellationToken)
     {
@@ -72,6 +76,12 @@ public class UpdateClientCommandHandler : ICommandHandler<UpdateClientCommand>
             request.Apply(foundClient);
         
             await _clientRepository.UpdateAsync(foundClient);
+            
+            _cacheService.Remove($"client-{foundClient.Id}");
+            
+            _cacheService.Remove($"client-{foundClient.DocumentNumber}");
+            
+            _cacheService.RemoveByPrefix("GetAllClientQuery_");
 
             return Result.Success();
         }

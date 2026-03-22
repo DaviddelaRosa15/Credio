@@ -3,9 +3,9 @@ using Credio.Core.Application.Dtos.Account;
 using Credio.Core.Application.Dtos.Client;
 using Credio.Core.Application.Dtos.Common;
 using Credio.Core.Application.Dtos.Employee;
+using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Dtos.LoanApplication;
 using Credio.Core.Application.Features.Account.Commands.Authenticate;
-using Credio.Core.Application.Features.Account.Commands.RegisterClient;
 using Credio.Core.Application.Features.Employee.Commands.RegisterEmployee;
 using Credio.Core.Domain.Entities;
 
@@ -18,12 +18,6 @@ namespace Credio.Core.Application.Mappings
 			#region Account
 			CreateMap<AuthenticationRequest, AuthenticateCommand>()
 				.ReverseMap();
-
-            CreateMap<RegisterRequest, RegisterClientCommand>()
-                .ForMember(x => x.Address, opt => opt.Ignore())
-                .ForMember(x => x.Image, opt => opt.Ignore())
-                .ReverseMap()
-                .ForMember(x => x.Password, opt => opt.Ignore());
 
             CreateMap<RegisterRequest, RegisterEmployeeCommand>()
                 .ForMember(x => x.Address, opt => opt.Ignore())
@@ -40,6 +34,18 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(x => x.Id, opt => opt.Ignore())
                 .ForMember(x => x.Employees, opt => opt.Ignore())
                 .ForMember(x => x.Clients, opt => opt.Ignore())
+                .ForMember(x => x.Created, opt => opt.Ignore())
+                .ForMember(x => x.CreatedBy, opt => opt.Ignore())
+                .ForMember(x => x.LastModified, opt => opt.Ignore())
+                .ForMember(x => x.LastModifiedBy, opt => opt.Ignore())
+                .ForMember(x => x.IsDeleted, opt => opt.Ignore())
+                .ForMember(x => x.Deleted, opt => opt.Ignore());
+            #endregion
+
+            #region AmortizationSchedule
+            CreateMap<AmortizationSchedule, InstallmentDTO>()
+                .ReverseMap()
+                .ForMember(x => x.Id, opt => opt.Ignore())
                 .ForMember(x => x.Created, opt => opt.Ignore())
                 .ForMember(x => x.CreatedBy, opt => opt.Ignore())
                 .ForMember(x => x.LastModified, opt => opt.Ignore())
@@ -174,12 +180,28 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(x => x.Deleted, opt => opt.Ignore());
             #endregion
 
+            #region Loan
+            CreateMap<Loan, LoanDTO>()
+                .ReverseMap();
+
+            CreateMap<Loan, LoanStatusDTO>()
+                .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
+                .ForMember(x => x.Name, opt => opt.MapFrom(y => y.LoanStatus.Name))
+                .ForMember(x => x.Description, opt => opt.MapFrom(y => y.LoanStatus.Description));
+            #endregion
+
             #region LoanApplication
             CreateMap<LoanApplication, LoanApplicationDto>()
                 .ForMember(dest => dest.ClientName,
                     opt => opt.MapFrom(src => src.Client.FirstName + " " + src.Client.LastName))
                 .ForMember(dest => dest.ApplicationStatusName,
-                    opt => opt.MapFrom(src => src.ApplicationStatus.Name));
+                    opt => opt.MapFrom(src => src.ApplicationStatus.Name))
+                .ForMember(dest => dest.PaymentFrequency,
+                    opt => opt.MapFrom(src => src.PaymentFrequency.Name));
+            #endregion
+
+            #region LoanStatus
+            CreateMap<LoanStatus, LoanStatusDTO>();
             #endregion
         }
     }

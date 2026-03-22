@@ -432,6 +432,8 @@ namespace Credio.Infrastructure.Identity.Services
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email,user.Email),
                 new Claim("uid", user.Id),
+                new Claim("firstName", user.FirstName),
+                new Claim("lastName", user.LastName),
                 new Claim("UrlImage", user.UrlImage)
             }
             .Union(userClaims)

@@ -31,7 +31,11 @@ public class LoanApplication : AuditableBaseEntity
 
     public int? ApprovedTerm { get; set; }
 
-    public double? ApprovedInterestRate { get; set; } 
+    public double? ApprovedInterestRate { get; set; }
+
+    public string PaymentFrequencyId { get; set; }
+
+    public PaymentFrequency PaymentFrequency { get; set; }
 
     public string ApplicationStatusId { get; set; }
 
