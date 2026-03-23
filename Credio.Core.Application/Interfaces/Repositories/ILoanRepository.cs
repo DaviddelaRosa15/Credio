@@ -8,6 +8,6 @@ public interface ILoanRepository : IGenericRepository<Loan>
     Task<int> GetLastLoanNumberAsync();
 
     Task<PortfolioSummaryDto?> GetPortfolioSummary(
-        string statusId, string searchTerm, DateOnly startDate, DateOnly endDate,
+        string? statusId, string? searchTerm, DateOnly? startDate, DateOnly? endDate,
         CancellationToken cancellationToken = default);
 }

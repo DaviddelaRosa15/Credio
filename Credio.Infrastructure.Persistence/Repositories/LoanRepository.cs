@@ -29,18 +29,21 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
     }
 
     public async Task<PortfolioSummaryDto?> GetPortfolioSummary(
-        string statusId, string searchTerm, DateOnly startDate, DateOnly endDate,
+        string? statusId, string? searchTerm, DateOnly? startDate, DateOnly? endDate,
         CancellationToken cancellationToken = default)
     {
         using ApplicationContext db = _dbContext.CreateDbContext();
 
         IQueryable<Loan> query = db.Loan
-            .Where(x =>
-                x.LoanStatusId == statusId &&
-                x.DisbursedDate >= startDate &&
-                x.EffectiveDate <= endDate &&
-                x.Client.FirstName.Contains(searchTerm) ||
-                x.LoanNumber.ToString().Contains(searchTerm))
+            .Where(predicate => 
+                (string.IsNullOrEmpty(statusId) || predicate.LoanStatusId == statusId) &&
+                (!startDate.HasValue || predicate.DisbursedDate >= startDate.Value) &&
+                (!endDate.HasValue || predicate.EffectiveDate <= endDate.Value) &&
+                (
+                    string.IsNullOrEmpty(searchTerm) ||
+                    predicate.Client.FirstName.Contains(searchTerm) ||
+                    predicate.LoanNumber.ToString().Contains(searchTerm)
+                ))
             .AsNoTracking();
 
         return new PortfolioSummaryDto
