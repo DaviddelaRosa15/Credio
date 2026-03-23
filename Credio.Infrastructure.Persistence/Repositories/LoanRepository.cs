@@ -1,3 +1,4 @@
+using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Domain.Entities;
 using Credio.Infrastructure.Persistence.Contexts;
@@ -18,12 +19,35 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
     {
         using var db = _dbContext.CreateDbContext();
 
-        // Obtener el número de préstamos existentes en la base de datos
+        // Obtener el nï¿½mero de prï¿½stamos existentes en la base de datos
         int loanCount = db.Loan.Count();
 
-        // Si no hay préstamos, el número de préstamo será 0, de lo contrario, se obtiene el máximo número de préstamo existente
+        // Si no hay prï¿½stamos, el nï¿½mero de prï¿½stamo serï¿½ 0, de lo contrario, se obtiene el mï¿½ximo nï¿½mero de prï¿½stamo existente
         int lastNumber = loanCount != 0 ? db.Loan.Max(e => e.LoanNumber) : loanCount;
 
         return lastNumber;
+    }
+
+    public async Task<PortfolioSummaryDto?> GetPortfolioSummary(
+        string statusId, string searchTerm, DateOnly startDate, DateOnly endDate,
+        CancellationToken cancellationToken = default)
+    {
+        using ApplicationContext db = _dbContext.CreateDbContext();
+
+        IQueryable<Loan> query = db.Loan
+            .Where(x =>
+                x.LoanStatusId == statusId &&
+                x.DisbursedDate >= startDate &&
+                x.EffectiveDate <= endDate &&
+                x.Client.FirstName.Contains(searchTerm) ||
+                x.LoanNumber.ToString().Contains(searchTerm))
+            .AsNoTracking();
+
+        return new PortfolioSummaryDto
+        {
+            TotalLoans = await query.CountAsync(cancellationToken),
+            LateFees = await query.SelectMany(x => x.LoanBalances).SumAsync(x => x.PrincipalBalance, cancellationToken),
+            TotalPortfolio = await query.SelectMany(x => x.LateFees).SumAsync(x => x.Balance, cancellationToken),
+        };
     }
 }
