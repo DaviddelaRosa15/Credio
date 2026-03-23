@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Runtime.InteropServices.ComTypes;
+using AutoMapper;
 using Credio.Core.Application.Dtos.Account;
 using Credio.Core.Application.Dtos.Client;
 using Credio.Core.Application.Dtos.Common;
@@ -183,6 +184,22 @@ namespace Credio.Core.Application.Mappings
             #region Loan
             CreateMap<Loan, LoanDTO>()
                 .ReverseMap();
+
+            CreateMap<Loan, LoanReportItemDto>()
+                .ForMember(dest => dest.Client,
+                    opt => opt.MapFrom(src => src.Client.FirstName + " " + src.Client.LastName))
+                .ForMember(dest => dest.OriginalAmount,
+                    opt => opt.MapFrom(src => src.Amount))
+                .ForMember(dest => dest.State,
+                    opt => opt.MapFrom(src => src.LoanStatus.Description))
+                .ForMember(dest => dest.OutstandingBalance,
+                    opt => opt.MapFrom(src => src.LoanBalances.Sum(x => x.TotalOutstanding)))
+                .ForMember(dest => dest.DaysInArrears,
+                    opt => opt.MapFrom(src => src.LoanBalances.Select(x => x.DaysInArrears).FirstOrDefault()))
+                .ForMember(dest => dest.TotalFeeCount,
+                    opt => opt.MapFrom(src => src.AmortizationSchedules.Count()))
+                .ForMember(dest => dest.TotalFeePaidCount,
+                    opt => opt.MapFrom(src => src.AmortizationSchedules.Count(x => x.AmortizationStatus.Description == "Pagado")));
             #endregion
 
             #region LoanApplication
