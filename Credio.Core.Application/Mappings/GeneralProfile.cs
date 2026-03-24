@@ -52,6 +52,14 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(x => x.LastModifiedBy, opt => opt.Ignore())
                 .ForMember(x => x.IsDeleted, opt => opt.Ignore())
                 .ForMember(x => x.Deleted, opt => opt.Ignore());
+            
+            CreateMap<AmortizationSchedule, UpcomingInstallmentDTO>()
+                .ForMember(dest => dest.Client,
+                    opt => opt.MapFrom(src => src.Loan.Client.FirstName + " " + src.Loan.Client.LastName))
+                .ForMember(dest => dest.Loan,
+                    opt => opt.MapFrom(src => src.Loan.LoanNumber))
+                .ForMember(dest => dest.State,
+                    opt => opt.MapFrom(src => src.AmortizationStatus.Description));
             #endregion
 
             #region Client
@@ -193,17 +201,6 @@ namespace Credio.Core.Application.Mappings
                     opt => opt.MapFrom(src => src.ApplicationStatus.Name))
                 .ForMember(dest => dest.PaymentFrequency,
                     opt => opt.MapFrom(src => src.PaymentFrequency.Name));
-            #endregion
-
-            #region AmortizationSchedule
-
-            CreateMap<AmortizationSchedule, UpcomingInstallmentDTO>()
-                .ForMember(dest => dest.Client,
-                    opt => opt.MapFrom(src => src.Loan.Client.FirstName + " " + src.Loan.Client.LastName))
-                .ForMember(dest => dest.Loan,
-                    opt => opt.MapFrom(src => src.Loan.LoanNumber))
-                .ForMember(dest => dest.State,
-                    opt => opt.MapFrom(src => src.AmortizationStatus.Description));
             #endregion
         }
     }
