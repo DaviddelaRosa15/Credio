@@ -12,6 +12,7 @@ namespace Credio.Core.Application.Seeds
             {
                 var loanStatuses = new List<string>
                     {
+                        "Creado",
                         "Activo",
                         "Pagado",
                         "En mora"
