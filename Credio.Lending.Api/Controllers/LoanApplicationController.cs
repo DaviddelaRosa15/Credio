@@ -1,9 +1,11 @@
 using Credio.Core.Application.Common.Primitives;
+using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Dtos.LoanApplication;
 using Credio.Core.Application.Dtos.Requests;
 using Credio.Core.Application.Features.LoanApplications.Commands.CreateLoanApplicationCommand;
 using Credio.Core.Application.Features.LoanApplications.Queries.GetAll;
 using Credio.Core.Application.Features.LoanApplications.Queries.GetById;
+
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
