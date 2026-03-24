@@ -1,4 +1,5 @@
-﻿using Credio.Core.Application.Interfaces.Repositories;
+﻿using Credio.Core.Application.Constants;
+using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Domain.Entities;
 
 namespace Credio.Core.Application.Seeds
@@ -12,10 +13,10 @@ namespace Credio.Core.Application.Seeds
             {
                 var loanStatuses = new List<string>
                     {
-                        "Creado",
-                        "Activo",
-                        "Pagado",
-                        "En mora"
+                        LoanStatuses.Created,
+                        LoanStatuses.Active,
+                        LoanStatuses.Paid,
+                        LoanStatuses.Defaulted
                     };
 
                 foreach (var item in loanStatuses)

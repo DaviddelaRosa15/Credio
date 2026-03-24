@@ -1,5 +1,6 @@
 using AutoMapper;
 using Credio.Core.Application.Common.Primitives;
+using Credio.Core.Application.Constants;
 using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
@@ -88,8 +89,8 @@ public class CreateLoanCommandHandler : ICommandHandler<CreateLoanCommand, LoanD
             // Obtener el método de amortización por defecto (Cuota Fija) si no se proporciona uno en la solicitud
             var amortizationMethod = await _methodRepository.GetByPropertyAsync(x => x.Name == "Cuota Fija");
 
-            // Obtener el estado de préstamo "Activo" para asignarlo al nuevo préstamo
-            var loanStatus = await _statusRepository.GetByPropertyAsync(x => x.Name == "Activo");
+            // Obtener el estado de préstamo "Creado" para asignarlo al nuevo préstamo
+            var loanStatus = await _statusRepository.GetByPropertyAsync(x => x.Name == LoanStatuses.Created);
 
              Domain.Entities.Loan newLoan = new()
             {
