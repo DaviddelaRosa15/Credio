@@ -61,19 +61,22 @@ public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, C
     private readonly IEmployeeRepository _employeeRepository;
     private readonly IMapper _mapper;
     private readonly IAccountService _accountService;
+    private readonly ICacheService _cacheService;
 
     public CreateClientCommandHandler(
         IDocumentTypeRepository documentTypeRepository,
         IClientRepository clientRepository,
         IEmployeeRepository employeeRepository,
         IMapper mapper,
-        IAccountService accountService)
+        IAccountService accountService, 
+        ICacheService cacheService)
     {
         _documentTypeRepository = documentTypeRepository;
         _clientRepository = clientRepository;
         _employeeRepository = employeeRepository;
         _mapper = mapper;
         _accountService = accountService;
+        _cacheService = cacheService;
     }
 
     public async Task<Result<CreateClientCommandResponse>> Handle(
@@ -137,6 +140,8 @@ public class CreateClientCommandHandler : ICommandHandler<CreateClientCommand, C
             client.AddEvent(new ClientWelcomeEvent($"{request.FirstName} {request.LastName}"));
 
             var createdClient = await _clientRepository.AddAsync(client);
+            
+            _cacheService.RemoveByPrefix("GetAllClientQuery_");
 
             CreateClientCommandResponse result = new CreateClientCommandResponse
             {
