@@ -2,9 +2,9 @@ namespace Credio.Core.Application.Dtos.Loan;
 
 public class BotNextPaymentResponseDTO
 {
-    public BotPaymentDetailDTO UrgentPayment { get; set; }
+    public BotPaymentDetailDTO? UrgentPayment { get; set; }
 
-    public List<BotNextPaymentResponseDTO> OtherActiveLoans { get; set; }
+    public List<BotPaymentDetailDTO> OtherActiveLoans { get; set; }
 }
 
 public class BotPaymentDetailDTO
@@ -17,7 +17,7 @@ public class BotPaymentDetailDTO
 
     public double LateFeeAmount { get; set; }
 
-    public int TotalAmountToPay { get; set; }
+    public double TotalAmountToPay { get; set; }
 
-    public int DaysUntilDue { get; set; }
+    public int? DaysUntilDue { get; set; }
 }
