@@ -1,14 +1,18 @@
+using System.Text.Json.Serialization;
 using AutoMapper;
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Common;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Domain.Entities;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Credio.Core.Application.Features.AmortizationSchedules.Queries.GetUpcomingInstallmentsQuery;
 
 public class GetUpcomingInstallmentsQuery : PaginationRequest, ICachedQuery<List<UpcomingInstallmentDTO>>
 {
+    [JsonIgnore]
+    [SwaggerIgnore]
     public string CachedKey => $"GetUpcomingInstallmentsQuery_{PageNumber}_{PageSize}";
 }
 
