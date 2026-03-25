@@ -10,4 +10,8 @@ public interface ILoanRepository : IGenericRepository<Loan>
     Task<PortfolioSummaryDto?> GetPortfolioSummary(
         string? statusId, string? searchTerm, DateOnly? startDate, DateOnly? endDate,
         CancellationToken cancellationToken = default);
+
+    Task<(int, double, double)> GetBasicDashboardMetrics(CancellationToken cancellationToken = default);
+
+    Task<List<double>> GetDisbursements(CancellationToken cancellationToken = default);
 }
