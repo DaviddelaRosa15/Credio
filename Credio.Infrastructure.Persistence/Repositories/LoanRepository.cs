@@ -53,4 +53,18 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
             TotalPortfolio = await query.SelectMany(x => x.LateFees).SumAsync(x => x.Balance, cancellationToken),
         };
     }
+
+    public async Task<List<Loan>> GetActiveLoansByDocumentNumberAsync(string documentNumber, CancellationToken cancellationToken = default)
+    {
+        using ApplicationContext db = _dbContext.CreateDbContext();
+        
+        return await db.Loan
+            .Include(x => x.LoanBalances)
+            .Include(x => x.AmortizationSchedules)
+                .ThenInclude(x => x.AmortizationStatus)
+            .Where(x => x.LoanStatus.Description == "Activo" && x.Client.DocumentNumber.Contains(documentNumber))
+            .AsNoTracking()
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
+    }
 }
