@@ -231,6 +231,10 @@ namespace Credio.Core.Application.Mappings
             CreateMap<LoanStatus, LoanStatusDTO>();
 
             CreateMap<PaymentFrequency, PaymentFrequencyDTO>();
+
+            CreateMap<ApplicationStatus, ApplicationStatusDTO>();
+
+            CreateMap<DocumentType, DocumentTypeDTO>();
             #endregion
         }
     }

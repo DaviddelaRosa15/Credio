@@ -21,6 +21,7 @@ public static partial class PersistenceExtensions
         services.AddTransient<ILoanApplicationRepository, LoanApplicationRepository>();
         services.AddTransient<ILoanStatusRepository, LoanStatusRepository>();
         services.AddTransient<IPaymentFrequencyRepository, PaymentFrequencyRepository>();
+        services.AddTransient<IPaymentMethodRepository, PaymentMethodRepository>();
 
         return services;
     }
