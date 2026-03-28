@@ -39,7 +39,8 @@ namespace Credio.Core.Application.Features.LoanApplications.Queries.GetAll
                     new List<Expression<Func<Domain.Entities.LoanApplication, object>>>
                     {
                         m => m.ApplicationStatus,
-                        m => m.Client
+                        m => m.Client,
+                        m => m.PaymentFrequency
                     },
                     !string.IsNullOrEmpty(query.EmployeeId)
                         ? (Expression<Func<Domain.Entities.LoanApplication, bool>>)(c => c.EmployeeId == query.EmployeeId)
