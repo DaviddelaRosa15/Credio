@@ -1,11 +1,10 @@
 using Credio.Core.Application.Common.Primitives;
-using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Dtos.LoanApplication;
 using Credio.Core.Application.Dtos.Requests;
+using Credio.Core.Application.Features.LoanApplication.Queries.SimulateAmortization;
 using Credio.Core.Application.Features.LoanApplications.Commands.CreateLoanApplicationCommand;
 using Credio.Core.Application.Features.LoanApplications.Queries.GetAll;
 using Credio.Core.Application.Features.LoanApplications.Queries.GetById;
-
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -116,6 +115,25 @@ public class LoanApplicationController : ControllerBase
     public async Task<IResult> GetApplicationById(string id, CancellationToken cancellationToken)
     {
         Result<LoanApplicationDto> result = await _sender.Send(new GetByIdLoanApplicationQuery(id), cancellationToken);
+
+        return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure: CustomResult.Problem);
+    }
+
+    [Authorize(Roles = "Administrator, Officer")]
+    [HttpGet("simulate")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SimulationResponseDTO))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    [SwaggerOperation(
+        Summary = "Simulación de calendario de pagos",
+        Description = "Obtiene la simulación de la tabla de amortización sin un número de préstamo"
+    )]
+    public async Task<IResult> SimulateAmortization([FromQuery] SimulateAmortizationQuery query, CancellationToken cancellationToken)
+    {
+        Result<SimulationResponseDTO> result = await _sender.Send(query, cancellationToken);
 
         return result.Match(
           onSuccess: () => CustomResult.Success(result),
