@@ -21,7 +21,7 @@ public class ApproveLoanApplicationCommand : ICommand
     [SwaggerParameter(Description = "Tasa aprobada")]
     public double ApprovedInterestRate { get; set; }
 
-    public void Apply(LoanApplication loanApplication)
+    public void Apply(Domain.Entities.LoanApplication loanApplication)
     {
         loanApplication.ApprovedAmount =  ApprovedAmount;
         loanApplication.ApprovedTerm = ApprovedTerm;
@@ -51,7 +51,7 @@ public class ApproveLoanApplicationCommandHandler : ICommandHandler<ApproveLoanA
     {
         try
         {
-            LoanApplication? foundApplication =
+            Domain.Entities.LoanApplication? foundApplication =
                 await _loanApplicationRepository.GetByIdWithIncludeAsync(x => x.Id == request.LoanApplicationId,
                     [x => x.ApplicationStatus]);
 
