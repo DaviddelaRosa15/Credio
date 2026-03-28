@@ -82,7 +82,7 @@ public class CreateLoanApplicationCommandHandler : ICommandHandler<CreateLoanApp
                 return Result<LoanApplicationDto>.Failure(Error.NotFound("No se pudo encontrar el empleado"));
             }
 
-            LoanApplication newLoanApplication = new LoanApplication
+            Domain.Entities.LoanApplication newLoanApplication = new Domain.Entities.LoanApplication
             {
                 ApplicationCode = ApplicationCodeGenerator.Generate(),
                 ClientId = request.ClientId,
@@ -94,9 +94,9 @@ public class CreateLoanApplicationCommandHandler : ICommandHandler<CreateLoanApp
                 PaymentFrequencyId = request.PaymentFrequencyId
             };
         
-            LoanApplication createdLoanApplication = await _loanApplicationRepository.AddAsync(newLoanApplication);
+            Domain.Entities.LoanApplication createdLoanApplication = await _loanApplicationRepository.AddAsync(newLoanApplication);
         
-            LoanApplication result = await _loanApplicationRepository
+            Domain.Entities.LoanApplication result = await _loanApplicationRepository
                 .GetByIdWithIncludeAsync(x => x.Id  == createdLoanApplication.Id, [x => x.Client, x => x.ApplicationStatus, x => x.PaymentFrequency]);
             
             _cacheService.RemoveByPrefix("GetAllLoanApplicationsQuery_");
