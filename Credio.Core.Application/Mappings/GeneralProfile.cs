@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Runtime.InteropServices.ComTypes;
+using AutoMapper;
 using Credio.Core.Application.Dtos.Account;
 using Credio.Core.Application.Dtos.Catalog;
 using Credio.Core.Application.Dtos.Client;
@@ -54,6 +55,14 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(x => x.LastModifiedBy, opt => opt.Ignore())
                 .ForMember(x => x.IsDeleted, opt => opt.Ignore())
                 .ForMember(x => x.Deleted, opt => opt.Ignore());
+            
+            CreateMap<AmortizationSchedule, UpcomingInstallmentDTO>()
+                .ForMember(dest => dest.Client,
+                    opt => opt.MapFrom(src => src.Loan.Client.FirstName + " " + src.Loan.Client.LastName))
+                .ForMember(dest => dest.Loan,
+                    opt => opt.MapFrom(src => src.Loan.LoanNumber))
+                .ForMember(dest => dest.State,
+                    opt => opt.MapFrom(src => src.AmortizationStatus.Description));
             #endregion
 
             #region Client
@@ -186,6 +195,22 @@ namespace Credio.Core.Application.Mappings
             CreateMap<Loan, LoanDTO>()
                 .ReverseMap();
 
+            CreateMap<Loan, LoanReportItemDto>()
+                .ForMember(dest => dest.Client,
+                    opt => opt.MapFrom(src => src.Client.FirstName + " " + src.Client.LastName))
+                .ForMember(dest => dest.OriginalAmount,
+                    opt => opt.MapFrom(src => src.Amount))
+                .ForMember(dest => dest.State,
+                    opt => opt.MapFrom(src => src.LoanStatus.Description))
+                .ForMember(dest => dest.OutstandingBalance,
+                    opt => opt.MapFrom(src => src.LoanBalances.Sum(x => x.TotalOutstanding)))
+                .ForMember(dest => dest.DaysInArrears,
+                    opt => opt.MapFrom(src => src.LoanBalances.Select(x => x.DaysInArrears).FirstOrDefault()))
+                .ForMember(dest => dest.TotalFeeCount,
+                    opt => opt.MapFrom(src => src.AmortizationSchedules.Count()))
+                .ForMember(dest => dest.TotalFeePaidCount,
+                    opt => opt.MapFrom(src => src.AmortizationSchedules.Count(x => x.AmortizationStatus.Description == "Pagado")));
+            
             CreateMap<Loan, LoanStatusDTO>()
                 .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
                 .ForMember(x => x.Name, opt => opt.MapFrom(y => y.LoanStatus.Name))
@@ -206,6 +231,10 @@ namespace Credio.Core.Application.Mappings
             CreateMap<LoanStatus, LoanStatusDTO>();
 
             CreateMap<PaymentFrequency, PaymentFrequencyDTO>();
+
+            CreateMap<ApplicationStatus, ApplicationStatusDTO>();
+
+            CreateMap<DocumentType, DocumentTypeDTO>();
             #endregion
         }
     }
