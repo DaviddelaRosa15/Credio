@@ -114,6 +114,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         
                 ToBeCollectedToday = g.Count(loan => loan.AmortizationSchedules.Any(s => s.DueDate == today && s.AmortizationStatus.Description != "Pagada"))
             })
+            .AsNoTracking()
             .FirstOrDefaultAsync(cancellationToken) ?? new CollectorPortfolioSummaryDto();
         
         List<CollectorPortfolioItemDto> items = await query
@@ -143,6 +144,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
                 
                 TotalInstallments = loan.AmortizationSchedules.Count()
             })
+            .AsNoTracking()
             .ToListAsync(cancellationToken);
 
         return new CollectorPortfolioResponseDto
