@@ -1,5 +1,7 @@
 ﻿using Credio.Core.Application.Dtos.Catalog;
 using Credio.Core.Application.Dtos.LoanStatus;
+using Credio.Core.Application.Features.Catalog.Queries.GetApplicationStatuses;
+using Credio.Core.Application.Features.Catalog.Queries.GetDocumentTypes;
 using Credio.Core.Application.Features.Catalog.Queries.GetPaymentFrequencies;
 using Credio.Core.Application.Features.LoanStatus.Queries.GetLoanStatuses;
 using Credio.Interface.Lending.Extensions;
@@ -53,6 +55,44 @@ namespace Credio.Lending.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<IResult> GetPaymentFrequencies([FromQuery] GetPaymentFrequenciesQuery query, CancellationToken cancellationToken)
+        {
+            var result = await _sender.Send(query, cancellationToken);
+
+            return result.Match(
+              onSuccess: () => CustomResult.Success(result),
+              onFailure: CustomResult.Problem);
+        }
+
+        [SwaggerOperation(
+        Summary = "Obtiene el estado de las solicitudes de credito",
+        Description = "Obtiene los estados de todas las solicitudes de credito que ha hecho el usuario"
+        )]
+        [Authorize(Roles = "Administrator, Officer")]
+        [HttpGet("application-statuses")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ApplicationStatusDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<IResult> GetApplicationStatuses([FromQuery] GetApplicationStatusesQuery query, CancellationToken cancellationToken)
+        {
+            var result = await _sender.Send(query, cancellationToken);
+
+            return result.Match(
+              onSuccess: () => CustomResult.Success(result),
+              onFailure: CustomResult.Problem);
+        }
+
+        [SwaggerOperation(
+        Summary = "Obtiene los tipos de documento",
+        Description = "Obtiene los tipos de documentos con los cuales se obtiene la identidad de la persona"
+        )]
+        [Authorize(Roles = "Administrator, Officer")]
+        [HttpGet("document-types")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DocumentTypeDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<IResult> GetDocumentTypes([FromQuery] GetDocumentTypesQuery query, CancellationToken cancellationToken)
         {
             var result = await _sender.Send(query, cancellationToken);
 

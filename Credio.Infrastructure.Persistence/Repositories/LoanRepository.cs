@@ -53,7 +53,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
             TotalPortfolio = await query.SelectMany(x => x.LateFees).SumAsync(x => x.Balance, cancellationToken),
         };
     }
-
+    
     public async Task<List<double>> GetDisbursements(CancellationToken cancellationToken = default)
     {
         using ApplicationContext db = _dbContext.CreateDbContext();
@@ -98,7 +98,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         IQueryable<Loan> query = db.Loan
             .Where(x => x.LoanStatus.Description == "Activo")
             .AsNoTracking();
-        
+
         // Basic Kpis
         int activeLoans = await query.CountAsync(cancellationToken);
 
@@ -109,7 +109,21 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
             .SelectMany(x => x.LateFees)
             .Where(x => x.Balance > 0 || x.LateFeeStatus.Description != "Pagado")
             .SumAsync(x => x.Balance, cancellationToken);
-        
+
         return (activeLoans, totalPortfolio, totalDelinquency);
+    }
+
+    public async Task<List<Loan>> GetActiveLoansByDocumentNumberAsync(string documentNumber, CancellationToken cancellationToken = default)
+    {
+        using ApplicationContext db = _dbContext.CreateDbContext();
+        
+        return await db.Loan
+            .Include(x => x.LoanBalances)
+            .Include(x => x.AmortizationSchedules)
+                .ThenInclude(x => x.AmortizationStatus)
+            .Where(x => x.LoanStatus.Description == "Activo" && x.Client.DocumentNumber.Contains(documentNumber))
+            .AsNoTracking()
+            .AsSplitQuery()
+            .ToListAsync(cancellationToken);
     }
 }
