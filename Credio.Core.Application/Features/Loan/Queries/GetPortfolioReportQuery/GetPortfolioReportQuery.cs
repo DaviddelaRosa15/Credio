@@ -64,7 +64,8 @@ public class GetPortfolioReportQueryHandler : IQueryHandler<GetPortfolioReportQu
                             string.IsNullOrEmpty(request.SearchTerm) ||
                             predicate.Client.FirstName.Contains(request.SearchTerm) ||
                             predicate.LoanNumber.ToString().Contains(request.SearchTerm)
-                        ));
+                        ),
+                querySplit: true);
         
             List<LoanReportItemDto> items = _mapper.Map<List<LoanReportItemDto>>(data.Items);
             

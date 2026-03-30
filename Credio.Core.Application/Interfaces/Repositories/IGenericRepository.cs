@@ -34,6 +34,7 @@ namespace Credio.Core.Application.Interfaces.Repositories
 	        int pageNumber,
 	        int pageSize,
 	        Func<IQueryable<Entity>, IQueryable<Entity>>? include = null,
-	        Expression<Func<Entity, bool>>? predicate = null);
+	        Expression<Func<Entity, bool>>? predicate = null,
+	        bool querySplit = falsei);
 	}
 }
