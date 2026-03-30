@@ -22,7 +22,6 @@ public class DashboardController : ControllerBase
         _sender = sender;
     }
     
-    
     //[Authorize(Roles =  "Administrator, Officer, Collector")]
     [HttpGet("upcoming-installments")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<UpcomingInstallmentDTO>))]
