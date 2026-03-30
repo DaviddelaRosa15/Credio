@@ -23,4 +23,16 @@ public class CurrentUserService : ICurrentUserService
     {
         return _httpContext.HttpContext?.User.Claims.FirstOrDefault(claim => claim.Type == "uid")?.Value;
     }
+
+    public bool isInRole(string role)
+    {
+        ClaimsPrincipal? user = _httpContext.HttpContext?.User;
+        
+        if(user is null) return false;
+
+        return user.Claims
+            .Where(claim => claim.Type is ClaimTypes.Role or "roles")
+            .Select(c => c.Value)
+            .Contains(role);
+    }
 }
