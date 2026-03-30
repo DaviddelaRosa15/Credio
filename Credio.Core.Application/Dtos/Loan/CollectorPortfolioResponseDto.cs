@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace Credio.Core.Application.Dtos.Loan;
 
 public class CollectorPortfolioResponseDto
@@ -15,7 +17,7 @@ public class CollectorPortfolioSummaryDto
 
     public int OverduePayments { get; set; }
 
-    public int OverDue { get; set; }
+    public int ToBeCollectedToday { get; set; }
 }
 
 public class CollectorPortfolioItemDto
@@ -24,9 +26,9 @@ public class CollectorPortfolioItemDto
 
     public int LoanNumber { get; set; }
 
-    public double Fee { get; set; }
+    public decimal Fee { get; set; }
 
-    public DateOnly DueDate { get; set; }
+    public DateOnly NextPaymentDate { get; set; }
 
     public string State { get; set; } = string.Empty;
 
