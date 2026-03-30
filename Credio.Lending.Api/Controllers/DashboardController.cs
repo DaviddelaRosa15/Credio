@@ -25,8 +25,8 @@ public class DashboardController : ControllerBase
     
     [Authorize(Roles =  "Administrator, Officer, Collector")]
     [HttpGet("upcoming-installments")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<UpcomingInstallmentDTO>))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
     [SwaggerOperation(
         Summary = "Listar las cuotas que están a punto de vencer",
         Description = "Listar las cuotas que están a punto de vencer"
