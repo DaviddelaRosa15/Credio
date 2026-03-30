@@ -22,7 +22,7 @@ public class DashboardController : ControllerBase
         _sender = sender;
     }
     
-    //[Authorize(Roles =  "Administrator, Officer, Collector")]
+    [Authorize(Roles =  "Administrator, Officer, Collector")]
     [HttpGet("upcoming-installments")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<UpcomingInstallmentDTO>))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
@@ -43,7 +43,7 @@ public class DashboardController : ControllerBase
         Summary = "Obtiene el calculo de las metricas",
         Description = "Obtiene el calculo de las metricas"
     )]
-    //[Authorize(Roles = "Administrator, Officer, Collector")]
+    [Authorize(Roles = "Administrator, Officer, Collector")]
     [HttpGet("metrics")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(DashboardMetricsDTO))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
