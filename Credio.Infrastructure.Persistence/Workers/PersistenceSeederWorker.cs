@@ -117,5 +117,21 @@ public class PersistenceSeederWorker: BaseWorker<PersistenceSeederWorker>
             _logger.LogInformation("Amortization Method already exists. Skipping seeding.");
         }
         #endregion
+
+        #region Payment Method Seeding
+        IPaymentMethodRepository paymentMethodRepository = scope.ServiceProvider.GetRequiredService<IPaymentMethodRepository>();
+
+        List<PaymentMethod> anyPaymentMethod = await paymentMethodRepository.GetAllAsync();
+
+        if (anyPaymentMethod is null || anyPaymentMethod.Count == 0)
+        {
+            _logger.LogInformation("Seeding payment method...");
+            await DefaultPaymentMethod.SeedAsync(paymentMethodRepository);
+        }
+        else
+        {
+            _logger.LogInformation("Payment Method already exists. Skipping seeding.");
+        }
+        #endregion
     }
 }
