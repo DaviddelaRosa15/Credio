@@ -88,7 +88,8 @@ namespace Credio.Core.Application.Helpers
             {
                 { "FullName", employee.FullName },
                 { "UserName", employee.UserName },
-                { "Password", employee.Password }
+                { "Password", employee.Password },
+                { "Role", employee.Role }
             });
         }
 

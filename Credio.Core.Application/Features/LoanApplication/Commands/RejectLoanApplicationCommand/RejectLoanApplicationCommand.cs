@@ -12,7 +12,7 @@ public class RejectLoanApplicationCommand : ICommand
 
     public string RejectReason { get; set; } = string.Empty;
 
-    public void Apply(LoanApplication loanApplication)
+    public void Apply(Domain.Entities.LoanApplication loanApplication)
     {
         loanApplication.RejectionReason = RejectReason;
     }
@@ -40,7 +40,7 @@ public class RejectLoanApplicationCommandHandler : ICommandHandler<RejectLoanApp
     {
         try
         {
-            LoanApplication? foundApplication = await _loanApplicationRepository
+            Domain.Entities.LoanApplication? foundApplication = await _loanApplicationRepository
                 .GetByIdWithIncludeAsync(x => x.Id == request.LoanApplicationId, [x => x.ApplicationStatus]);
 
             if (foundApplication is null) return Result.Failure(Error.NotFound("La aplicacion para el prestamo no fue encontrada"));
