@@ -117,5 +117,21 @@ public class PersistenceSeederWorker: BaseWorker<PersistenceSeederWorker>
             _logger.LogInformation("Amortization Method already exists. Skipping seeding.");
         }
         #endregion
+
+        #region System settings Seeding
+        ISystemSettingsRepository systemSettingsRepository = scope.ServiceProvider.GetRequiredService<ISystemSettingsRepository>();
+
+        List<SystemSettings> anySystemSettings = await systemSettingsRepository.GetAllAsync();
+
+        if (anySystemSettings is null || anySystemSettings.Count == 0)
+        {
+            _logger.LogInformation("Seeding system settings...");
+            await DefaultSystemSettings.SeedAsync(systemSettingsRepository);
+        }
+        else
+        {
+            _logger.LogInformation("System settings already exists. Skipping seeding.");
+        }
+        #endregion
     }
 }
