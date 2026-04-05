@@ -1,13 +1,25 @@
-using System.Text.Json.Serialization;
+using Credio.Core.Domain.Settings;
 using Credio.Lending.Api.ExceptionHandler;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization;
 
 namespace Credio.Interface.Lending.Extensions;
 
 public static class InterfaceExtensions
 {
-    public static IServiceCollection AddInterfaceLayer(this IServiceCollection services)
+    public static IServiceCollection AddInterfaceLayer(this IServiceCollection services, IConfiguration configuration)
     {
+        // Configuración de EndOfDaySettings
+        var endOfDayLogSettingsSection = configuration.GetSection("EndOfDayLogSettings");
+        var eodSettings = endOfDayLogSettingsSection.Get<EndOfDayLogSettings>();
+
+        // Validación de configuración
+        services.Configure<EndOfDayLogSettings>(options =>
+        {
+            options.BatchSize = eodSettings.BatchSize;
+            options.CheckFrequencyInMinutes = eodSettings.CheckFrequencyInMinutes;
+        });
+
         // Core
         services
             .AddProblemDetails()

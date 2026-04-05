@@ -20,7 +20,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
     
     // Add services to the container.
     builder.Services
-        .AddInterfaceLayer()
+        .AddInterfaceLayer(builder.Configuration)
         .AddApplicationLayer()
         .AddPersistenceInfrastructure(builder.Configuration)
         .AddIdentityInfrastructure(builder.Configuration)
