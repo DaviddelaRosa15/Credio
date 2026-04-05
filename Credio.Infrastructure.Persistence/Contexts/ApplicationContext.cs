@@ -45,6 +45,10 @@ namespace Credio.Infrastructure.Persistence.Contexts
         public DbSet<DocumentType> DocumentType => Set<DocumentType>(); 
 		
         public DbSet<Employee> Employee => Set<Employee>();
+
+        public DbSet<EndOfDayExecutionLog> EndOfDayExecutionLog => Set<EndOfDayExecutionLog>();
+
+        public DbSet<EndOfDayQueue> EndOfDayQueue => Set<EndOfDayQueue>();
 		
         public DbSet<LateFee> LateFee => Set<LateFee>();
 		
