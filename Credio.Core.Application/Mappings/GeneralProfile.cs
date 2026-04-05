@@ -1,9 +1,9 @@
-﻿using System.Runtime.InteropServices.ComTypes;
-using AutoMapper;
+﻿using AutoMapper;
 using Credio.Core.Application.Dtos.Account;
 using Credio.Core.Application.Dtos.Catalog;
 using Credio.Core.Application.Dtos.Client;
 using Credio.Core.Application.Dtos.Common;
+using Credio.Core.Application.Dtos.CoreConfiguration;
 using Credio.Core.Application.Dtos.Employee;
 using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Dtos.LoanApplication;
@@ -245,6 +245,11 @@ namespace Credio.Core.Application.Mappings
                     opt => opt.MapFrom(src => src.ApplicationStatus.Name))
                 .ForMember(dest => dest.PaymentFrequency,
                     opt => opt.MapFrom(src => src.PaymentFrequency.Name));
+            #endregion
+
+            #region SystemSettings
+            CreateMap<SystemSettings, SystemSettingDTO>()
+                .ReverseMap();
             #endregion
         }
     }

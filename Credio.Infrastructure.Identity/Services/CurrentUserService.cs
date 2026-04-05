@@ -1,7 +1,6 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using Credio.Core.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace Credio.Infrastructure.Identity.Services;
 
@@ -22,5 +21,10 @@ public class CurrentUserService : ICurrentUserService
     public string? GetCurrentUserId()
     {
         return _httpContext.HttpContext?.User.Claims.FirstOrDefault(claim => claim.Type == "uid")?.Value;
+    }
+
+    public List<string>? GetCurrentUserRoles()
+    {
+        return _httpContext?.HttpContext?.User.Claims.Where(claim => claim.Type == ClaimTypes.Role).Select(claim => claim.Value).ToList();
     }
 }
