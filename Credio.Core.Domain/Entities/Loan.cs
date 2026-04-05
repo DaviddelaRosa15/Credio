@@ -8,7 +8,6 @@ public class Loan : AuditableBaseEntity
     {
         LateFees = [];
         AmortizationSchedules = [];
-        LoanBalances = [];
     }
     
     public int LoanNumber { get; set; }
@@ -55,5 +54,5 @@ public class Loan : AuditableBaseEntity
 
     public List<AmortizationSchedule> AmortizationSchedules { get; set; }
 
-    public List<LoanBalance> LoanBalances { get; set; }
+    public LoanBalance? LoanBalance { get; set; }
 }

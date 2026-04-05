@@ -53,7 +53,7 @@ public class GetPortfolioReportQueryHandler : IQueryHandler<GetPortfolioReportQu
                 include: query => 
                     query.Include(x => x.Client)
                          .Include(x => x.LoanStatus)
-                         .Include(x => x.LoanBalances)
+                         .Include(x => x.LoanBalance)
                          .Include(x => x.AmortizationSchedules)
                             .ThenInclude(x => x.AmortizationStatus),
                 predicate =>

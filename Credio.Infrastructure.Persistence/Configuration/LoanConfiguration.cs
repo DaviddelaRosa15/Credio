@@ -15,5 +15,10 @@ public class LoanConfiguration : IEntityTypeConfiguration<Loan>
         builder
             .Property(x => x.InterestRate)
             .HasPrecision(18, 2);
+
+        builder
+            .HasOne(l => l.LoanBalance)
+            .WithOne(lb => lb.Loan)
+            .HasForeignKey<LoanBalance>(lb => lb.LoanId);
     }
 }
