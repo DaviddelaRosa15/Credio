@@ -7,7 +7,7 @@ using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Application.Interfaces.Services;
 
-namespace Credio.Core.Application.Features.CoreConfiguration.Queries
+namespace Credio.Core.Application.Features.CoreConfiguration.Queries.GetAllSystemSettings
 {
     public class GetAllSystemSettingsQuery : IQuery<List<SystemSettingDTO>>
     {

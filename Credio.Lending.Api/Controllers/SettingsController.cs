@@ -1,6 +1,6 @@
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.CoreConfiguration;
-using Credio.Core.Application.Features.CoreConfiguration.Queries;
+using Credio.Core.Application.Features.CoreConfiguration.Queries.GetAllSystemSettings;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
