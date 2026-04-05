@@ -33,8 +33,10 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Queries.GetAllSyste
             {
                 List<SystemSettingDTO> response = [];
 
+                // Obtener los roles del usuario actual
                 var userRoles = _currentUserService.GetCurrentUserRoles();
 
+                // Si el usuario es SuperAdmin, obtiene todas las configuraciones del sistema
                 if (userRoles.Any(x => x == Roles.SuperAdmin.ToString()))
                 {
                     var systemSettings = await _systemSettingsRepository.GetAllAsync();
@@ -42,6 +44,7 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Queries.GetAllSyste
                 }
                 else
                 {
+                    // Si el usuario no es SuperAdmin, obtiene solo las configuraciones del sistema que no pertenecen al grupo "EndOfDay"
                     var systemSettings = await _systemSettingsRepository.GetAllByPropertyAsync(s => !s.GroupName.Equals(EndOfDaySettings.GroupName));
                     response = _mapper.Map<List<SystemSettingDTO>>(systemSettings);
                 }
