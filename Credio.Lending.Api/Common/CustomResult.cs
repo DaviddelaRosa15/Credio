@@ -43,6 +43,7 @@ public static class CustomResult
         return error.Type switch
         {
             ErrorType.BadRequest => (error.ErrorCode, error.Description, "https://tools.ietf.org/html/rfc7231#section-6.5.1", StatusCodes.Status400BadRequest),
+            ErrorType.Forbidden => (error.ErrorCode, error.Description, "https://tools.ietf.org/html/rfc7231#section-6.5.3", StatusCodes.Status403Forbidden),
             ErrorType.NotFound => (error.ErrorCode, error.Description, "https://tools.ietf.org/html/rfc7231#section-6.5.4", StatusCodes.Status404NotFound),
             ErrorType.Conflict => (error.ErrorCode, error.Description, "https://tools.ietf.org/html/rfc7231#section-6.5.8", StatusCodes.Status409Conflict),
             ErrorType.InternalServerError => (error.ErrorCode, error.Description, "https://tools.ietf.org/html/rfc7231#section-6.6.1", StatusCodes.Status500InternalServerError),

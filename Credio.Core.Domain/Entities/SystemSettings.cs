@@ -20,9 +20,4 @@ public class SystemSettings
     public string? ModifiedBy { get; set; }
 
     public DateTime? Modified { get; set; }
-
-    public SystemSettings()
-    {
-        Key = Guid.NewGuid().ToString().Substring(0, 12);
-    }
 }
