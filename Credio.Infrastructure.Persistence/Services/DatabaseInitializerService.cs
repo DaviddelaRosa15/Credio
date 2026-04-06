@@ -1,6 +1,7 @@
 using Credio.Core.Application.Interfaces.Services;
 using Credio.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Credio.Infrastructure.Persistence.Services;
@@ -9,13 +10,16 @@ public sealed class DatabaseInitializerService : IDatabaseInitializerService
 {
     private readonly IDbContextFactory<ApplicationContext> _dbContext;
     private readonly ILogger<DatabaseInitializerService> _logger;
+    private readonly IHostEnvironment _hostEnvironment;
 
     public DatabaseInitializerService(
         IDbContextFactory<ApplicationContext> dbContext,
-        ILogger<DatabaseInitializerService> logger)
+        ILogger<DatabaseInitializerService> logger,
+        IHostEnvironment  hostEnvironment)
     {
         _dbContext = dbContext;
         _logger = logger;
+        _hostEnvironment = hostEnvironment;
     }
 
     public async Task CanConnectAsync(CancellationToken cancellationToken = default)
@@ -36,6 +40,12 @@ public sealed class DatabaseInitializerService : IDatabaseInitializerService
 
     public async Task MigrateAsync(CancellationToken cancellationToken = default)
     {
+        if (_hostEnvironment.IsDevelopment())
+        {
+            _logger.LogInformation("Skipping migrations in Development environment.");
+            return;
+        }
+        
         await using DbContext context = await _dbContext.CreateDbContextAsync(cancellationToken);
         
         try
