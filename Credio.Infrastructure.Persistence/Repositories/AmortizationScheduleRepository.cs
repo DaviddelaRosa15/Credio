@@ -27,9 +27,9 @@ namespace Credio.Infrastructure.Persistence.Repositories
             {
                 CurrentPercentage = await db.AmortizationSchedule
                     .CountAsync(x => x.AmortizationStatus.Description != "Pagada", cancellationToken),
-                DueSoonPercentage = await db.AmortizationSchedule
-                    .CountAsync(x => x.AmortizationStatus.Description != "Pagada" && x.DueDate < today,cancellationToken),
                 OverduePercentage = await db.AmortizationSchedule
+                    .CountAsync(x => x.AmortizationStatus.Description != "Pagada" && x.DueDate < today,cancellationToken),
+                DueSoonPercentage = await db.AmortizationSchedule
                     .CountAsync(x => x.AmortizationStatus.Description != "Pagada"
                                      && x.DueDate >= today
                                      && x.DueDate <= next15Days, cancellationToken)
