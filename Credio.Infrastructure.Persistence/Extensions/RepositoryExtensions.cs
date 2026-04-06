@@ -19,6 +19,7 @@ public static partial class PersistenceExtensions
         services.AddTransient<IEndOfDayExecutionLogRepository, EndOfDayExecutionLogRepository>();
         services.AddTransient<IEndOfDayQueueRepository, EndOfDayQueueRepository>();
         services.AddTransient<IApplicationStatusRepository, ApplicationStatusRepository>();
+        services.AddTransient<ILateFeeRepository, LateFeeRepository>();
         services.AddTransient<ILateFeeStatusRepository, LateFeeStatusRepository>();
         services.AddTransient<ILoanApplicationRepository, LoanApplicationRepository>();
         services.AddTransient<ILoanBalanceRepository, LoanBalanceRepository>();
