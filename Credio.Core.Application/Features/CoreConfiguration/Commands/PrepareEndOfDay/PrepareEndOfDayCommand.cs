@@ -7,12 +7,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Credio.Core.Application.Features.CoreConfiguration.Commands.PrepareEndOfDay
 {
-    public class PrepareEndOfDayCommand : ICommand
+    public class PrepareEndOfDayCommand : ICommand<string>
     {
 
     }
 
-    public class PrepareEndOfDayCommandHandler : ICommandHandler<PrepareEndOfDayCommand>
+    public class PrepareEndOfDayCommandHandler : ICommandHandler<PrepareEndOfDayCommand, string>
     {
         private readonly IEndOfDayExecutionLogRepository _endOfDayExecutionLogRepository;
         private readonly IEndOfDayQueueRepository _endOfDayQueueRepository;
@@ -31,8 +31,10 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.PrepareEnd
             _logger = logger;
         }
 
-        public async Task<Result> Handle(PrepareEndOfDayCommand request, CancellationToken cancellationToken)
+        public async Task<Result<string>> Handle(PrepareEndOfDayCommand request, CancellationToken cancellationToken)
         {
+            string logId = string.Empty;
+
             // Obteniendo la fecha actual
             DateOnly today = DateOnly.FromDateTime(DateTime.Now);
 
@@ -62,6 +64,7 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.PrepareEnd
                         _logger.LogInformation($"Creando un nuevo registro de COB para el dia de hoy ({today})");
                         createdLog = await _endOfDayExecutionLogRepository.AddAsync(newLog);
                         _logger.LogInformation($"Registro de COB creado con ID: {createdLog.Id}");
+                        logId = createdLog.Id;
                     }
                     catch (Exception ex)
                     {
@@ -104,14 +107,15 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.PrepareEnd
                 else
                 {
                     _logger.LogInformation($"Ya existe un registro de COB para el dia de hoy ({today}) con ID: {existinTodayCOB.Id}");
+                    logId = existinTodayCOB.Id;
                 }
 
-                return Result.Success();
+                return Result<string>.Success(logId);
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error en el proceso: {ex}");
-                return Result.Failure(Error.InternalServerError("Ocurrio un error al preparar el proceso de COB para el dia de hoy"));
+                return Result<string>.Failure(Error.InternalServerError("Ocurrio un error al preparar el proceso de COB para el dia de hoy"));
             }
         }
     }

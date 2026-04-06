@@ -1,27 +1,29 @@
 ﻿using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Constants;
+using Credio.Core.Application.Dtos.CoreConfiguration;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Domain.Entities;
 using Credio.Core.Domain.Settings;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEndOfDayQueue
 {
-    public class ProcessEndOfDayQueueCommand : ICommand
+    public class ProcessEndOfDayQueueCommand : ICommand<EndOfDayProcessResponseDTO>
     {
         public string LogId { get; set; }
     }
 
-    public class ProcessEndOfDayQueueCommandHandler : ICommandHandler<ProcessEndOfDayQueueCommand>
+    public class ProcessEndOfDayQueueCommandHandler : ICommandHandler<ProcessEndOfDayQueueCommand, EndOfDayProcessResponseDTO>
     {
         private readonly IAmortizationStatusRepository _amortizationStatusRepository;
         private readonly IEndOfDayExecutionLogRepository _endOfDayExecutionLogRepository;
         private readonly IEndOfDayQueueRepository _endOfDayQueueRepository;
         private readonly EndOfDayLogSettings _endOfDayLogSettings;
+        private readonly ILateFeeRepository _lateFeeRepository;
+        private readonly ILateFeeStatusRepository _lateFeeStatusRepository;
         private readonly ILoanStatusRepository _loanStatusRepository;
         private readonly ILogger<ProcessEndOfDayQueueCommandHandler> _logger;
         private readonly ISystemSettingsRepository _settingsRepository;
@@ -31,6 +33,8 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEnd
             IEndOfDayExecutionLogRepository endOfDayExecutionLogRepository,
             IEndOfDayQueueRepository endOfDayQueueRepository,
             IOptions<EndOfDayLogSettings> endOfDayLogSettings,
+            ILateFeeRepository lateFeeRepository,
+            ILateFeeStatusRepository lateFeeStatusRepository,
             ILoanStatusRepository loanStatusRepository,
             ILogger<ProcessEndOfDayQueueCommandHandler> logger,
             ISystemSettingsRepository settingsRepository)
@@ -39,14 +43,18 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEnd
             _endOfDayExecutionLogRepository = endOfDayExecutionLogRepository;
             _endOfDayQueueRepository = endOfDayQueueRepository;
             _endOfDayLogSettings = endOfDayLogSettings.Value;
+            _lateFeeRepository = lateFeeRepository;
+            _lateFeeStatusRepository = lateFeeStatusRepository;
             _loanStatusRepository = loanStatusRepository;
             _logger = logger;
             _settingsRepository = settingsRepository;
         }
 
-        public async Task<Result> Handle(ProcessEndOfDayQueueCommand request, CancellationToken cancellationToken)
+        public async Task<Result<EndOfDayProcessResponseDTO>> Handle(ProcessEndOfDayQueueCommand request, CancellationToken cancellationToken)
         {
+            bool hasErrors = false;
             int processedLoans = 0;
+            int failedLoans = 0;
 
             // Obteniendo la fecha actual
             DateOnly today = DateOnly.FromDateTime(DateTime.Now);
@@ -66,7 +74,10 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEnd
             var statusPaid = await _amortizationStatusRepository.GetByPropertyAsync(s => s.Name.Equals("Pagada"));
 
             // Obteniendo el estado de préstamo que corresponde a "En Mora"
-            var statusInArrears = await _loanStatusRepository.GetByPropertyAsync(s => s.Name.Equals("En Mora"));
+            var statusInArrears = await _loanStatusRepository.GetByPropertyAsync(s => s.Name.Equals("En mora"));
+
+            // Obteniendo el estado de mora pendiente
+            var statusFeePending = await _lateFeeStatusRepository.GetByPropertyAsync(s => s.Name.Equals("Pendiente"));
 
             // Obteniendo el registro de ejecución de COB para el día de hoy
             var log = await _endOfDayExecutionLogRepository.GetByIdAsync(request.LogId);
@@ -76,6 +87,14 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEnd
                 _logger.LogInformation($"Iniciando proceso de COB para el día de hoy. Log ID: {request.LogId}");
                 int loteNumber = 1;
                 int pageSize = _endOfDayLogSettings.BatchSize;
+
+                // Se actualiza el estado del registro de ejecución de COB para el día de hoy a "En Proceso" para indicar que el proceso de COB ha iniciado
+                if(log.Status != EndOfDayLogStatuses.Processing)
+                {
+                    _logger.LogInformation($"Actualizando estado del registro de ejecución de COB para el día de hoy a 'En Proceso'. Log ID: {request.LogId}");
+                    log.Status = EndOfDayLogStatuses.Processing;
+                    await _endOfDayExecutionLogRepository.UpdateAsync(log);
+                }
 
                 // Obteniendo los registros de la cola de COB para el día de hoy, esto con el fin de procesar los préstamos vencidos en lotes
                 var queues = await _endOfDayQueueRepository.GetPagedAsync(1, pageSize,
@@ -130,13 +149,14 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEnd
                                 else
                                 {
                                     // Se crea el registro de interés moratorio para el día de hoy
-                                    schedule.LateFees.Add(new LateFee
+                                    await _lateFeeRepository.AddAsync(new LateFee
                                     {
                                         Amount = (double)lateFeeTotal,
                                         AmortizationScheduleId = schedule.Id,
                                         Balance = (double)lateFeeTotal,
                                         GeneratedDate = DateTime.Now,
-                                        LoanId = item.Loan.Id
+                                        LoanId = item.Loan.Id,
+                                        LateFeeStatusId = statusFeePending.Id
                                     });
 
                                     // Se acumulan los intereses moratorios totales para el préstamo
@@ -159,6 +179,10 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEnd
                             item.Status = EndOfDayQueueStatuses.Failed;
                             item.ErrorMessage = $"Ocurrio un error al procesar el préstamo: {ex.Message}";
                             item.ProcessedAt = DateTime.Now;
+
+                            failedLoans++;
+                            hasErrors = true;
+
                             continue;
                         }
                     }
@@ -177,7 +201,7 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEnd
                 }
 
                 _logger.LogInformation($"Proceso de COB para el día de hoy completado. Total de préstamos procesados: {processedLoans}");
-                log.Status = EndOfDayLogStatuses.Completed;
+                log.Status = hasErrors ? EndOfDayLogStatuses.CompletedWithErrors : EndOfDayLogStatuses.Completed;
                 log.ProcessedLoans = processedLoans;
                 log.EndTime = DateTime.Now;
                 log.Notes = $"Proceso de COB completado para el día de hoy. Total de préstamos procesados: {processedLoans}";
@@ -186,12 +210,33 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEnd
                 _logger.LogInformation($"Actualizando registro de ejecución de COB para el día de hoy con el estado 'Completado'. Log ID: {request.LogId}");
                 await _endOfDayExecutionLogRepository.UpdateAsync(log);
 
-                return Result.Success();
+                return Result<EndOfDayProcessResponseDTO>.Success(new EndOfDayProcessResponseDTO
+                {
+                    ExecutionTime = log.StartTime,
+                    FailedLoans = failedLoans,
+                    LogId = request.LogId,
+                    ProcessedLoans = processedLoans,
+                    Status = hasErrors ? EndOfDayLogStatuses.CompletedWithErrors : EndOfDayLogStatuses.Completed,
+                    TotalLoans = processedLoans + failedLoans
+                });
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Error procesando la cola de COB para el día de hoy. Log ID: {request.LogId}. Error: {ex}");
-                return Result.Failure(Error.InternalServerError("Ocurrio un error al procesar la cola de COB para el día de hoy."));
+
+                // Se actualiza el registro de ejecución de COB para el día de hoy con el estado "Fallido"
+                log.Status = EndOfDayLogStatuses.Failed;
+                await _endOfDayExecutionLogRepository.UpdateAsync(log);
+
+                return Result<EndOfDayProcessResponseDTO>.Success(new EndOfDayProcessResponseDTO
+                {
+                    ExecutionTime = log.StartTime,
+                    FailedLoans = failedLoans,
+                    LogId = request.LogId,
+                    ProcessedLoans = processedLoans,
+                    Status = EndOfDayLogStatuses.Failed,
+                    TotalLoans = processedLoans + failedLoans
+                });
             }
         }
     }
