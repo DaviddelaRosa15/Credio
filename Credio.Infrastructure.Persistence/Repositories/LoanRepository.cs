@@ -35,6 +35,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         using ApplicationContext db = _dbContext.CreateDbContext();
 
         IQueryable<Loan> query = db.Loan
+            .Include(x => x.LoanBalance)
             .Where(predicate => 
                 (string.IsNullOrEmpty(statusId) || predicate.LoanStatusId == statusId) &&
                 (!startDate.HasValue || predicate.DisbursedDate >= startDate.Value) &&
@@ -49,8 +50,9 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         return new PortfolioSummaryDto
         {
             TotalLoans = await query.CountAsync(cancellationToken),
-            LateFees = await query.SumAsync(x => x.LoanBalance.PrincipalBalance, cancellationToken),
-            TotalPortfolio = await query.SelectMany(x => x.LateFees).SumAsync(x => x.Balance, cancellationToken),
+            TotalPortfolio = await query.SumAsync(
+                x => x.LoanBalance != null ? x.LoanBalance.PrincipalBalance : 0, cancellationToken),
+            LateFees = await query.SelectMany(x => x.LateFees).SumAsync(x => x.Balance, cancellationToken),
         };
     }
     
