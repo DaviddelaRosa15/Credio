@@ -107,7 +107,7 @@ namespace Credio.Lending.Api.Controllers
             Summary = "Obtiene kpis base para el empleado dado",
             Description = "Obtiene kpis base para el empleado dado"
         )]
-        //[Authorize(Roles = "Administrator, Collector")]
+        [Authorize(Roles = "Administrator, Collector")]
         [HttpGet("{id}/collection-portfolio")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CollectorPortfolioResponseDto))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
