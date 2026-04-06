@@ -387,6 +387,108 @@ namespace Credio.Infrastructure.Persistence.Migrations
                     b.ToTable("Employee");
                 });
 
+            modelBuilder.Entity("Credio.Core.Domain.Entities.EndOfDayExecutionLog", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Deleted")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateOnly>("ExecutionDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("text");
+
+                    b.Property<int>("ProcessedLoans")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TotalLoans")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EndOfDayExecutionLog");
+                });
+
+            modelBuilder.Entity("Credio.Core.Domain.Entities.EndOfDayQueue", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("Deleted")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LoanId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LogId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ProcessedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LoanId");
+
+                    b.HasIndex("LogId");
+
+                    b.ToTable("EndOfDayQueue");
+                });
+
             modelBuilder.Entity("Credio.Core.Domain.Entities.LateFee", b =>
                 {
                     b.Property<string>("Id")
@@ -696,7 +798,8 @@ namespace Credio.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LoanId");
+                    b.HasIndex("LoanId")
+                        .IsUnique();
 
                     b.ToTable("LoanBalance");
                 });
@@ -993,6 +1096,25 @@ namespace Credio.Infrastructure.Persistence.Migrations
                     b.Navigation("DocumentType");
                 });
 
+            modelBuilder.Entity("Credio.Core.Domain.Entities.EndOfDayQueue", b =>
+                {
+                    b.HasOne("Credio.Core.Domain.Entities.Loan", "Loan")
+                        .WithMany()
+                        .HasForeignKey("LoanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Credio.Core.Domain.Entities.EndOfDayExecutionLog", "Log")
+                        .WithMany("QueueItems")
+                        .HasForeignKey("LogId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Loan");
+
+                    b.Navigation("Log");
+                });
+
             modelBuilder.Entity("Credio.Core.Domain.Entities.LateFee", b =>
                 {
                     b.HasOne("Credio.Core.Domain.Entities.AmortizationSchedule", "AmortizationSchedule")
@@ -1109,8 +1231,8 @@ namespace Credio.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Credio.Core.Domain.Entities.LoanBalance", b =>
                 {
                     b.HasOne("Credio.Core.Domain.Entities.Loan", "Loan")
-                        .WithMany("LoanBalances")
-                        .HasForeignKey("LoanId")
+                        .WithOne("LoanBalance")
+                        .HasForeignKey("Credio.Core.Domain.Entities.LoanBalance", "LoanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1217,6 +1339,11 @@ namespace Credio.Infrastructure.Persistence.Migrations
                     b.Navigation("Routes");
                 });
 
+            modelBuilder.Entity("Credio.Core.Domain.Entities.EndOfDayExecutionLog", b =>
+                {
+                    b.Navigation("QueueItems");
+                });
+
             modelBuilder.Entity("Credio.Core.Domain.Entities.LateFeeStatus", b =>
                 {
                     b.Navigation("LateFees");
@@ -1228,7 +1355,7 @@ namespace Credio.Infrastructure.Persistence.Migrations
 
                     b.Navigation("LateFees");
 
-                    b.Navigation("LoanBalances");
+                    b.Navigation("LoanBalance");
                 });
 
             modelBuilder.Entity("Credio.Core.Domain.Entities.LoanApplication", b =>

@@ -39,6 +39,8 @@ public class Error
 
     public static Error BadRequest(string description) => new Error("Bad Request", description, ErrorType.BadRequest);
 
+    public static Error Forbidden(string description) => new Error("Forbidden", description, ErrorType.Forbidden);
+
     public static Error Conflict(string description) => new Error("Conflict", description, ErrorType.Conflict);
 
     public static Error NotFound(string description) => new Error("Not Found", description, ErrorType.NotFound);

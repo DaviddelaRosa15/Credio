@@ -188,5 +188,36 @@ namespace Credio.Infrastructure.Persistence.Repositories
             
             return await query.AnyAsync(predicate, cancellationToken);
         }
+
+        public async Task<PagedResult<Entity>> GetPagedAsync(int pageNumber, int pageSize, Func<IQueryable<Entity>, IQueryable<Entity>>? include = null, Expression<Func<Entity, bool>>? predicate = null, bool querySplit = false)
+        {
+            using ApplicationContext dbContext = _dbContextFactory.CreateDbContext();
+
+            IQueryable<Entity> query = dbContext.Set<Entity>();
+
+            if (predicate != null)
+            {
+                query = query.Where(predicate);
+            }
+
+            if (include != null)
+            {
+                query = include(query);
+            }
+
+            if (querySplit)
+            {
+                query = query.AsSplitQuery();
+            }
+
+            int totalCount = await query.CountAsync();
+
+            List<Entity> items = await query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<Entity>(items, totalCount, pageNumber, pageSize);
+        }
     }
 }

@@ -117,5 +117,37 @@ public class PersistenceSeederWorker: BaseWorker<PersistenceSeederWorker>
             _logger.LogInformation("Amortization Method already exists. Skipping seeding.");
         }
         #endregion
+
+        #region System settings Seeding
+        ISystemSettingsRepository systemSettingsRepository = scope.ServiceProvider.GetRequiredService<ISystemSettingsRepository>();
+
+        List<SystemSettings> anySystemSettings = await systemSettingsRepository.GetAllAsync();
+
+        if (anySystemSettings is null || anySystemSettings.Count == 0)
+        {
+            _logger.LogInformation("Seeding system settings...");
+            await DefaultSystemSettings.SeedAsync(systemSettingsRepository);
+        }
+        else
+        {
+            _logger.LogInformation("System settings already exists. Skipping seeding.");
+        }
+        #endregion
+
+        #region Late Fee Status Seeding
+        ILateFeeStatusRepository lateFeeStatusRepository = scope.ServiceProvider.GetRequiredService<ILateFeeStatusRepository>();
+
+        List<LateFeeStatus> anylateFeeStatuses = await lateFeeStatusRepository.GetAllAsync();
+
+        if (anylateFeeStatuses is null || anylateFeeStatuses.Count == 0)
+        {
+            _logger.LogInformation("Seeding late fee statuses...");
+            await DefaultLateFeeStatus.SeedAsync(lateFeeStatusRepository);
+        }
+        else
+        {
+            _logger.LogInformation("Late fee statuses already exists. Skipping seeding.");
+        }
+        #endregion
     }
 }

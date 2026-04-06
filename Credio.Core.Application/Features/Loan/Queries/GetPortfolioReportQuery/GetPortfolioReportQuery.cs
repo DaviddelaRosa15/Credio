@@ -5,6 +5,7 @@ using Credio.Core.Application.Dtos.Common;
 using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Credio.Core.Application.Features.Loan.Queries.GetPortfolioReportQuery;
@@ -45,9 +46,16 @@ public class GetPortfolioReportQueryHandler : IQueryHandler<GetPortfolioReportQu
                 request.StartDate,
                 request.EndDate,
                 cancellationToken);
-
-            PagedResult<Domain.Entities.Loan> data = await _loanRepository.GetPagedAsync(request.PageNumber, request.PageSize,
-                [props => props.Client,props => props.LoanStatus, props => props.LoanBalances, props => props.AmortizationSchedules],
+            
+            PagedResult<Domain.Entities.Loan> data = await _loanRepository.GetPagedAsync(
+                request.PageNumber, 
+                request.PageSize,
+                include: query => 
+                    query.Include(x => x.Client)
+                         .Include(x => x.LoanStatus)
+                         .Include(x => x.LoanBalance)
+                         .Include(x => x.AmortizationSchedules)
+                            .ThenInclude(x => x.AmortizationStatus),
                 predicate =>
                         (string.IsNullOrEmpty(request.StatusId) || predicate.LoanStatusId == request.StatusId) &&
                         (!request.StartDate.HasValue || predicate.DisbursedDate >= request.StartDate.Value) &&
@@ -56,7 +64,8 @@ public class GetPortfolioReportQueryHandler : IQueryHandler<GetPortfolioReportQu
                             string.IsNullOrEmpty(request.SearchTerm) ||
                             predicate.Client.FirstName.Contains(request.SearchTerm) ||
                             predicate.LoanNumber.ToString().Contains(request.SearchTerm)
-                        ));
+                        ),
+                querySplit: true);
         
             List<LoanReportItemDto> items = _mapper.Map<List<LoanReportItemDto>>(data.Items);
             
