@@ -3,6 +3,7 @@ using System;
 using Credio.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Credio.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    partial class ApplicationContextModelSnapshot : ModelSnapshot
+    [Migration("20260405160835_AddEndOfDayEntities")]
+    partial class AddEndOfDayEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -798,8 +801,7 @@ namespace Credio.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LoanId")
-                        .IsUnique();
+                    b.HasIndex("LoanId");
 
                     b.ToTable("LoanBalance");
                 });
@@ -1231,8 +1233,8 @@ namespace Credio.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Credio.Core.Domain.Entities.LoanBalance", b =>
                 {
                     b.HasOne("Credio.Core.Domain.Entities.Loan", "Loan")
-                        .WithOne("LoanBalance")
-                        .HasForeignKey("Credio.Core.Domain.Entities.LoanBalance", "LoanId")
+                        .WithMany("LoanBalances")
+                        .HasForeignKey("LoanId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1355,7 +1357,7 @@ namespace Credio.Infrastructure.Persistence.Migrations
 
                     b.Navigation("LateFees");
 
-                    b.Navigation("LoanBalance");
+                    b.Navigation("LoanBalances");
                 });
 
             modelBuilder.Entity("Credio.Core.Domain.Entities.LoanApplication", b =>

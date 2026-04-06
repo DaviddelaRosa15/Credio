@@ -23,7 +23,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
         .AddInterfaceLayer()
         .AddApplicationLayer()
         .AddPersistenceInfrastructure(builder.Configuration)
-        .AddIdentityInfrastructure(builder.Configuration)
+        .AddIdentityInfrastructure(builder.Configuration, true)
         .AddSharedInfrastructure(builder.Configuration);
 }
 // Build the application

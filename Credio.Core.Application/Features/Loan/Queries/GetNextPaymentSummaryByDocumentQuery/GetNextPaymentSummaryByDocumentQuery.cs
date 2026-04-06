@@ -43,9 +43,7 @@ public class GetNextPaymentSummaryByDocumentQueryHandler : IQueryHandler<GetNext
                         .OrderBy(x => x.DueDate)
                         .FirstOrDefault();
             
-                    double lateFee = loan.LoanBalances
-                        .Select(x => x.LateFeeBalance)
-                        .FirstOrDefault(); 
+                    double lateFee = loan.LoanBalance.LateFeeBalance; 
 
                     return new
                     {
@@ -63,9 +61,7 @@ public class GetNextPaymentSummaryByDocumentQueryHandler : IQueryHandler<GetNext
                 .Select(x => new BotPaymentDetailDTO
                 {
                     LoanNumber = x.Loan.LoanNumber,
-                    DaysUntilDue = x.Loan.LoanBalances
-                        .Select(lb => lb.DaysInArrears)
-                        .FirstOrDefault(),
+                    DaysUntilDue = x.Loan.LoanBalance.DaysInArrears,
                     InstallmentAmount = x.NextPayment!.InstallmentNumber,
                     DueTime = x.NextPayment.DueDate,
                     LateFeeAmount = x.LateFee,

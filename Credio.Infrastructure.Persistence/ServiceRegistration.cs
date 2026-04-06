@@ -10,16 +10,19 @@ namespace Credio.Infrastructure.Persistence
 {
     public static class ServiceRegistration
     {
-        public static IServiceCollection AddPersistenceInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddPersistenceInfrastructure(this IServiceCollection services, IConfiguration configuration, bool includeWorkers = false)
         {
             services.AddSingleton<DomainEventChannel>();
             
             services
                 .AddServices()
                 .AddRepositories()
-                .AddInterceptors()
-                .AddWorkers();
+                .AddInterceptors();
             
+            if (includeWorkers)
+            {
+                services.AddWorkers();
+            }
             
             #region Vaciar tablas
             /*var optionsBuilder = new DbContextOptionsBuilder<ApplicationContext>();

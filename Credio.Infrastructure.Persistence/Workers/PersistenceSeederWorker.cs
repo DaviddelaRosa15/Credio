@@ -133,5 +133,21 @@ public class PersistenceSeederWorker: BaseWorker<PersistenceSeederWorker>
             _logger.LogInformation("System settings already exists. Skipping seeding.");
         }
         #endregion
+
+        #region Late Fee Status Seeding
+        ILateFeeStatusRepository lateFeeStatusRepository = scope.ServiceProvider.GetRequiredService<ILateFeeStatusRepository>();
+
+        List<LateFeeStatus> anylateFeeStatuses = await lateFeeStatusRepository.GetAllAsync();
+
+        if (anylateFeeStatuses is null || anylateFeeStatuses.Count == 0)
+        {
+            _logger.LogInformation("Seeding late fee statuses...");
+            await DefaultLateFeeStatus.SeedAsync(lateFeeStatusRepository);
+        }
+        else
+        {
+            _logger.LogInformation("Late fee statuses already exists. Skipping seeding.");
+        }
+        #endregion
     }
 }

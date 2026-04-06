@@ -16,11 +16,15 @@ public static partial class PersistenceExtensions
         services.AddTransient<IClientRepository, ClientRepository>();
         services.AddTransient<IDocumentTypeRepository, DocumentTypeRepository>();
         services.AddTransient<IEmployeeRepository, EmployeeRepository>();
+        services.AddTransient<IEndOfDayExecutionLogRepository, EndOfDayExecutionLogRepository>();
+        services.AddTransient<IEndOfDayQueueRepository, EndOfDayQueueRepository>();
         services.AddTransient<IApplicationStatusRepository, ApplicationStatusRepository>();
-        services.AddTransient<ILoanBalanceRepository, LoanBalanceRepository>();
-        services.AddTransient<ILoanRepository, LoanRepository>();
+        services.AddTransient<ILateFeeRepository, LateFeeRepository>();
+        services.AddTransient<ILateFeeStatusRepository, LateFeeStatusRepository>();
         services.AddTransient<ILoanApplicationRepository, LoanApplicationRepository>();
+        services.AddTransient<ILoanBalanceRepository, LoanBalanceRepository>();
         services.AddTransient<ILoanStatusRepository, LoanStatusRepository>();
+        services.AddTransient<ILoanRepository, LoanRepository>();
         services.AddTransient<IPaymentFrequencyRepository, PaymentFrequencyRepository>();
         services.AddTransient<IPaymentMethodRepository, PaymentMethodRepository>();
         services.AddTransient<ISystemSettingsRepository, SystemSettingsRepository>();

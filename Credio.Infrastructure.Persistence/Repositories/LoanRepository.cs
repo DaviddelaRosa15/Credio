@@ -49,7 +49,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         return new PortfolioSummaryDto
         {
             TotalLoans = await query.CountAsync(cancellationToken),
-            LateFees = await query.SelectMany(x => x.LoanBalances).SumAsync(x => x.PrincipalBalance, cancellationToken),
+            LateFees = await query.SumAsync(x => x.LoanBalance.PrincipalBalance, cancellationToken),
             TotalPortfolio = await query.SelectMany(x => x.LateFees).SumAsync(x => x.Balance, cancellationToken),
         };
     }
@@ -103,7 +103,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         int activeLoans = await query.CountAsync(cancellationToken);
 
         double totalPortfolio =
-            await query.SelectMany(x => x.LoanBalances).SumAsync(x => x.PrincipalBalance, cancellationToken);
+            await query.SumAsync(x => x.LoanBalance.PrincipalBalance, cancellationToken);
 
         double totalDelinquency = await query
             .SelectMany(x => x.LateFees)
@@ -118,7 +118,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         using ApplicationContext db = _dbContext.CreateDbContext();
         
         return await db.Loan
-            .Include(x => x.LoanBalances)
+            .Include(x => x.LoanBalance)
             .Include(x => x.AmortizationSchedules)
                 .ThenInclude(x => x.AmortizationStatus)
             .Where(x => x.LoanStatus.Description == "Activo" && x.Client.DocumentNumber.Contains(documentNumber))

@@ -20,7 +20,7 @@ namespace Credio.Infrastructure.Identity
 {
     public static class ServiceRegistration
     {
-        public static IServiceCollection AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddIdentityInfrastructure(this IServiceCollection services, IConfiguration configuration, bool includeWorkers = false)
         {
             services.AddHttpContextAccessor();
             
@@ -137,7 +137,10 @@ namespace Credio.Infrastructure.Identity
             #endregion
 
             #region Workers
-            services.AddHostedService<IdentitySeederWorker>();
+            if (includeWorkers)
+            {
+                services.AddHostedService<IdentitySeederWorker>();
+            }
             #endregion
 
             return services;
