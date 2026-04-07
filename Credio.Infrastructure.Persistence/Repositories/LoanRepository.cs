@@ -54,7 +54,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         };
     }
     
-    public async Task<List<double>> GetDisbursements(CancellationToken cancellationToken = default)
+    public async Task<List<CashFlowItemDto>> GetDisbursements(CancellationToken cancellationToken = default)
     {
         using ApplicationContext db = _dbContext.CreateDbContext();
         
@@ -82,12 +82,16 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
             .Select(i => startDate.AddMonths(i))
             .ToList();
         
-        // Building the array base in the months [0,1000] (if the month don't exist is going to return 0 else the amount)
+        // Building the array base in the months 
         return months
-            .Select(m => disbursements
-                .Where(x => x.Year == m.Year && x.Month == m.Month)
-                .Select(x => x.Amount)
-                .FirstOrDefault())
+            .Select(m => new CashFlowItemDto
+            {
+                Month = $"{m:MMMM yyyy}", // Example: "October 2025"
+                Amount = disbursements
+                    .Where(x => x.Year == m.Year && x.Month == m.Month)
+                    .Select(x => x.Amount)
+                    .FirstOrDefault()
+            })
             .ToList();
     }
 
@@ -103,7 +107,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         int activeLoans = await query.CountAsync(cancellationToken);
 
         double totalPortfolio =
-            await query.SumAsync(x => x.LoanBalance.PrincipalBalance, cancellationToken);
+            await query.SumAsync(x => x.LoanBalance != null ? x.LoanBalance.PrincipalBalance : 0,cancellationToken);
 
         double totalDelinquency = await query
             .SelectMany(x => x.LateFees)

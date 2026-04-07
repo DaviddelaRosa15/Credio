@@ -7,6 +7,6 @@ namespace Credio.Core.Application.Interfaces.Repositories
     {
         Task<PortfolioStateDTO> GetPortfolioState(CancellationToken cancellationToken);
 
-        Task<List<decimal>> GetCollections(CancellationToken cancellationToken);
+        Task<List<CashFlowItemDto>> GetCollections(CancellationToken cancellationToken);
     }
 }

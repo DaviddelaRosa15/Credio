@@ -13,7 +13,7 @@ public interface ILoanRepository : IGenericRepository<Loan>
     
     Task<(int, double, double)> GetBasicDashboardMetrics(CancellationToken cancellationToken = default);
 
-    Task<List<double>> GetDisbursements(CancellationToken cancellationToken = default);
+    Task<List<CashFlowItemDto>> GetDisbursements(CancellationToken cancellationToken = default);
     
     Task<List<Loan>> GetActiveLoansByDocumentNumberAsync(string documentNumber, CancellationToken cancellationToken = default);
 }
