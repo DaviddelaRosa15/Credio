@@ -3,6 +3,7 @@ using Credio.Core.Application.Dtos.LoanStatus;
 using Credio.Core.Application.Features.Catalog.Queries.GetApplicationStatuses;
 using Credio.Core.Application.Features.Catalog.Queries.GetDocumentTypes;
 using Credio.Core.Application.Features.Catalog.Queries.GetPaymentFrequencies;
+using Credio.Core.Application.Features.Catalog.Queries.GetPaymentMethods;
 using Credio.Core.Application.Features.LoanStatus.Queries.GetLoanStatuses;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
@@ -93,6 +94,25 @@ namespace Credio.Lending.Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
         public async Task<IResult> GetDocumentTypes([FromQuery] GetDocumentTypesQuery query, CancellationToken cancellationToken)
+        {
+            var result = await _sender.Send(query, cancellationToken);
+
+            return result.Match(
+              onSuccess: () => CustomResult.Success(result),
+              onFailure: CustomResult.Problem);
+        }
+
+        [SwaggerOperation(
+        Summary = "Obtiene los metodos de pago",
+        Description = "Obtiene los metodos de pagos admitidos por el sistema"
+        )]
+        [Authorize(Roles = "Cobrador , Admin,  Oficial , Administrator, Officer")]
+        [HttpGet("payment-methods")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaymentMethodDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<IResult> GetPaymentMethod([FromQuery] GetPaymentMethodsQuery query, CancellationToken cancellationToken)
         {
             var result = await _sender.Send(query, cancellationToken);
 
