@@ -73,6 +73,8 @@ namespace Credio.Core.Application.Mappings
             CreateMap<ApplicationStatus, ApplicationStatusDTO>();
 
             CreateMap<DocumentType, DocumentTypeDTO>();
+
+            CreateMap<PaymentMethod, PaymentMethodDTO>();
             #endregion
 
             #region Client

@@ -165,5 +165,21 @@ public class PersistenceSeederWorker: BaseWorker<PersistenceSeederWorker>
             _logger.LogInformation("Payment Method already exists. Skipping seeding.");
         }
         #endregion
+
+        #region Payment Status Seeding
+        IPaymentStatusRepository paymentStatusRepository = scope.ServiceProvider.GetRequiredService<IPaymentStatusRepository>();
+
+        List<PaymentStatus> anyPaymentStatus = await paymentStatusRepository.GetAllAsync();
+
+        if (anyPaymentStatus is null || anyPaymentStatus.Count == 0)
+        {
+            _logger.LogInformation("Seeding payment status...");
+            await DefaultPaymentStatus.SeedAsync(paymentStatusRepository);
+        }
+        else
+        {
+            _logger.LogInformation("Payment Status already exists. Skipping seeding.");
+        }
+        #endregion
     }
 }
