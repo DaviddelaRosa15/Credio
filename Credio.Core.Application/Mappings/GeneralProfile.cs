@@ -55,6 +55,24 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(x => x.LastModifiedBy, opt => opt.Ignore())
                 .ForMember(x => x.IsDeleted, opt => opt.Ignore())
                 .ForMember(x => x.Deleted, opt => opt.Ignore());
+            
+            CreateMap<AmortizationSchedule, UpcomingInstallmentDTO>()
+                .ForMember(dest => dest.Client,
+                    opt => opt.MapFrom(src => src.Loan.Client.FirstName + " " + src.Loan.Client.LastName))
+                .ForMember(dest => dest.Loan,
+                    opt => opt.MapFrom(src => src.Loan.LoanNumber))
+                .ForMember(dest => dest.State,
+                    opt => opt.MapFrom(src => src.AmortizationStatus.Description));
+            #endregion
+
+            #region Catalog
+            CreateMap<LoanStatus, LoanStatusDTO>();
+
+            CreateMap<PaymentFrequency, PaymentFrequencyDTO>();
+
+            CreateMap<ApplicationStatus, ApplicationStatusDTO>();
+
+            CreateMap<DocumentType, DocumentTypeDTO>();
             #endregion
 
             #region Client
@@ -207,6 +225,16 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(x => x.Id, opt => opt.MapFrom(y => y.Id))
                 .ForMember(x => x.Name, opt => opt.MapFrom(y => y.LoanStatus.Name))
                 .ForMember(x => x.Description, opt => opt.MapFrom(y => y.LoanStatus.Description));
+
+            CreateMap<Loan, LoanAmortizationScheduleResponseDTO>()
+                .ForMember(dest => dest.ClientFullName,
+                    opt => opt.MapFrom(src => src.Client.FirstName + " " + src.Client.LastName))
+                .ForMember(dest => dest.LoanId,
+                    opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.PrincipalAmount,
+                    opt => opt.MapFrom(src => src.Amount))
+                .ForMember(dest => dest.AmortizationSchedule,
+                    opt => opt.MapFrom(src => src.AmortizationSchedules.OrderBy(a => a.InstallmentNumber)));                
             #endregion
 
             #region LoanApplication
@@ -217,16 +245,6 @@ namespace Credio.Core.Application.Mappings
                     opt => opt.MapFrom(src => src.ApplicationStatus.Name))
                 .ForMember(dest => dest.PaymentFrequency,
                     opt => opt.MapFrom(src => src.PaymentFrequency.Name));
-            #endregion
-
-            #region Catalog
-            CreateMap<LoanStatus, LoanStatusDTO>();
-
-            CreateMap<PaymentFrequency, PaymentFrequencyDTO>();
-
-            CreateMap<ApplicationStatus, ApplicationStatusDTO>();
-
-            CreateMap<DocumentType, DocumentTypeDTO>();
             #endregion
         }
     }
