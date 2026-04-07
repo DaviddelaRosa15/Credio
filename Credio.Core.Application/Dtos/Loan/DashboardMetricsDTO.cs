@@ -17,13 +17,22 @@ public class DashboardMetricsDTO
 
 public class CashFlowDTO
 {
-    public List<double> Disbursements { get; set; } = new();
-    public List<decimal> Collections { get; set; } = new();
+    public List<CashFlowItemDto> Disbursements { get; set; } = new();
+    public List<CashFlowItemDto> Collections { get; set; } = new();
+}
+
+public class CashFlowItemDto
+{
+    public string Month { get; set; }
+
+    public double Amount { get; set; }
 }
 
 public class PortfolioStateDTO
 {
     public double CurrentPercentage { get; set; }   
     public double OverduePercentage { get; set; }     
-    public double DueSoonPercentage { get; set; }     
+    public double DueSoonPercentage { get; set; }
+    
+    public int TotalInstallments { get; set; }
 }
