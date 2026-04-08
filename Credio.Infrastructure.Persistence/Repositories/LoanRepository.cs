@@ -121,7 +121,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
             .Include(x => x.LoanBalance)
             .Include(x => x.AmortizationSchedules)
                 .ThenInclude(x => x.AmortizationStatus)
-            .Where(x => x.LoanStatus.Description == "Activo" && x.Client.DocumentNumber.Contains(documentNumber))
+            .Where(x => (x.LoanStatus.Description == "Activo" || x.LoanStatus.Description == "En mora") && x.Client.DocumentNumber.Contains(documentNumber))
             .AsNoTracking()
             .AsSplitQuery()
             .ToListAsync(cancellationToken);
