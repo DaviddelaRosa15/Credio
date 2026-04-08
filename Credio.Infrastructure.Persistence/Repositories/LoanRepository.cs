@@ -86,7 +86,8 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         return months
             .Select(m => new CashFlowItemDto
             {
-                Month = $"{m:MMMM yyyy}", // Example: "October 2025"
+                Month = $"{m:MMMM}",
+                Year = $"{m:yyyy}",
                 Amount = disbursements
                     .Where(x => x.Year == m.Year && x.Month == m.Month)
                     .Select(x => x.Amount)

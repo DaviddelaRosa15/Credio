@@ -72,7 +72,8 @@ namespace Credio.Infrastructure.Persistence.Repositories
             return months
                 .Select(m => new CashFlowItemDto
                 {
-                    Month = $"{m:MMMM yyyy}", // Example: "October 2025"
+                    Month = $"{m:MMMM}",
+                    Year = $"{m:yyyy}",
                     Amount = (double)collections
                         .Where(x => x.Year == m.Year && x.Month == m.Month)
                         .Select(x => x.Amount)

@@ -25,6 +25,8 @@ public class CashFlowItemDto
 {
     public string Month { get; set; }
 
+    public string Year { get; set; }
+
     public double Amount { get; set; }
 }
 
