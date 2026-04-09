@@ -32,7 +32,7 @@ public class GetNextPaymentSummaryByDocumentQueryHandler : IQueryHandler<GetNext
 
             if (activeLoans.Count <= 0)
             {
-                return Result<BotNextPaymentResponseDTO>.Failure(Error.NotFound("No se ha encontrado prestamo activo al numero de documento dado"));
+                return Result<BotNextPaymentResponseDTO>.Failure(Error.NotFound("No se ha encontrado prestamo activo o en mora al numero de documento dado"));
             }
 
             // Get the next outstanding payment for each loan
@@ -42,8 +42,8 @@ public class GetNextPaymentSummaryByDocumentQueryHandler : IQueryHandler<GetNext
                         .Where(x => x.AmortizationStatus.Description == "Pendiente")
                         .OrderBy(x => x.DueDate)
                         .FirstOrDefault();
-            
-                    double lateFee = loan.LoanBalance.LateFeeBalance;
+
+                    double lateFee = loan.LoanBalance?.LateFeeBalance ?? 0;
 
                     return new
                     {
