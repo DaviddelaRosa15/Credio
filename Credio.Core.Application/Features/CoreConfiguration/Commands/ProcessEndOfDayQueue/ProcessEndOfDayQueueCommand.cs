@@ -4,6 +4,7 @@ using Credio.Core.Application.Dtos.CoreConfiguration;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Domain.Entities;
+using Credio.Core.Domain.Events;
 using Credio.Core.Domain.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -151,8 +152,7 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEnd
                                 }
                                 else
                                 {
-                                    // Se crea el registro de interés moratorio para el día de hoy
-                                    await _lateFeeRepository.AddAsync(new LateFee
+                                    LateFee newLateFee = new()
                                     {
                                         Amount = (double)lateFeeTotal,
                                         AmortizationScheduleId = schedule.Id,
@@ -160,7 +160,13 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEnd
                                         GeneratedDate = DateTime.Now,
                                         LoanId = item.Loan.Id,
                                         LateFeeStatusId = statusFeePending.Id
-                                    });
+                                    };
+
+                                    // Se agrega el evento de dominio de préstamo entró en mora al nuevo registro de interés moratorio
+                                    newLateFee.AddEvent(new LoanEnteredArrearsEvent(item.Loan.Id, (double)lateFeeTotal, diffDays));
+
+                                    // Se crea el registro de interés moratorio para el día de hoy
+                                    await _lateFeeRepository.AddAsync(newLateFee);
 
                                     // Se acumulan los intereses moratorios totales para el préstamo
                                     totalLateFees += lateFeeTotal;
