@@ -91,6 +91,10 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.PrepareEnd
                         var createdQueueItems = await _endOfDayQueueRepository.AddManyAsync(queueItems);
                         _logger.LogInformation($"Registros en la cola de COB creados para el dia de hoy ({today})");
 
+                        // Actualizando el registro de COB con el total de préstamos a procesar
+                        createdLog.TotalLoans = queueItems.Count;
+                        await _endOfDayExecutionLogRepository.UpdateAsync(createdLog);
+
                         _logger.LogInformation($"Preparación completada: {queueItems.Count} préstamos listos para procesar.");
                     }
                     catch (Exception ex)

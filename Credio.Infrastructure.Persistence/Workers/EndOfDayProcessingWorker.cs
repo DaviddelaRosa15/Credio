@@ -38,9 +38,19 @@ namespace Credio.Infrastructure.Persistence.Workers
                     using IServiceScope scope = _scopeFactory.CreateScope();
                     var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
                     var settingsRepo = scope.ServiceProvider.GetRequiredService<ISystemSettingsRepository>();
+                    var endOfDayLogRepo = scope.ServiceProvider.GetRequiredService<IEndOfDayExecutionLogRepository>();
 
                     DateTime now = DateTime.Now;
                     DateOnly today = DateOnly.FromDateTime(now);
+
+                    var existingLog = await endOfDayLogRepo.GetByPropertyAsync(log => log.ExecutionDate == today);
+                    if (existingLog is not null && (existingLog.Status == EndOfDayLogStatuses.Completed || existingLog.Status == EndOfDayLogStatuses.CompletedWithErrors))
+                    {
+                        _lastExecutionDate = today; // Actualizamos el cache para evitar reintentos innecesarios
+                        _logger.LogInformation("El proceso de COB ya se ejecutó hoy con estado: {Status}. No se permitirá otra ejecución hasta mañana.", existingLog.Status);
+                        await Task.Delay(TimeSpan.FromMinutes(_settings.CheckFrequencyInMinutes), stoppingToken);
+                        continue; // Saltamos a la siguiente iteración sin hacer nada
+                    }
 
                     // 1. Obtener la hora programada
                     var cobTimeSetting = await settingsRepo.GetByPropertyAsync(s => s.Key == EndOfDaySettings.COBExecutionTimeKey);
