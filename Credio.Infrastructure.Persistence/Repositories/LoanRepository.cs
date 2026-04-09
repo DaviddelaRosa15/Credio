@@ -112,7 +112,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
 
         double totalDelinquency = await query
             .SelectMany(x => x.LateFees)
-            .Where(x => x.Balance > 0 || x.LateFeeStatus.Description != "Pagado")
+            .Where(x => x.Balance > 0 || x.LateFeeStatus.Description != "Pagada")
             .SumAsync(x => x.Balance, cancellationToken);
 
         return (activeLoans, totalPortfolio, totalDelinquency);
