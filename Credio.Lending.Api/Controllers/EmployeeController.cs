@@ -1,11 +1,12 @@
 ﻿using Credio.Core.Application.Common.Primitives;
-using Credio.Core.Application.Dtos.Client;
 using Credio.Core.Application.Dtos.Employee;
-using Credio.Core.Application.Features.Clients.Queries;
+using Credio.Core.Application.Dtos.Loan;
+using Credio.Core.Application.Dtos.Requests;
 using Credio.Core.Application.Features.Employee.Commands.RegisterEmployee;
 using Credio.Core.Application.Features.Employee.Queries.GetAll;
 using Credio.Core.Application.Features.Employee.Queries.GetEmployeeByCode;
 using Credio.Core.Application.Features.Employee.Queries.GetEmployeeById;
+using Credio.Core.Application.Features.Loan.Queries.GetCollectorPortfolioQuery;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -100,6 +101,27 @@ namespace Credio.Lending.Api.Controllers
             return result.Match(
               onSuccess: () => CustomResult.Success(result),
               onFailure: CustomResult.Problem);
+        }
+        
+        [SwaggerOperation(
+            Summary = "Obtiene kpis base para el empleado dado",
+            Description = "Obtiene kpis base para el empleado dado"
+        )]
+        [Authorize(Roles = "Administrator, Collector")]
+        [HttpGet("{id}/collection-portfolio")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(CollectorPortfolioResponseDto))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        public async Task<IResult> GetEmployeeCollectionPortfolio(
+            string id,
+            [FromQuery] GetCollectorPortfolioRequest request,
+            CancellationToken cancellationToken)
+        {
+            Result<CollectorPortfolioResponseDto> result = await _sender.Send(request.ToQuery(id), cancellationToken);
+            
+            return result.Match(
+                onSuccess: () => CustomResult.Success(result),
+                onFailure:CustomResult.Problem);
         }
     }
 }

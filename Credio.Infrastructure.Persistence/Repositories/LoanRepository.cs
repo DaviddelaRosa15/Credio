@@ -128,4 +128,90 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
             .AsSplitQuery()
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<CollectorPortfolioResponseDto> GetCollectorPortfolio(
+        string employeeId,
+        string? searchTerm,
+        string? state,
+        CancellationToken cancellationToken = default)
+    {
+        using ApplicationContext db = _dbContext.CreateDbContext();
+        
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+        IQueryable<Loan> query = db.Loan.Where(
+            predicate => predicate.EmployeeId == employeeId && 
+                         predicate.LoanStatus.Description == "Activo") 
+            .Include(x => x.AmortizationSchedules);
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            query = query.Where(p => 
+                p.Client.FirstName.Contains(searchTerm) || 
+                p.LoanNumber.ToString().Contains(searchTerm));
+        }
+
+        if (!string.IsNullOrEmpty(state) && state != "Todos")
+        {
+            if (state == "Al Dia")
+            {
+                query = query.Where(loan => !loan.AmortizationSchedules.Any(s => s.AmortizationStatus.Description == "Atrasada" || s.DueDate < today));
+            }
+            else if (state == "Vencidos")
+            {
+                query = query.Where(loan => loan.AmortizationSchedules.Any(s => s.DueDate < today));
+            }
+        }
+
+        CollectorPortfolioSummaryDto summary = await query
+            .GroupBy(_ => 1) 
+            .Select(g => new CollectorPortfolioSummaryDto
+            {
+                TotalCustomers = g.Select(x => x.ClientId).Distinct().Count(),
+        
+                PaymentsUpToDate = g.Count(loan => !loan.AmortizationSchedules.Any(s => s.AmortizationStatus.Description == "Atrasada" || s.DueDate < today)),
+        
+                OverduePayments = g.Count(loan => loan.AmortizationSchedules.Any(s => s.DueDate < today && s.AmortizationStatus.Description != "Pagada")),
+        
+                ToBeCollectedToday = g.Count(loan => loan.AmortizationSchedules.Any(s => s.DueDate == today && s.AmortizationStatus.Description != "Pagada"))
+            })
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cancellationToken) ?? new CollectorPortfolioSummaryDto();
+        
+        List<CollectorPortfolioItemDto> items = await query
+            .Select(loan => new CollectorPortfolioItemDto
+            {
+                CustomerName = loan.Client.FirstName + " " + loan.Client.LastName,
+                
+                LoanNumber = loan.LoanNumber,
+                
+                Fee = loan.AmortizationSchedules
+                    .Where(x => x.AmortizationStatus.Description != "Pagada")
+                    .OrderBy(x => x.DueDate)
+                    .Select(x => x.DueAmount)
+                    .FirstOrDefault(),
+                
+                NextPaymentDate = loan.AmortizationSchedules
+                    .Where(x => x.AmortizationStatus.Description != "Pagada")
+                    .OrderBy(x => x.DueDate)
+                    .Select(x => x.DueDate)
+                    .FirstOrDefault(),
+                
+                State = loan.AmortizationSchedules.Any(s => s.DueDate < today && s.AmortizationStatus.Description != "Pagada")
+                    ? "Mora" 
+                    : "Al Día",
+                
+                PaidInstallments = loan.AmortizationSchedules.Count(s => s.AmortizationStatus.Description == "Pagada"),
+                
+                TotalInstallments = loan.AmortizationSchedules.Count()
+            })
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        return new CollectorPortfolioResponseDto
+        {
+            Summary = summary,
+            Items = items,
+        };
+    }
 }
