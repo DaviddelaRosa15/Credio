@@ -145,6 +145,9 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEnd
 
                                     // Se acumulan los intereses moratorios totales para el préstamo
                                     totalLateFees += lateFee;
+
+                                    // Se actualiza el número de días en mora para el préstamo
+                                    item.Loan.LoanBalance.DaysInArrears += 1;
                                 }
                                 else
                                 {
@@ -161,6 +164,9 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Commands.ProcessEnd
 
                                     // Se acumulan los intereses moratorios totales para el préstamo
                                     totalLateFees += lateFeeTotal;
+
+                                    // Se actualiza el número de días en mora para el préstamo con la diferencia en días calculada
+                                    item.Loan.LoanBalance.DaysInArrears += diffDays;
                                 }
                             }
 

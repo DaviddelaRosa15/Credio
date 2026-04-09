@@ -36,7 +36,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
 
         IQueryable<Loan> query = db.Loan
             .Include(x => x.LoanBalance)
-            .Where(predicate => 
+            .Where(predicate =>
                 (string.IsNullOrEmpty(statusId) || predicate.LoanStatusId == statusId) &&
                 (!startDate.HasValue || predicate.DisbursedDate >= startDate.Value) &&
                 (!endDate.HasValue || predicate.EffectiveDate <= endDate.Value) &&
@@ -55,17 +55,17 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
             LateFees = await query.SelectMany(x => x.LateFees).SumAsync(x => x.Balance, cancellationToken),
         };
     }
-    
+
     public async Task<List<double>> GetDisbursements(CancellationToken cancellationToken = default)
     {
         using ApplicationContext db = _dbContext.CreateDbContext();
-        
+
         // Getting today date in the date only format
         DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
-        
+
         // The start date is going to be the first day of the month, six months ago
         DateOnly startDate = new DateOnly(today.Year, today.Month, 1).AddMonths(-6);
-        
+
         // Only loans disbursed within the last 7 months.
         var disbursements = await db.Loan
             .Where(x => x.DisbursedDate >= startDate)
@@ -78,12 +78,12 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
                 Amount = g.Sum(x => x.Amount)
             })
             .ToListAsync(cancellationToken);
-        
+
         // Generating 7 months
         List<DateOnly> months = Enumerable.Range(0, 7)
             .Select(i => startDate.AddMonths(i))
             .ToList();
-        
+
         // Building the array base in the months [0,1000] (if the month don't exist is going to return 0 else the amount)
         return months
             .Select(m => disbursements
@@ -98,7 +98,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         using ApplicationContext db = _dbContext.CreateDbContext();
 
         IQueryable<Loan> query = db.Loan
-            .Where(x => x.LoanStatus.Description == "Activo")
+            .Where(x => x.LoanStatus.Description == "Activo" || x.LoanStatus.Description == "En mora")
             .AsNoTracking();
 
         // Basic Kpis
