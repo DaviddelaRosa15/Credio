@@ -13,11 +13,11 @@ public class BotPaymentDetailDTO
 
     public DateOnly DueTime { get; set; }
 
-    public double InstallmentAmount { get; set; }
+    public decimal InstallmentAmount { get; set; }
 
     public double LateFeeAmount { get; set; }
 
-    public double TotalAmountToPay { get; set; }
+    public decimal TotalAmountToPay { get; set; }
 
     public int? DaysUntilDue { get; set; }
 }

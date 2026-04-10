@@ -32,27 +32,24 @@ public class GetNextPaymentSummaryByDocumentQueryHandler : IQueryHandler<GetNext
 
             if (activeLoans.Count <= 0)
             {
-                return Result<BotNextPaymentResponseDTO>.Failure(Error.NotFound("No se ha encontrado prestamo activo al numero de documento dado"));
+                return Result<BotNextPaymentResponseDTO>.Failure(Error.NotFound("No se ha encontrado prestamo activo o en mora al numero de documento dado"));
             }
 
             // Get the next outstanding payment for each loan
             var outstandingPayment = activeLoans.Select(loan => 
                 {
                     AmortizationSchedule? nextPayment = loan.AmortizationSchedules
-                        .Where(x => x.AmortizationStatus.Description == "Pendiente")
+                        .Where(x => x.AmortizationStatus.Description is "Pendiente" or "Atrasada")
                         .OrderBy(x => x.DueDate)
                         .FirstOrDefault();
-            
-                    double lateFee = loan.LoanBalances
-                        .Select(x => x.LateFeeBalance)
-                        .FirstOrDefault(); 
+
+                    double lateFee = loan.LoanBalance?.LateFeeBalance ?? 0;
 
                     return new
                     {
                         Loan = loan,
                         NextPayment = nextPayment,
                         LateFee = lateFee,
-                        TotalAmountToPay = (double)(nextPayment?.PrincipalAmount ?? 0) + lateFee
                     };
                 })
                 .Where(x => x.NextPayment is not null)
@@ -63,13 +60,11 @@ public class GetNextPaymentSummaryByDocumentQueryHandler : IQueryHandler<GetNext
                 .Select(x => new BotPaymentDetailDTO
                 {
                     LoanNumber = x.Loan.LoanNumber,
-                    DaysUntilDue = x.Loan.LoanBalances
-                        .Select(lb => lb.DaysInArrears)
-                        .FirstOrDefault(),
-                    InstallmentAmount = x.NextPayment!.InstallmentNumber,
+                    DaysUntilDue = DaysUntilDue(x.NextPayment!.DueDate),
+                    InstallmentAmount = x.NextPayment!.DueAmount,
                     DueTime = x.NextPayment.DueDate,
                     LateFeeAmount = x.LateFee,
-                    TotalAmountToPay = x.TotalAmountToPay
+                    TotalAmountToPay = (x.NextPayment.DueAmount + (decimal)x.LateFee ) - (x.NextPayment.PaidAmount ?? 0)
                 })
                 .ToList();
 
@@ -83,5 +78,12 @@ public class GetNextPaymentSummaryByDocumentQueryHandler : IQueryHandler<GetNext
         {
             return Result<BotNextPaymentResponseDTO>.Failure(Error.InternalServerError("Hubo un error al obtener las cuotas proximas"));
         }
+    }
+
+    private static int DaysUntilDue(DateOnly dueDate)
+    {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        
+        return (dueDate.ToDateTime(TimeOnly.MinValue) - today.ToDateTime(TimeOnly.MinValue)).Days;
     }
 }

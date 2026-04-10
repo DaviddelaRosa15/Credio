@@ -28,7 +28,9 @@ namespace Credio.Core.Domain.Entities
         public string? Email { get; set; }
         
         public string EmployeeCode { get; set; }
-        
+
+        public bool IsCollector { get; set; } = false;
+
         public string UserId { get; set; }
         
         public string? AddressId { get; set; }

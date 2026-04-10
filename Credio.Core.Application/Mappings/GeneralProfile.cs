@@ -73,6 +73,8 @@ namespace Credio.Core.Application.Mappings
             CreateMap<ApplicationStatus, ApplicationStatusDTO>();
 
             CreateMap<DocumentType, DocumentTypeDTO>();
+
+            CreateMap<PaymentMethod, PaymentMethodDTO>();
             #endregion
 
             #region Client
@@ -213,9 +215,9 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(dest => dest.State,
                     opt => opt.MapFrom(src => src.LoanStatus.Description))
                 .ForMember(dest => dest.OutstandingBalance,
-                    opt => opt.MapFrom(src => src.LoanBalances.Sum(x => x.TotalOutstanding)))
+                    opt => opt.MapFrom(src => src.LoanBalance.TotalOutstanding))
                 .ForMember(dest => dest.DaysInArrears,
-                    opt => opt.MapFrom(src => src.LoanBalances.Select(x => x.DaysInArrears).FirstOrDefault()))
+                    opt => opt.MapFrom(src => src.LoanBalance.DaysInArrears))
                 .ForMember(dest => dest.TotalFeeCount,
                     opt => opt.MapFrom(src => src.AmortizationSchedules.Count()))
                 .ForMember(dest => dest.TotalFeePaidCount,

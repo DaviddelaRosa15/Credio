@@ -34,6 +34,7 @@ namespace Credio.Core.Application
             services.AddScoped<IEmailHelper, EmailHelper>();
             services.AddSingleton<IExponentialBackoffService, ExponentialBakOffService>();
             services.AddSingleton<IAmortizationCalculatorService, AmortizationCalculatorService>();
+            services.AddSingleton<IEndOfDayService, EndOfDayService>();
             #endregion
 
             return services;
