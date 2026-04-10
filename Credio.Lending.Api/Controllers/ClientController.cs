@@ -146,7 +146,7 @@ public class ClientController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClientDashboardResponseDTO))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
     [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
-    ///[Authorize(Roles = "Client")]
+    [Authorize(Roles = "Client")]
     [HttpGet("{clientId}/dashboard")]
     public async Task<IResult> GetClientDashboardByClientId(string clientId, CancellationToken cancellationToken = default)
     {
