@@ -24,9 +24,9 @@ public class GetDashboardMetricsQueryHandler : IQueryHandler<GetDashboardMetrics
         {
           (int activeLoans, double totalPortfolio, double totalDelinquency) = await _loanRepository.GetBasicDashboardMetrics(cancellationToken);
           
-          List<double> disbursements = await _loanRepository.GetDisbursements(cancellationToken);
+          List<CashFlowItemDto> disbursements = await _loanRepository.GetDisbursements(cancellationToken);
           
-          List<decimal> collections = await _amortizationScheduleRepository.GetCollections(cancellationToken);
+          List<CashFlowItemDto> collections = await _amortizationScheduleRepository.GetCollections(cancellationToken);
 
           PortfolioStateDTO portfolioState = await _amortizationScheduleRepository.GetPortfolioState(cancellationToken);
 
