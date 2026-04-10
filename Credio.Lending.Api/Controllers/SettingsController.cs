@@ -1,5 +1,6 @@
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.CoreConfiguration;
+using Credio.Core.Application.Features.CoreConfiguration.Commands.TriggerEndOfDay;
 using Credio.Core.Application.Features.CoreConfiguration.Commands.UpdateSystemSetting;
 using Credio.Core.Application.Features.CoreConfiguration.Queries.GetAllSystemSettings;
 using Credio.Interface.Lending.Extensions;
@@ -55,6 +56,26 @@ public class SettingsController : ControllerBase
     public async Task<IResult> UpdateSystemSettings([FromBody] UpdateSystemSettingCommand command, CancellationToken cancellationToken)
     {
         Result<SystemSettingDTO> result = await _sender.Send(command, cancellationToken);
+
+        return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure: CustomResult.Problem);
+    }
+
+    [Authorize(Roles = "SuperAdmin")]
+    [HttpPost("trigger-eod")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EndOfDayProcessResponseDTO))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    [SwaggerOperation(
+        Summary = "Correr proceso de cierre de día",
+        Description = "Ejecuta el proceso de cierre de día"
+    )]
+    public async Task<IResult> RunEndOfDayProcess([FromBody] TriggerEndOfDayCommand command, CancellationToken cancellationToken)
+    {
+        Result<EndOfDayProcessResponseDTO> result = await _sender.Send(command, cancellationToken);
 
         return result.Match(
           onSuccess: () => CustomResult.Success(result),

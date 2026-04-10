@@ -34,7 +34,7 @@ public class AdjustLoanDatesEventHandler : IDomainEventHandler<LoanDisbursedEven
             int diffDays = notification.DisbursedDate.DayNumber - loan.EffectiveDate.DayNumber;
             _logger.LogInformation($"La diferencia de días del prestamo {loan.LoanNumber} es: {diffDays}");
 
-            if (diffDays > 0) 
+            if (diffDays != 0) 
             {
                 // Ordenar las amortizaciones por número de cuota
                 var loanSchedules = loan.AmortizationSchedules.OrderBy(s => s.InstallmentNumber).ToList();

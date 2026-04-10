@@ -36,7 +36,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
 
         IQueryable<Loan> query = db.Loan
             .Include(x => x.LoanBalance)
-            .Where(predicate => 
+            .Where(predicate =>
                 (string.IsNullOrEmpty(statusId) || predicate.LoanStatusId == statusId) &&
                 (!startDate.HasValue || predicate.DisbursedDate >= startDate.Value) &&
                 (!endDate.HasValue || predicate.EffectiveDate <= endDate.Value) &&
@@ -55,17 +55,17 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
             LateFees = await query.SelectMany(x => x.LateFees).SumAsync(x => x.Balance, cancellationToken),
         };
     }
-    
+
     public async Task<List<CashFlowItemDto>> GetDisbursements(CancellationToken cancellationToken = default)
     {
         using ApplicationContext db = _dbContext.CreateDbContext();
-        
+
         // Getting today date in the date only format
         DateOnly today = DateOnly.FromDateTime(DateTime.UtcNow);
-        
+
         // The start date is going to be the first day of the month, six months ago
         DateOnly startDate = new DateOnly(today.Year, today.Month, 1).AddMonths(-6);
-        
+
         // Only loans disbursed within the last 7 months.
         var disbursements = await db.Loan
             .Where(x => x.DisbursedDate >= startDate)
@@ -78,12 +78,12 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
                 Amount = g.Sum(x => x.Amount)
             })
             .ToListAsync(cancellationToken);
-        
+
         // Generating 7 months
         List<DateOnly> months = Enumerable.Range(0, 7)
             .Select(i => startDate.AddMonths(i))
             .ToList();
-        
+
         // Building the array base in the months 
         return months
             .Select(m => new CashFlowItemDto
@@ -103,14 +103,14 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         using ApplicationContext db = _dbContext.CreateDbContext();
 
         IQueryable<Loan> query = db.Loan
-            .Where(x => x.LoanStatus.Description == "Activo")
+            .Where(x => x.LoanStatus.Description == "Activo" || x.LoanStatus.Description == "En mora")
             .AsNoTracking();
 
         // Basic Kpis
         int activeLoans = await query.CountAsync(cancellationToken);
 
         double totalPortfolio =
-            await query.SumAsync(x => x.LoanBalance != null ? x.LoanBalance.PrincipalBalance : 0,cancellationToken);
+            await query.SumAsync(x => x.LoanBalance != null ? x.LoanBalance.PrincipalBalance : 0, cancellationToken);
 
         double totalDelinquency = await query
             .SelectMany(x => x.LateFees)
@@ -123,7 +123,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
     public async Task<List<Loan>> GetActiveLoansByDocumentNumberAsync(string documentNumber, CancellationToken cancellationToken = default)
     {
         using ApplicationContext db = _dbContext.CreateDbContext();
-        
+
         return await db.Loan
             .Include(x => x.LoanBalance)
             .Include(x => x.AmortizationSchedules)
@@ -141,18 +141,18 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         CancellationToken cancellationToken = default)
     {
         using ApplicationContext db = _dbContext.CreateDbContext();
-        
+
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
 
         IQueryable<Loan> query = db.Loan.Where(
-            predicate => predicate.EmployeeId == employeeId && 
-                         predicate.LoanStatus.Description == "Activo") 
+            predicate => predicate.EmployeeId == employeeId &&
+                         predicate.LoanStatus.Description == "Activo")
             .Include(x => x.AmortizationSchedules);
 
         if (!string.IsNullOrEmpty(searchTerm))
         {
-            query = query.Where(p => 
-                p.Client.FirstName.Contains(searchTerm) || 
+            query = query.Where(p =>
+                p.Client.FirstName.Contains(searchTerm) ||
                 p.LoanNumber.ToString().Contains(searchTerm));
         }
 
@@ -169,45 +169,45 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         }
 
         CollectorPortfolioSummaryDto summary = await query
-            .GroupBy(_ => 1) 
+            .GroupBy(_ => 1)
             .Select(g => new CollectorPortfolioSummaryDto
             {
                 TotalCustomers = g.Select(x => x.ClientId).Distinct().Count(),
-        
+
                 PaymentsUpToDate = g.Count(loan => !loan.AmortizationSchedules.Any(s => s.AmortizationStatus.Description == "Atrasada" || s.DueDate < today)),
-        
+
                 OverduePayments = g.Count(loan => loan.AmortizationSchedules.Any(s => s.DueDate < today && s.AmortizationStatus.Description != "Pagada")),
-        
+
                 ToBeCollectedToday = g.Count(loan => loan.AmortizationSchedules.Any(s => s.DueDate == today && s.AmortizationStatus.Description != "Pagada"))
             })
             .AsNoTracking()
             .FirstOrDefaultAsync(cancellationToken) ?? new CollectorPortfolioSummaryDto();
-        
+
         List<CollectorPortfolioItemDto> items = await query
             .Select(loan => new CollectorPortfolioItemDto
             {
                 CustomerName = loan.Client.FirstName + " " + loan.Client.LastName,
-                
+
                 LoanNumber = loan.LoanNumber,
-                
+
                 Fee = loan.AmortizationSchedules
                     .Where(x => x.AmortizationStatus.Description != "Pagada")
                     .OrderBy(x => x.DueDate)
                     .Select(x => x.DueAmount)
                     .FirstOrDefault(),
-                
+
                 NextPaymentDate = loan.AmortizationSchedules
                     .Where(x => x.AmortizationStatus.Description != "Pagada")
                     .OrderBy(x => x.DueDate)
                     .Select(x => x.DueDate)
                     .FirstOrDefault(),
-                
+
                 State = loan.AmortizationSchedules.Any(s => s.DueDate < today && s.AmortizationStatus.Description != "Pagada")
-                    ? "Mora" 
+                    ? "Mora"
                     : "Al Día",
-                
+
                 PaidInstallments = loan.AmortizationSchedules.Count(s => s.AmortizationStatus.Description == "Pagada"),
-                
+
                 TotalInstallments = loan.AmortizationSchedules.Count()
             })
             .AsNoTracking()
