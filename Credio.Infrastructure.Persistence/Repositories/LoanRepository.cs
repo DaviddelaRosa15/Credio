@@ -219,4 +219,21 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
             Items = items,
         };
     }
+
+    public async Task<ClientDashboardResponseDTO> GetClientDashboard(string clientId, CancellationToken cancellationToken = default)
+    {
+        using ApplicationContext context = _dbContext.CreateDbContext();
+
+        IQueryable<Loan> query = context.Loan
+            .Include(x => x.LoanBalance)
+            .Include(x => x.AmortizationSchedules)
+            .Where(x => x.Client.Id == clientId && x.LoanStatus.Description == "Activo");
+
+        return new ClientDashboardResponseDTO
+        {
+            ActiveLoans = await query.CountAsync(cancellationToken),
+            TotalBorrowed = await query.SumAsync(x => x.Amount, cancellationToken),
+            OutstandingBalance = await query.SumAsync(x => x.LoanBalance != null ? x.LoanBalance.TotalOutstanding : 0, cancellationToken),
+        };
+    }
 }

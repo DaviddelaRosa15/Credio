@@ -25,4 +25,8 @@ public interface ILoanRepository : IGenericRepository<Loan>
         string? searchTerm,
         string? state,
         CancellationToken cancellationToken = default);
+    
+    Task<ClientDashboardResponseDTO> GetClientDashboard(
+        string clientId,
+        CancellationToken cancellationToken = default);
 }
