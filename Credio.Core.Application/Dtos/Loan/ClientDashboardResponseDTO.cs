@@ -8,7 +8,7 @@ public class ClientDashboardResponseDTO
 
     public double OutstandingBalance { get; set; }
 
-    public OfficerInfoDTO OfficerInfo { get; set; }
+    public OfficerInfoDTO? OfficerInfo { get; set; }
 
     public List<ClientDashboardLoanDTO> Loans { get; set; }
 }
@@ -28,13 +28,13 @@ public class ClientDashboardLoanDTO
 
     public string LoanStatus { get; set; }
 
-    public DateOnly DisbursedDate { get; set; }
+    public DateOnly? DisbursedDate { get; set; }
 
     public double Amount { get; set; }
 
-    public int TotalOutstanding{ get; set; }
+    public double OutstandingBalance{ get; set; }
 
-    public int MonthlyFee { get; set; }
+    public decimal MonthlyFee { get; set; }
 
     public int FeesPaid { get; set; }
 
