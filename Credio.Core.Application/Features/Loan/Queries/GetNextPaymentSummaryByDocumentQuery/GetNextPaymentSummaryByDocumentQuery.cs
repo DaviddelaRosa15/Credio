@@ -39,7 +39,7 @@ public class GetNextPaymentSummaryByDocumentQueryHandler : IQueryHandler<GetNext
             var outstandingPayment = activeLoans.Select(loan => 
                 {
                     AmortizationSchedule? nextPayment = loan.AmortizationSchedules
-                        .Where(x => x.AmortizationStatus.Description == "Pendiente")
+                        .Where(x => x.AmortizationStatus.Description is "Pendiente" or "Atrasada")
                         .OrderBy(x => x.DueDate)
                         .FirstOrDefault();
 
@@ -50,14 +50,11 @@ public class GetNextPaymentSummaryByDocumentQueryHandler : IQueryHandler<GetNext
                         Loan = loan,
                         NextPayment = nextPayment,
                         LateFee = lateFee,
-                        TotalAmountToPay = (nextPayment?.DueAmount ?? 0 + (decimal)lateFee) - nextPayment?.PaidAmount ?? 0
                     };
                 })
                 .Where(x => x.NextPayment is not null)
                 .OrderBy(x => x.NextPayment!.DueDate)
                 .ToList();
-            
-            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
             
             List<BotPaymentDetailDTO> mapped = outstandingPayment
                 .Select(x => new BotPaymentDetailDTO
@@ -67,7 +64,7 @@ public class GetNextPaymentSummaryByDocumentQueryHandler : IQueryHandler<GetNext
                     InstallmentAmount = x.NextPayment!.DueAmount,
                     DueTime = x.NextPayment.DueDate,
                     LateFeeAmount = x.LateFee,
-                    TotalAmountToPay = x.TotalAmountToPay
+                    TotalAmountToPay = (x.NextPayment.DueAmount + (decimal)x.LateFee ) - (x.NextPayment.PaidAmount ?? 0)
                 })
                 .ToList();
 
