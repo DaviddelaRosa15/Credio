@@ -220,20 +220,55 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         };
     }
 
-    public async Task<ClientDashboardResponseDTO> GetClientDashboard(string clientId, CancellationToken cancellationToken = default)
+    public async Task<List<ClientDashboardLoanDTO>> GetClientLoansOverviewByClientId(string clientId, CancellationToken cancellationToken = default)
+    {
+        using ApplicationContext context = _dbContext.CreateDbContext();
+        
+        return await context.Loan
+            .Where(l => l.Client.Id == clientId && l.LoanStatus.Description == "Activo")
+            .Select(l => new ClientDashboardLoanDTO
+            {
+                LoanNumber = l.LoanNumber,
+                Amount = l.Amount,
+                LoanStatus = l.LoanStatus.Name,
+                DisbursedDate = l.DisbursedDate,
+                OutstandingBalance = l.LoanBalance != null ? l.LoanBalance.TotalOutstanding : 0,
+                NextPayment = l.AmortizationSchedules
+                    .Where(s => s.AmortizationStatus.Description == "Pendiente")
+                    .OrderBy(s => s.DueDate)
+                    .Select(s => s.DueDate) 
+                    .FirstOrDefault(),
+               MonthlyFee = l.AmortizationSchedules
+                   .Where(s => s.AmortizationStatus.Description == "Pendiente")
+                   .OrderBy(s => s.DueDate)
+                   .Select(s => s.DueAmount) 
+                   .FirstOrDefault(),
+               FeesPaid = l.AmortizationSchedules.Count(x => x.AmortizationStatus.Description == "Pagada"),
+               TotalFees = l.AmortizationSchedules.Count,
+            })
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<(int, double, double)> GetClientLoanSummaryByClientIdAsync(string clientId, CancellationToken cancellationToken = default)
     {
         using ApplicationContext context = _dbContext.CreateDbContext();
 
-        IQueryable<Loan> query = context.Loan
+        var result = await context.Loan
             .Include(x => x.LoanBalance)
-            .Include(x => x.AmortizationSchedules)
-            .Where(x => x.Client.Id == clientId && x.LoanStatus.Description == "Activo");
-
-        return new ClientDashboardResponseDTO
-        {
-            ActiveLoans = await query.CountAsync(cancellationToken),
-            TotalBorrowed = await query.SumAsync(x => x.Amount, cancellationToken),
-            OutstandingBalance = await query.SumAsync(x => x.LoanBalance != null ? x.LoanBalance.TotalOutstanding : 0, cancellationToken),
-        };
+            .Where(x => x.Client.Id == clientId && x.LoanStatus.Description == "Activo")
+            .AsNoTracking()
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                ActiveLoans = g.Count(),
+                TotalBorrowed = g.Sum(x => x.Amount),
+                OutstandingBalance = g.Sum(x => x.LoanBalance != null ? x.LoanBalance.TotalOutstanding : 0)
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+        
+        return result is null
+            ? (0, 0, 0)
+            : (result.ActiveLoans, result.TotalBorrowed, result.OutstandingBalance);
     }
 }
