@@ -106,7 +106,7 @@ namespace Credio.Lending.Api.Controllers
         Summary = "Obtiene los metodos de pago",
         Description = "Obtiene los metodos de pagos admitidos por el sistema"
         )]
-        [Authorize(Roles = "Cobrador , Admin,  Oficial")]
+        [Authorize(Roles = "Collector , Administrator,  Officer")]
         [HttpGet("payment-methods")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(PaymentMethodDTO))]
         [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
