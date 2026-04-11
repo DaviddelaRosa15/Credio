@@ -35,7 +35,7 @@ namespace Credio.Infrastructure.Shared
             });
 
             services.AddTransient<IEmailService, EmailService>();
-            services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+            services.AddTransient<IEmailTemplateService, EmailTemplateService>();
             services.AddSingleton<ICacheService, CacheService>();
             
             return services;

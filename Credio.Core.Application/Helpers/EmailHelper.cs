@@ -1,4 +1,5 @@
-﻿using Credio.Core.Application.Dtos.Email;
+﻿using Credio.Core.Application.Dtos.CoreConfiguration;
+using Credio.Core.Application.Dtos.Email;
 using Credio.Core.Application.Interfaces.Helpers;
 using Credio.Core.Application.Interfaces.Services;
 
@@ -90,6 +91,18 @@ namespace Credio.Core.Application.Helpers
                 { "UserName", employee.UserName },
                 { "Password", employee.Password },
                 { "Role", employee.Role }
+            });
+        }
+
+        public string MakeEmailForLoanArrearsNotice(LoanInArrearsNotificationDTO notification)
+        {
+            return _service.RenderTemplate("LoanArrearsNotice", new Dictionary<string, string>
+            {
+                { "ArrearsAmount", $"RD$ {notification.ArrearsAmount:N2}" },
+                { "ClientName", notification.ClientName },
+                { "DaysOverdue", notification.DaysOverdue.ToString() },
+                { "LoanNumber", notification.LoanNumber.ToString() },
+                { "TotalDue", $"RD$ {notification.TotalDue:N2}" }
             });
         }
 
