@@ -1,3 +1,4 @@
+using Credio.Core.Application.Dtos.CoreConfiguration;
 using Credio.Core.Application.Dtos.Email;
 
 namespace Credio.Core.Application.Interfaces.Helpers
@@ -6,6 +7,7 @@ namespace Credio.Core.Application.Interfaces.Helpers
     {
         string MakeEmailForChange(string fullName);
         string MakeEmailForEmployee(EmployeeWelcomeEmail employee);
+        string MakeEmailForLoanArrearsNotice(LoanInArrearsNotificationDTO notification);
         string MakeEmailForReset(string fullName, string code);
     }
 }

@@ -251,8 +251,11 @@ namespace Credio.Core.Application.Services
                                         LateFeeStatusId = statusFeePending.Id
                                     };
 
+                                    // Cálculo del monto total adeudado por el cliente incluyendo el monto de la cuota vencida y los intereses moratorios generados
+                                    double totalAmount = (double)(lateFeeTotal + schedule.DueAmount);
+
                                     // Se agrega el evento de dominio de préstamo entró en mora al nuevo registro de interés moratorio
-                                    newLateFee.AddEvent(new LoanEnteredArrearsEvent(item.Loan.Id, (double)lateFeeTotal, diffDays));
+                                    newLateFee.AddEvent(new LoanEnteredArrearsEvent(item.Loan.Id, (double)lateFeeTotal, totalAmount, diffDays));
 
                                     // Se crea el registro de interés moratorio para el día de hoy
                                     await _lateFeeRepository.AddAsync(newLateFee);
