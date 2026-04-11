@@ -81,6 +81,8 @@ namespace Credio.Core.Application.Mappings
             CreateMap<Client, ClientDTO>()
                 .ForMember(x => x.DocumentType, opt => opt.MapFrom(y => y.DocumentType.Name))
                 .ForMember(x => x.OfficerId, opt => opt.MapFrom(y => y.EmployeeId))
+                .ForMember(x => x.HomeLatitude, opt => opt.MapFrom(y => y.HomeLatitude))
+                .ForMember(x => x.HomeLongitude, opt => opt.MapFrom(y => y.HomeLongitude))
                 .ReverseMap()
                 .ForMember(x => x.DocumentType, opt => opt.Ignore())
                 .ForMember(x => x.Loans, opt => opt.Ignore())
