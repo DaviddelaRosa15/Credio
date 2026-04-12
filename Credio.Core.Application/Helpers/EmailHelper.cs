@@ -114,5 +114,19 @@ namespace Credio.Core.Application.Helpers
                 { "ConfirmationCode", code }
             });
         }
+
+        public string MakeEmailForEodAlert(EodAlertNotificationDTO notification)
+        {
+            return _service.RenderTemplate("SystemErrorAlert", new Dictionary<string, string>
+            {
+                { "ErrorSummary", notification.ErrorSummary },
+                { "ExecutionDate", notification.ExecutionDate.ToString("dd/MM/yyyy")  },
+                { "FailedCount", notification.FailedCount.ToString() },
+                { "PendingCount", notification.PendingCount.ToString() },
+                { "ProcessedCount", notification.ProcessedCount.ToString() },
+                { "ProcessName", notification.ProcessName },
+                { "TechnicalDetails", notification.TechnicalDetails }
+            });
+        }
     }
 }

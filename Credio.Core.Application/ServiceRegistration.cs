@@ -33,8 +33,10 @@ namespace Credio.Core.Application
             #region Services
             services.AddTransient<IEmailHelper, EmailHelper>();
             services.AddSingleton<IExponentialBackoffService, ExponentialBakOffService>();
+            services.AddTransient<IEodAlertService, EodAlertService>();
             services.AddSingleton<IAmortizationCalculatorService, AmortizationCalculatorService>();
             services.AddSingleton<IEndOfDayService, EndOfDayService>();
+            services.AddTransient<ISupportEmailProviderService, SupportEmailProviderService>();
             #endregion
 
             return services;

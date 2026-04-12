@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Credio - Alerta de Error Crítico</title>
+</head>
+
+<body
+    style="margin: 0; padding: 0; background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8f9fa; padding: 30px 0">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" border="0"
+                    style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); border: 1px solid #e9ecef;">
+
+                    <tr>
+                        <td
+                            style="background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%); padding: 32px; text-align: center;">
+                            <div
+                                style="background-color: rgba(255, 255, 255, 0.2); width: 60px; height: 60px; border-radius: 50%; display: inline-block; margin-bottom: 16px; line-height: 60px; font-size: 32px;">
+                                ⚠️
+                            </div>
+                            <h2
+                                style="margin: 0; font-size: 24px; font-weight: bold; color: #ffffff; letter-spacing: 0.5px;">
+                                ERROR CRÍTICO DETECTADO
+                            </h2>
+                            <p style="margin: 8px 0 0 0; font-size: 14px; color: #ffcdd2;">
+                                Se ha interrumpido un proceso batch en el sistema
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 32px; color: #212529;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+                                <tr>
+                                    <td style="font-size: 16px;">
+                                        <strong>Proceso:</strong> <span
+                                            style="color: #d32f2f;">{{ProcessName}}</span><br />
+                                        <strong>Fecha de Ejecución:</strong> {{ExecutionDate}}
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div
+                                style="background-color: #fff5f5; border: 1px solid #feb2b2; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+                                <h3
+                                    style="margin: 0 0 8px 0; font-size: 14px; color: #c53030; text-transform: uppercase; letter-spacing: 1px;">
+                                    Resumen del Error
+                                </h3>
+                                <p
+                                    style="margin: 0; font-size: 15px; line-height: 1.6; color: #2d3748; font-weight: 500;">
+                                    {{ErrorSummary}}
+                                </p>
+                            </div>
+
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                                style="border-collapse: collapse; margin-bottom: 24px; font-size: 14px;">
+                                <thead>
+                                    <tr>
+                                        <th align="left"
+                                            style="padding: 12px; border-bottom: 2px solid #edf2f7; color: #718096;">
+                                            Métrica</th>
+                                        <th align="right"
+                                            style="padding: 12px; border-bottom: 2px solid #edf2f7; color: #718096;">
+                                            Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 12px; border-bottom: 1px solid #edf2f7;">Registros
+                                            Procesados</td>
+                                        <td align="right"
+                                            style="padding: 12px; border-bottom: 1px solid #edf2f7; font-weight: bold; color: #2f855a;">
+                                            {{ProcessedCount}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px; border-bottom: 1px solid #edf2f7;">Registros
+                                            Pendientes</td>
+                                        <td align="right"
+                                            style="padding: 12px; border-bottom: 1px solid #edf2f7; font-weight: bold; color: #718096;">
+                                            {{PendingCount}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px; border-bottom: 1px solid #edf2f7;">Registros Fallidos
+                                        </td>
+                                        <td align="right"
+                                            style="padding: 12px; border-bottom: 1px solid #edf2f7; font-weight: bold; color: #e53e3e;">
+                                            {{FailedCount}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <h3
+                                style="font-size: 13px; color: #4a5568; margin-bottom: 10px; text-transform: uppercase;">
+                                Detalles Técnicos (Stack Trace)
+                            </h3>
+                            <div
+                                style="background-color: #1a202c; border-radius: 6px; padding: 16px; overflow-x: auto;">
+                                <code
+                                    style="font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; color: #a0aec0; line-height: 1.5; white-space: pre-wrap;">
+                                    {{TechnicalDetails}}
+                                </code>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td
+                            style="background-color: #f7fafc; padding: 24px; text-align: center; border-top: 1px solid #e2e8f0;">
+                            <p style="font-size: 12px; color: #718096; margin: 0;">
+                                Esta es una notificación automática del sistema de monitoreo de <strong>Credio</strong>.
+                                <br />Por favor, no responda a este correo.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

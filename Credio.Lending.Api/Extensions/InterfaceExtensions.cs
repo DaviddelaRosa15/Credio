@@ -20,6 +20,16 @@ public static class InterfaceExtensions
             options.CheckFrequencyInMinutes = eodSettings.CheckFrequencyInMinutes;
         });
 
+        // Configuración de TechnicalAlertSettings
+        var technicalAlertSettingsSection = configuration.GetSection("TechnicalAlertSettings");
+        var technicalAlertSettings = technicalAlertSettingsSection.Get<TechnicalAlertSettings>();
+
+        // Validación de configuración
+        services.Configure<TechnicalAlertSettings>(options =>
+        {
+            options.DefaultSupportEmail = technicalAlertSettings.DefaultSupportEmail;
+        });
+
         // Core
         services
             .AddProblemDetails()
