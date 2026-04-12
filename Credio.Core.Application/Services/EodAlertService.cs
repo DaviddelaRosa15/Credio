@@ -12,18 +12,18 @@ namespace Credio.Core.Application.Services
         private readonly IEmailHelper _emailHelper;
         private readonly IEmailService _emailService;
         private readonly IEndOfDayExecutionLogRepository _endOfDayExecutionLogRepository;
-        private readonly ISystemSettingsRepository _settingsRepository;
+        private readonly ISupportEmailProviderService _supportEmailProviderService;
 
         public EodAlertService(
             IEmailHelper emailHelper,
             IEmailService emailService,
             IEndOfDayExecutionLogRepository endOfDayExecutionLogRepository,
-            ISystemSettingsRepository settingsRepository)
+            ISupportEmailProviderService supportEmailProviderService)
         {
             _emailHelper = emailHelper;
             _emailService = emailService;
             _endOfDayExecutionLogRepository = endOfDayExecutionLogRepository;
-            _settingsRepository = settingsRepository;
+            _supportEmailProviderService = supportEmailProviderService;
         }
 
         public async Task SendEodAlertAsync(string message, string? exception)
@@ -35,35 +35,50 @@ namespace Credio.Core.Application.Services
             DateOnly today = DateOnly.FromDateTime(DateTime.Now);
 
             // Obtener correo técnico de configuración
-            var technicalEmail = await _settingsRepository.GetByPropertyAsync(s => s.Key == EndOfDaySettings.TechSupportEmailKey);
+            string technicalEmail = await _supportEmailProviderService.GetSupportEmailAsync();
 
-            // Obtener log de ejecución del día
-            var log = await _endOfDayExecutionLogRepository.GetByPropertyWithIncludeAsync(l => l.ExecutionDate == today, [log => log.QueueItems]);
+            try
+            {
+                // Obtener log de ejecución del día
+                var log = await _endOfDayExecutionLogRepository.GetByPropertyWithIncludeAsync(l => l.ExecutionDate == today, [log => log.QueueItems]);
 
-            if(log is null)
+                if (log is null)
+                {
+                    alert.ExecutionDate = today;
+                    alert.ErrorSummary = "No se llegó a ejecutar el proceso de Fin de Día o no se pudo registrar el log de ejecución.";
+                    alert.FailedCount = 0;
+                    alert.PendingCount = 0;
+                    alert.ProcessedCount = 0;
+                    alert.ProcessName = "Proceso de Fin de Día";
+                    alert.TechnicalDetails = exception ?? "No se obtuvo información adicional.";
+                }
+                else
+                {
+                    alert.ExecutionDate = log.ExecutionDate;
+                    alert.ErrorSummary = message;
+                    alert.FailedCount = log.QueueItems.Count(q => q.Status == EndOfDayQueueStatuses.Failed);
+                    alert.PendingCount = log.QueueItems.Count(q => q.Status == EndOfDayQueueStatuses.Pending);
+                    alert.ProcessedCount = log.ProcessedLoans;
+                    alert.ProcessName = "Proceso de Fin de Día";
+                    alert.TechnicalDetails = exception ?? "No se obtuvo información adicional.";
+                }
+            }
+            catch
             {
                 alert.ExecutionDate = today;
-                alert.ErrorSummary = "No se llegó a ejecutar el proceso de Fin de Día o no se pudo registrar el log de ejecución.";
+                alert.ErrorSummary = message;
                 alert.FailedCount = 0;
                 alert.PendingCount = 0;
                 alert.ProcessedCount = 0;
                 alert.ProcessName = "Proceso de Fin de Día";
                 alert.TechnicalDetails = exception ?? "No se obtuvo información adicional.";
-            }else
-            {
-                alert.ExecutionDate = log.ExecutionDate;
-                alert.ErrorSummary = message;
-                alert.FailedCount = log.QueueItems.Count(q => q.Status == EndOfDayQueueStatuses.Failed);
-                alert.PendingCount = log.QueueItems.Count(q => q.Status == EndOfDayQueueStatuses.Pending);
-                alert.ProcessedCount = log.ProcessedLoans;
-                alert.ProcessName = "Proceso de Fin de Día";
-                alert.TechnicalDetails = exception ?? "No se obtuvo información adicional.";
             }
+            
 
             // Enviar correo de alerta
             await _emailService.SendAsync(new EmailRequest()
             {
-                To = technicalEmail.Value,
+                To = technicalEmail,
                 Body = _emailHelper.MakeEmailForEodAlert(alert),
                 Subject = "Alerta: Problema detectado en proceso de Fin de Día",
             });

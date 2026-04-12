@@ -17,6 +17,7 @@ namespace Credio.Core.Application.Services
         private readonly IEndOfDayExecutionLogRepository _endOfDayExecutionLogRepository;
         private readonly IEndOfDayQueueRepository _endOfDayQueueRepository;
         private readonly EndOfDayLogSettings _endOfDayLogSettings;
+        private readonly IEodAlertService _eodAlertService;
         private readonly ILateFeeRepository _lateFeeRepository;
         private readonly ILateFeeStatusRepository _lateFeeStatusRepository;
         private readonly ILoanRepository _loanRepository;
@@ -29,6 +30,7 @@ namespace Credio.Core.Application.Services
             IEndOfDayExecutionLogRepository endOfDayExecutionLogRepository,
             IEndOfDayQueueRepository endOfDayQueueRepository,
             IOptions<EndOfDayLogSettings> endOfDayLogSettings,
+            IEodAlertService eodAlertService,
             ILateFeeRepository lateFeeRepository,
             ILateFeeStatusRepository lateFeeStatusRepository,
             ILoanRepository loanRepository,
@@ -40,6 +42,7 @@ namespace Credio.Core.Application.Services
             _endOfDayExecutionLogRepository = endOfDayExecutionLogRepository;
             _endOfDayQueueRepository = endOfDayQueueRepository;
             _endOfDayLogSettings = endOfDayLogSettings.Value;
+            _eodAlertService = eodAlertService;
             _lateFeeRepository = lateFeeRepository;
             _lateFeeStatusRepository = lateFeeStatusRepository;
             _loanRepository = loanRepository;
@@ -85,6 +88,10 @@ namespace Credio.Core.Application.Services
                     }
                     catch (Exception ex)
                     {
+                        // Si ocurre un error, se envia una alerta con el error ocurrido
+                        string exceptionMessage = ex.InnerException?.Message ?? ex.Message;
+                        await _eodAlertService.SendEodAlertAsync($"Error creando el el registro de COB para el dia de hoy ({today})", exceptionMessage);
+
                         throw new Exception($"Error creando el el registro de COB para el dia de hoy ({today}): {ex.Message}");
                     }
 
@@ -122,6 +129,10 @@ namespace Credio.Core.Application.Services
                         // Se intenta actualizar el registro de COB con el estado de "Failed", si ocurre un error al actualizar, se lanza una excepción con el error original y el error al actualizar
                         await _endOfDayExecutionLogRepository.UpdateAsync(createdLog);
 
+                        // Si ocurre un error, se envia una alerta con el error ocurrido
+                        string exceptionMessage = ex.InnerException?.Message ?? ex.Message;
+                        await _eodAlertService.SendEodAlertAsync($"Error creando los registros en la cola de COB para el dia de hoy ({today})", exceptionMessage);
+
                         throw new Exception($"Error creando los registros en la cola de COB para el dia de hoy ({today}): {ex.Message}");
                     }
                 }
@@ -136,6 +147,11 @@ namespace Credio.Core.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError($"Error en el proceso: {ex}");
+
+                // Si ocurre un error, se envia una alerta con el error ocurrido
+                string exceptionMessage = ex.InnerException?.Message ?? ex.Message;
+                await _eodAlertService.SendEodAlertAsync($"Ocurrio un error al preparar el proceso de COB para el dia de hoy {today})", exceptionMessage);
+
                 throw new Exception("Ocurrio un error al preparar el proceso de COB para el dia de hoy");
             }
         }
@@ -331,6 +347,10 @@ namespace Credio.Core.Application.Services
                 // Se actualiza el registro de ejecución de COB para el día de hoy con el estado "Fallido"
                 log.Status = EndOfDayLogStatuses.Failed;
                 await _endOfDayExecutionLogRepository.UpdateAsync(log);
+
+                // Si ocurre un error, se envia una alerta con el error ocurrido
+                string exceptionMessage = ex.InnerException?.Message ?? ex.Message;
+                await _eodAlertService.SendEodAlertAsync($"Ocurrio un error al procesar la cola de COB para el día de hoy. Log ID: {logId}", exceptionMessage);
 
                 return new EndOfDayProcessResponseDTO
                 {
