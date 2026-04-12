@@ -22,6 +22,7 @@ namespace Credio.Core.Application.Services
         private readonly IMapper _mapper;
         private readonly IPaymentRepository _paymentRepository;
         private readonly IPaymentStatusRepository _paymentStatusRepository;
+        private readonly IReceiptNumberGeneratorService _receiptNumberGeneratorService;
 
         public PaymentService(
             IAmortizationCalculatorService amortizationService,
@@ -32,7 +33,8 @@ namespace Credio.Core.Application.Services
             ILogger<PaymentService> logger,
             IMapper mapper,
             IPaymentRepository paymentRepository,
-            IPaymentStatusRepository paymentStatusRepository)
+            IPaymentStatusRepository paymentStatusRepository,
+            IReceiptNumberGeneratorService receiptNumberGeneratorService)
         {
             _amortizationService = amortizationService;
             _amortizationSchedulesRepository = amortizationSchedulesRepository;
@@ -43,6 +45,34 @@ namespace Credio.Core.Application.Services
             _mapper = mapper;
             _paymentRepository = paymentRepository;
             _paymentStatusRepository = paymentStatusRepository;
+            _receiptNumberGeneratorService = receiptNumberGeneratorService;
+        }
+
+        public async Task<RegisterPaymentResponseDTO> GetPaymentReceiptSnapshotAsync(string paymentId)
+        {
+            var payment = await _paymentRepository.GetByIdWithIncludeAsync(p => p.Id == paymentId,
+                p => p.Include(p => p.PaymentMethod));
+
+            var loan = await _loanRepository.GetByIdWithIncludeAsync(l => l.Id == payment.LoanId,
+                l => l.Include(l => l.Client)
+                .Include(l => l.LoanBalance)
+                .Include(l => l.AmortizationSchedules).ThenInclude(s => s.AmortizationStatus));
+
+            var response = new RegisterPaymentResponseDTO
+            {
+                PaymentId = payment.Id,
+                ReceiptNumber = payment.ReceiptNumber,
+                PaymentDate = DateOnly.FromDateTime((DateTime)payment.PaymentDate),
+                ClientName = $"{loan.Client.FirstName} {loan.Client.LastName}",
+                LoanNumber = loan.LoanNumber,
+                PaymentMethod = payment.PaymentMethod.Name,
+                AmountPaid = payment.AmountPaid,
+                RemainingBalance = loan.LoanBalance.PrincipalBalance,
+                PaidInstallmentsCount = loan.AmortizationSchedules.Count(s => s.AmortizationStatus.Name == "Pagada"),
+                TotalInstallmentsCount = loan.AmortizationSchedules.Count()
+            };
+
+            return response;
         }
 
         public async Task ProcessPaymentAsync(string loanId, Payment payment)
@@ -85,7 +115,7 @@ namespace Credio.Core.Application.Services
             }
         }
 
-        public async Task<Payment> RegisterInitialPaymentAsync(RegisterPaymentCommand command)
+        public async Task<Payment> RegisterInitialPaymentAsync(RegisterPaymentCommand command, int loanNumber)
         {
             // Obtener el estado "Pendiente" para asignarlo al nuevo pago
             var pendingStatus = await _paymentStatusRepository.GetByPropertyAsync(ps => ps.Name == PaymentStatuses.Pendiente);
@@ -100,7 +130,8 @@ namespace Credio.Core.Application.Services
                 GpsLatitude = command.GpsLatitude,
                 GpsLongitude = command.GpsLongitude,
                 PaymentDate = DateTime.UtcNow,
-                PaymentStatusId = pendingStatus.Id
+                PaymentStatusId = pendingStatus.Id,
+                ReceiptNumber = await _receiptNumberGeneratorService.GenerateReceiptNumberAsync(loanNumber.ToString(), command.LoanId)
             };
 
             // 2. Guardar el pago en la base de datos
