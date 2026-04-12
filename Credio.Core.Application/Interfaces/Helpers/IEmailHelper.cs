@@ -9,5 +9,6 @@ namespace Credio.Core.Application.Interfaces.Helpers
         string MakeEmailForEmployee(EmployeeWelcomeEmail employee);
         string MakeEmailForLoanArrearsNotice(LoanInArrearsNotificationDTO notification);
         string MakeEmailForReset(string fullName, string code);
+        string MakeEmailForEodAlert(EodAlertNotificationDTO notification);
     }
 }
