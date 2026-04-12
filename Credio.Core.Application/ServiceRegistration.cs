@@ -36,6 +36,7 @@ namespace Credio.Core.Application
             services.AddTransient<IEodAlertService, EodAlertService>();
             services.AddSingleton<IAmortizationCalculatorService, AmortizationCalculatorService>();
             services.AddSingleton<IEndOfDayService, EndOfDayService>();
+            services.AddTransient<ISupportEmailProviderService, SupportEmailProviderService>();
             #endregion
 
             return services;
