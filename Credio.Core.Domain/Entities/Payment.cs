@@ -28,5 +28,7 @@ public class Payment : AuditableBaseEntity
     
     public double? GpsLongitude { get; set; } 
 
+    public string ReceiptNumber { get; set; }
+
     public string? ReceiptUrl { get; set; } = string.Empty;
 }
