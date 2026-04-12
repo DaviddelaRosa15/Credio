@@ -1,4 +1,5 @@
-﻿using Credio.Core.Application.Dtos.Email;
+﻿using Credio.Core.Application.Dtos.CoreConfiguration;
+using Credio.Core.Application.Dtos.Email;
 using Credio.Core.Application.Interfaces.Helpers;
 using Credio.Core.Application.Interfaces.Services;
 
@@ -93,12 +94,38 @@ namespace Credio.Core.Application.Helpers
             });
         }
 
+        public string MakeEmailForLoanArrearsNotice(LoanInArrearsNotificationDTO notification)
+        {
+            return _service.RenderTemplate("LoanArrearsNotice", new Dictionary<string, string>
+            {
+                { "ArrearsAmount", $"RD$ {notification.ArrearsAmount:N2}" },
+                { "ClientName", notification.ClientName },
+                { "DaysOverdue", notification.DaysOverdue.ToString() },
+                { "LoanNumber", notification.LoanNumber.ToString() },
+                { "TotalDue", $"RD$ {notification.TotalDue:N2}" }
+            });
+        }
+
         public string MakeEmailForReset(string fullName, string code)
         {
             return _service.RenderTemplate("ConfirmationCode", new Dictionary<string, string>
             {
                 { "FullName", fullName },
                 { "ConfirmationCode", code }
+            });
+        }
+
+        public string MakeEmailForEodAlert(EodAlertNotificationDTO notification)
+        {
+            return _service.RenderTemplate("SystemErrorAlert", new Dictionary<string, string>
+            {
+                { "ErrorSummary", notification.ErrorSummary },
+                { "ExecutionDate", notification.ExecutionDate.ToString("dd/MM/yyyy")  },
+                { "FailedCount", notification.FailedCount.ToString() },
+                { "PendingCount", notification.PendingCount.ToString() },
+                { "ProcessedCount", notification.ProcessedCount.ToString() },
+                { "ProcessName", notification.ProcessName },
+                { "TechnicalDetails", notification.TechnicalDetails }
             });
         }
     }

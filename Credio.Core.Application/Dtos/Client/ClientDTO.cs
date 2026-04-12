@@ -22,6 +22,10 @@ namespace Credio.Core.Application.Dtos.Client
         public string? Email { get; set; }
 
         public string? AddressId { get; set; }
+
+        public string HomeLatitude { get; set; }
+
+        public string HomeLongitude { get; set; }
     }
 }
 
