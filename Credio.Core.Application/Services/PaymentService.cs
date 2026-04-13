@@ -30,6 +30,7 @@ namespace Credio.Core.Application.Services
             IAmortizationStatusRepository amortizationStatusRepository,
             ILateFeeStatusRepository lateFeeStatusRepository,
             ILoanRepository loanRepository,
+            ILoanStatusRepository loanStatusRepository,
             ILogger<PaymentService> logger,
             IMapper mapper,
             IPaymentRepository paymentRepository,
@@ -41,6 +42,7 @@ namespace Credio.Core.Application.Services
             _amortizationStatusRepository = amortizationStatusRepository;
             _lateFeeStatusRepository = lateFeeStatusRepository;
             _loanRepository = loanRepository;
+            _loanStatusRepository = loanStatusRepository;
             _logger = logger;
             _mapper = mapper;
             _paymentRepository = paymentRepository;
@@ -115,7 +117,7 @@ namespace Credio.Core.Application.Services
             }
         }
 
-        public async Task<Payment> RegisterInitialPaymentAsync(RegisterPaymentCommand command, int loanNumber)
+        public async Task<Payment> RegisterInitialPaymentAsync(RegisterPaymentCommand command, string collectorId, int loanNumber)
         {
             // Obtener el estado "Pendiente" para asignarlo al nuevo pago
             var pendingStatus = await _paymentStatusRepository.GetByPropertyAsync(ps => ps.Name == PaymentStatuses.Pendiente);
@@ -124,12 +126,12 @@ namespace Credio.Core.Application.Services
             var payment = new Payment
             {
                 LoanId = command.LoanId,
-                EmployeeId = command.CollectorId,
+                EmployeeId = collectorId,
                 AmountPaid = command.AmountPaid,
                 PaymentMethodId = command.PaymentMethodId,
                 GpsLatitude = command.GpsLatitude,
                 GpsLongitude = command.GpsLongitude,
-                PaymentDate = DateTime.UtcNow,
+                PaymentDate = DateTime.Now,
                 PaymentStatusId = pendingStatus.Id,
                 ReceiptNumber = await _receiptNumberGeneratorService.GenerateReceiptNumberAsync(loanNumber.ToString(), command.LoanId)
             };
@@ -152,7 +154,7 @@ namespace Credio.Core.Application.Services
 
                 // Obtener las cuotas de amortización pendientes ordenadas por fecha de vencimiento
                 var schedules = loan.AmortizationSchedules
-                    .Where(s => s.AmortizationStatusId != paidStatus.Id)
+                    .Where(s => s.AmortizationStatusId != paidStatus.Id && s.DueDate <= DateOnly.FromDateTime(DateTime.Now))
                     .OrderBy(s => s.DueDate).ToList();
                 _logger.LogInformation("Iniciando distribución en cascada para el préstamo {LoanId} con monto pagado {AmountPaid}", loan.Id, state.RemainingAmount);
 
@@ -168,7 +170,7 @@ namespace Credio.Core.Application.Services
                     {
                         // Aplicar el pago a la cuota de mora, pero sin exceder el monto pendiente de esa cuota ni el monto restante del pago
                         var lateFeeAmountToApply = Math.Min((decimal)lafee.Balance, state.RemainingAmount);
-                        lafee.Balance -= (double)lateFeeAmountToApply;
+                        lafee.Balance = Math.Round(lafee.Balance - (double)lateFeeAmountToApply, 2);
                         state.RemainingAmount -= lateFeeAmountToApply;
 
                         // Registrar el monto aplicado a mora en el estado de distribución
@@ -187,7 +189,7 @@ namespace Credio.Core.Application.Services
                     {
                         // Aplicar el pago a los intereses de esta cuota, pero sin exceder el monto pendiente de intereses ni el monto restante del pago
                         var interestToApply = Math.Min(interestPending, state.RemainingAmount);
-                        schedule.InterestPaid = (schedule.InterestPaid ?? 0) + interestToApply;
+                        schedule.InterestPaid = Math.Round((schedule.InterestPaid ?? 0) + interestToApply, 2);
                         state.RemainingAmount -= interestToApply;
 
                         // Registrar el monto aplicado a intereses en el estado de distribución
@@ -207,7 +209,7 @@ namespace Credio.Core.Application.Services
                         var principalToApply = Math.Min(principalPending, state.RemainingAmount);
 
                         // Actualizamos la cuota
-                        schedule.PrincipalPaid = (schedule.PrincipalPaid ?? 0) + principalToApply;
+                        schedule.PrincipalPaid = Math.Round((schedule.PrincipalPaid ?? 0) + principalToApply, 2);
 
                         // Actualizamos el estado para descontar luego del LoanBalance
                         state.TotalPrincipalAppliedAmount += principalToApply;
@@ -217,7 +219,7 @@ namespace Credio.Core.Application.Services
                     #endregion
 
                     // Actualizar el monto pagado total de esta cuota para verificar si se ha pagado completamente
-                    schedule.PaidAmount = (schedule.PrincipalPaid ?? 0) + (schedule.InterestPaid ?? 0);
+                    schedule.PaidAmount = Math.Round((schedule.PrincipalPaid ?? 0) + (schedule.InterestPaid ?? 0), 2);
 
                     /// Si esta cuota ya está completamente pagada, marcarla como "Pagada"
                     if (schedule.PaidAmount >= schedule.DueAmount)
@@ -257,19 +259,37 @@ namespace Credio.Core.Application.Services
                 _logger.LogInformation("Iniciando reamortización por abono extraordinario para el préstamo {LoanId}", loan.Id);
 
                 var _pendingStatus = await _amortizationStatusRepository.GetByPropertyAsync(s => s.Name == "Pendiente");
+                var _paidStatus = await _amortizationStatusRepository.GetByPropertyAsync(s => s.Name == "Pagada");
 
                 // 1. Obtener el balance actual desde la cabecera (LoanBalance)
                 var loanBalance = loan.LoanBalance;
 
                 // 2. Calcular el nuevo capital que queda "vivo"
                 // Restamos lo que se pagó de capital en las cuotas exigibles + el sobrante que quedó en el state
-                decimal newPrincipalBase = Math.Max(0, (decimal)loanBalance.PrincipalBalance - (state.TotalPrincipalAppliedAmount + state.RemainingAmount));
-
+                decimal newPrincipalBase = Math.Max(0, Math.Round((decimal)loanBalance.PrincipalBalance - (state.TotalPrincipalAppliedAmount + state.RemainingAmount), 2));
+                
                 // 3. Identificar cuotas futuras a eliminar (solo las "Pendientes")
                 var futureSchedules = loan.AmortizationSchedules
                     .Where(s => s.AmortizationStatusId == _pendingStatus.Id && s.DueDate > DateOnly.FromDateTime(DateTime.Now))
                     .OrderBy(s => s.DueDate)
                     .ToList();
+
+                if (newPrincipalBase == 0)
+                {
+                    _logger.LogInformation("No se requiere reamortización para el préstamo {LoanId} ya que el nuevo capital base es 0", loan.Id);
+                    futureSchedules.ForEach(s =>
+                    {
+                        s.InterestPaid = s.InterestAmount;
+                        s.PrincipalPaid = s.PrincipalAmount;
+                        s.PaidAmount = s.DueAmount;
+                        s.AmortizationStatusId = _paidStatus.Id; // Marcamos como pagadas estas cuotas futuras, ya que no queda capital restante
+                    });
+
+                    // Actualizamos estas cuotas para reflejar que se pagaron completamente
+                    await _amortizationSchedulesRepository.UpdateManyAsync(futureSchedules);
+
+                    return; // No hay capital restante, por lo que no se necesita reamortizar
+                }
 
                 if (futureSchedules.Count > 0)
                 {
@@ -312,22 +332,23 @@ namespace Credio.Core.Application.Services
                 loanBalance.LastPaymentDate = DateTime.Now;
 
                 // Actualizar el balance de capital restando lo que se pagó de capital en las cuotas
-                loanBalance.PrincipalBalance = Math.Max(0, loanBalance.PrincipalBalance - (double)(state.TotalPrincipalAppliedAmount + state.RemainingAmount));
+                loanBalance.PrincipalBalance = Math.Max(0, Math.Round(loanBalance.PrincipalBalance - (double)(state.TotalPrincipalAppliedAmount + state.RemainingAmount), 2));
 
                 // Actualizar el balance de mora restando lo que se pagó de mora en las cuotas
                 if (loanBalance.LateFeeBalance > 0)
                 {
-                    loanBalance.LateFeeBalance = Math.Max(0, loanBalance.LateFeeBalance - (double)state.TotalLateFeeAppliedAmount);
+                    loanBalance.LateFeeBalance = Math.Max(0, Math.Round(loanBalance.LateFeeBalance - (double)state.TotalLateFeeAppliedAmount, 2));
 
                     if (loanBalance.LateFeeBalance == 0)
                     {
                         var activeStatus = await _loanStatusRepository.GetByPropertyAsync(s => s.Name == LoanStatuses.Active);
                         loan.LoanStatusId = activeStatus.Id;
+                        loanBalance.DaysInArrears = 0;
                     }
                 }
 
                 // Actualizar el balance pendiente
-                loanBalance.TotalOutstanding = loanBalance.PrincipalBalance + loanBalance.InterestBalance + loanBalance.LateFeeBalance;
+                loanBalance.TotalOutstanding = Math.Round(loanBalance.PrincipalBalance + loanBalance.InterestBalance + loanBalance.LateFeeBalance, 2);
 
                 // Actualizar el balance cuando se paga el capital completamente
                 if (loanBalance.PrincipalBalance <= 0)
@@ -336,6 +357,7 @@ namespace Credio.Core.Application.Services
                     loanBalance.InterestBalance = 0;
                     loanBalance.LateFeeBalance = 0;
                     loanBalance.TotalOutstanding = 0;
+                    loanBalance.DaysInArrears = 0;
                     var paidOffStatus = await _loanStatusRepository.GetByPropertyAsync(s => s.Name == LoanStatuses.Paid);
                     loan.LoanStatusId = paidOffStatus.Id;
                 }

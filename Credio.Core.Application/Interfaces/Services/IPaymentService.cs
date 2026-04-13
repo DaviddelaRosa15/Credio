@@ -8,6 +8,6 @@ namespace Credio.Core.Application.Interfaces.Services
     {
         Task<RegisterPaymentResponseDTO> GetPaymentReceiptSnapshotAsync(string paymentId);
         Task ProcessPaymentAsync(string loanId, Payment payment);
-        Task<Payment> RegisterInitialPaymentAsync(RegisterPaymentCommand command, int loanNumber);
+        Task<Payment> RegisterInitialPaymentAsync(RegisterPaymentCommand command, string collectorId, int loanNumber);
     }
 }
