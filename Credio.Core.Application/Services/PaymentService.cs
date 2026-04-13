@@ -334,6 +334,9 @@ namespace Credio.Core.Application.Services
                 // Actualizar el balance de capital restando lo que se pagó de capital en las cuotas
                 loanBalance.PrincipalBalance = Math.Max(0, Math.Round(loanBalance.PrincipalBalance - (double)(state.TotalPrincipalAppliedAmount + state.RemainingAmount), 2));
 
+                // Actualizar el balance de intereses restando lo que se pagó de intereses en las cuotas
+                loanBalance.InterestBalance = Math.Max(0, Math.Round(loanBalance.InterestBalance - (double)state.TotalInterestAppliedAmount, 2));
+
                 // Actualizar el balance de mora restando lo que se pagó de mora en las cuotas
                 if (loanBalance.LateFeeBalance > 0)
                 {
