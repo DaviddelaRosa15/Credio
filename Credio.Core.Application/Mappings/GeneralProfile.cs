@@ -249,6 +249,10 @@ namespace Credio.Core.Application.Mappings
                     opt => opt.MapFrom(src => src.ApplicationStatus.Name))
                 .ForMember(dest => dest.PaymentFrequency,
                     opt => opt.MapFrom(src => src.PaymentFrequency.Name));
+
+            CreateMap<LoanApplication, BotApplicationStatusDTO>()
+                .ForMember(dest => dest.StatusName, opt => opt.MapFrom(src => src.ApplicationStatus.Name))
+                .ForMember(dest => dest.LastUpdateDate, opt => opt.MapFrom(src => src.LastModified.HasValue ? DateOnly.FromDateTime(src.LastModified.Value) : (DateOnly?)null));
             #endregion
 
             #region SystemSettings
