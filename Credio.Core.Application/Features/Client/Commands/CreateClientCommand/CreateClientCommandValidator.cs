@@ -43,11 +43,15 @@ public class CreateClientCommandValidator : AbstractValidator<CreateClientComman
         
         RuleFor(command => command.HomeLatitude)
             .NotNull().WithMessage("The home latitude can't be null")
-            .NotEmpty().WithMessage("The home latitude id can't be empty");
-        
+            .InclusiveBetween(-90, 90)
+            .WithMessage("Latitude must be between -90 and 90")
+            .PrecisionScale(10, 8, false);
+
         RuleFor(command => command.HomeLongitude)
-            .NotNull().WithMessage("The home longitude id can't be null")
-            .NotEmpty().WithMessage("The home longitude can't be empty");
+            .NotNull().WithMessage("The home longitude can't be null")
+            .InclusiveBetween(-180, 180)
+            .WithMessage("Longitude must be between -180 and 180")
+            .PrecisionScale(10, 8, false);
         
         RuleFor(command => command.Email)
             .NotNull().WithMessage("The email can't be null")
