@@ -1,10 +1,12 @@
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Client;
+using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Dtos.Requests;
 using Credio.Core.Application.Features.Client.Queries.GetAll;
 using Credio.Core.Application.Features.Clients.Commands.CreateClientCommand;
 using Credio.Core.Application.Features.Clients.Commands.DeleteClientCommand;
 using Credio.Core.Application.Features.Clients.Queries;
+using Credio.Core.Application.Features.Loan.Queries.GetClientDashboardQuery;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -135,5 +137,23 @@ public class ClientController : ControllerBase
         return result.Match(
           onSuccess: () => CustomResult.Success(result),
           onFailure: CustomResult.Problem);
+    }
+   
+    [SwaggerOperation(
+       Summary = "Obtiene el dashboard del cliente segun el client id dado",
+       Description = "Obtiene el dashboard del cliente segun el client id dado"
+    )]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ClientDashboardResponseDTO))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    [Authorize(Roles = "Client")]
+    [HttpGet("{clientId}/dashboard")]
+    public async Task<IResult> GetClientDashboardByClientId(string clientId, CancellationToken cancellationToken = default)
+    {
+       Result<ClientDashboardResponseDTO> result = await _sender.Send(new GetClientDashboardQuery { ClientId = clientId }, cancellationToken);
+       
+       return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure:CustomResult.Problem);
     }
 }
