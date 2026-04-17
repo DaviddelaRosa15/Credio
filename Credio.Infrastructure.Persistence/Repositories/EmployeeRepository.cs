@@ -18,9 +18,17 @@ namespace Credio.Infrastructure.Persistence.Repositories
         {
             using var db = _dbContext.CreateDbContext();
 
-            // Obtener el último código de empleado registrado
-            var lastEmployee = db.Employee.Max(e => e.EmployeeCode);
-            int lastCode = string.IsNullOrEmpty(lastEmployee) ? 0 : int.Parse(lastEmployee.Replace("U", ""));
+            // 1. Ejecutamos el filtro básico en SQL y traemos los datos a memoria (ToListAsync)
+            var employeeCodes = await db.Employee
+                .Where(e => e.EmployeeCode != null && e.EmployeeCode.StartsWith("U"))
+                .Select(e => e.EmployeeCode)
+                .ToListAsync();
+
+            // 2. Ahora que los datos están en memoria (C#), hacemos la extracción y el Max()
+            var lastCode = employeeCodes
+                .Select(code => int.Parse(code.Substring(1)))
+                .DefaultIfEmpty(0)
+                .Max();
 
             return lastCode;
         }
