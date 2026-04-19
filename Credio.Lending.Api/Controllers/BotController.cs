@@ -2,6 +2,7 @@ using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Dtos.LoanApplication;
 using Credio.Core.Application.Dtos.LoanStatus;
+using Credio.Core.Application.Features.Loan.Queries.GetBotLoanDetailByNumberQuery;
 using Credio.Core.Application.Features.Loan.Queries.GetNextPaymentSummaryByDocumentQuery;
 using Credio.Core.Application.Features.LoanApplication.Queries.GetApplicationStatusForBotQuery;
 using Credio.Core.Application.Features.LoanStatus.Queries.GetLoanStatuses;
@@ -59,5 +60,23 @@ public class BotController : ControllerBase
         return result.Match(
             onSuccess: () => CustomResult.Success(result),
             onFailure:CustomResult.Problem);
+    }
+    
+    [SwaggerOperation(
+        Summary = "Consulta que devuelva el resumen general de un préstamo a partir de su número de identificación",
+        Description = "Consulta que devuelva el resumen general de un préstamo a partir de su número de identificación"
+    )]
+    [Authorize(Roles = "Administrator, Officer")]
+    [HttpGet("loans/{loanNumber}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BotLoanDetailDTO))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    public async Task<IResult> GetLoanDetailsByLoanNumber(int loanNumber, CancellationToken cancellationToken = default)
+    {
+        Result<BotLoanDetailDTO> result = await _sender.Send(new GetBotLoanDetailByNumberQuery { LoanNumber = loanNumber }, cancellationToken);
+        
+        return result.Match(
+            onSuccess: () => CustomResult.Success(result),
+            onFailure: CustomResult.Problem);
     }
 }
