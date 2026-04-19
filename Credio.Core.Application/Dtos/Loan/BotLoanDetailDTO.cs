@@ -10,7 +10,7 @@ public class BotLoanDetailDTO
 
     public double CurrentBalance { get; set; }
 
-    public DateOnly NextPaymentDate { get; set; }
+    public DateOnly? NextPaymentDate { get; set; }
 
-    public double NextPaymentAmount { get; set; }
+    public decimal? NextPaymentAmount { get; set; }
 }
