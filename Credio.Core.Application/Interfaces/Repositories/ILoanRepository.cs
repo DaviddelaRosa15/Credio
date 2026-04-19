@@ -29,4 +29,6 @@ public interface ILoanRepository : IGenericRepository<Loan>
     Task<List<ClientDashboardLoanDTO>> GetClientLoansOverviewByClientId(string clientId, CancellationToken cancellationToken = default);
     
     Task<(int, double, double)> GetClientLoanSummaryByClientIdAsync(string clientId, CancellationToken cancellationToken = default);
+
+    Task<BotLoanDetailDTO?> GetBotLoanDetailByLoanNumber(int loanNumber, CancellationToken cancellationToken = default);
 }

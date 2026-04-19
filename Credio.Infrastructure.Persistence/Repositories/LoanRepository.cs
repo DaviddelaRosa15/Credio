@@ -3,6 +3,7 @@ using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Domain.Entities;
 using Credio.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace Credio.Infrastructure.Persistence.Repositories;
 
@@ -270,5 +271,37 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         return result is null
             ? (0, 0, 0)
             : (result.ActiveLoans, result.TotalBorrowed, result.OutstandingBalance);
+    }
+
+    public async Task<BotLoanDetailDTO?> GetBotLoanDetailByLoanNumber(int loanNumber, CancellationToken cancellationToken = default)
+    {
+        using ApplicationContext context = _dbContext.CreateDbContext();
+
+        BotLoanDetailDTO? result = await context.Loan
+            .Include(x => x.LoanBalance)
+            .Include(x => x.LoanStatus)
+            .Include(x => x.AmortizationSchedules)
+            .Where(x => x.LoanNumber == loanNumber)
+            .Select(loan => new
+            {
+                loan,
+                nextPayment = loan.AmortizationSchedules
+                    .Where(s => s.AmortizationStatus.Description == "Pendiente")
+                    .OrderBy(s => s.DueDate)
+                    .FirstOrDefault()
+            })
+            .Select(x => new BotLoanDetailDTO
+            {
+                LoanNumber = x.loan.LoanNumber,
+                StatusName = x.loan.LoanStatus.Name,
+                OriginalAmount = x.loan.Amount,
+                CurrentBalance = x.loan.LoanBalance != null ? x.loan.LoanBalance.TotalOutstanding : 0,
+                NextPaymentDate = x.nextPayment != null ? x.nextPayment.DueDate : null,
+                NextPaymentAmount = x.nextPayment != null ? 
+                    x.nextPayment.DueAmount + (x.loan.LoanBalance != null ? (decimal)x.loan.LoanBalance.LateFeeBalance : 0) : 0
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return result;
     }
 }
