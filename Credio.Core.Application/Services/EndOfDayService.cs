@@ -8,6 +8,7 @@ using Credio.Core.Domain.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Credio.Core.Application.Services
 {
@@ -97,8 +98,11 @@ namespace Credio.Core.Application.Services
 
                     try
                     {
+                        // Obteniendo el estado de amortización que corresponde a "Pagada"
+                        var statusPaid = await _amortizationStatusRepository.GetByPropertyAsync(s => s.Name.Equals("Pagada"));
+
                         // Obteniendo los prestamos que tienen cuotas vencidas para el dia de hoy
-                        var overdueLoans = await _loanRepository.GetAllByPropertyWithIncludeAsync(l => l.AmortizationSchedules.Any(a => a.DueDate < today),
+                        var overdueLoans = await _loanRepository.GetAllByPropertyWithIncludeAsync(l => l.AmortizationSchedules.Any(a => a.DueDate < today && a.AmortizationStatusId != statusPaid.Id),
                             [l => l.AmortizationSchedules]);
                         _logger.LogInformation($"Se encontraron {overdueLoans.Count} prestamos con cuotas vencidas para el dia de hoy ({today})");
 
@@ -221,6 +225,7 @@ namespace Credio.Core.Application.Services
                         try
                         {
                             decimal totalLateFees = 0;
+                            decimal totalInterest = 0;
 
                             // Procesar cada cuota del préstamo para verificar si se encuentra vencida y calcular los intereses moratorios correspondientes
                             foreach (var schedule in item.Loan.AmortizationSchedules.Where(a => (a.DueDate.AddDays(gracePeriod) < today) && a.AmortizationStatusId != statusPaid.Id))
@@ -279,14 +284,22 @@ namespace Credio.Core.Application.Services
                                     // Se acumulan los intereses moratorios totales para el préstamo
                                     totalLateFees += lateFeeTotal;
 
+                                    // Se actualiza el balance de interes del préstamo
+                                    totalInterest += schedule.InterestAmount;
+
                                     // Se actualiza el número de días en mora para el préstamo con la diferencia en días calculada
                                     item.Loan.LoanBalance.DaysInArrears += diffDays;
                                 }
                             }
 
+                            // Actualización del balance de interes del préstamo
+                            item.Loan.LoanBalance.InterestBalance += (double)totalInterest;
+
                             // Actualización del balance del préstamo con los intereses moratorios generados en el proceso de COB
                             item.Loan.LoanBalance.LateFeeBalance += (double)totalLateFees;
-                            item.Loan.LoanBalance.TotalOutstanding += (double)totalLateFees;
+
+                            // Actualización del balance total del préstamo
+                            item.Loan.LoanBalance.TotalOutstanding += (double)(totalLateFees + totalInterest);
 
                             // Actualización del estado del préstamo a "En Mora" si se generaron intereses moratorios en el proceso de COB
                             item.Loan.LoanStatusId = statusInArrears.Id;
