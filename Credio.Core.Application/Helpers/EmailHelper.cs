@@ -1,5 +1,6 @@
 ﻿using Credio.Core.Application.Dtos.CoreConfiguration;
 using Credio.Core.Application.Dtos.Email;
+using Credio.Core.Application.Dtos.Payment;
 using Credio.Core.Application.Interfaces.Helpers;
 using Credio.Core.Application.Interfaces.Services;
 
@@ -126,6 +127,18 @@ namespace Credio.Core.Application.Helpers
                 { "ProcessedCount", notification.ProcessedCount.ToString() },
                 { "ProcessName", notification.ProcessName },
                 { "TechnicalDetails", notification.TechnicalDetails }
+            });
+        }
+
+        public string MakeEmailForPaymentNotifications(PaymentNotificationDTO notification)
+        {
+            return _service.RenderTemplate("PaymentReceipt", new Dictionary<string, string>
+            {
+                { "ClientName", notification.ClientName },
+                { "LoanNumber", notification.LoanNumber.ToString() },
+                { "PaymentDate", notification.PaymentDate.ToString() },
+                { "PaidAmount", $"RD$ {notification.AmountPaid:N2}" },
+                { "RemainingBalance", $"RD$ {notification.RemainingBalance:N2}" }
             });
         }
     }
