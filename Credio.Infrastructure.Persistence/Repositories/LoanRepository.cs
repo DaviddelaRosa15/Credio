@@ -3,6 +3,7 @@ using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Domain.Entities;
 using Credio.Infrastructure.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace Credio.Infrastructure.Persistence.Repositories;
 
@@ -218,5 +219,89 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
             Summary = summary,
             Items = items,
         };
+    }
+
+    public async Task<List<ClientDashboardLoanDTO>> GetClientLoansOverviewByClientId(string clientId, CancellationToken cancellationToken = default)
+    {
+        using ApplicationContext context = _dbContext.CreateDbContext();
+        
+        return await context.Loan
+            .Where(l => l.Client.Id == clientId && l.LoanStatus.Description == "Activo")
+            .Select(l => new ClientDashboardLoanDTO
+            {
+                LoanNumber = l.LoanNumber,
+                Amount = l.Amount,
+                LoanStatus = l.LoanStatus.Name,
+                DisbursedDate = l.DisbursedDate,
+                OutstandingBalance = l.LoanBalance != null ? l.LoanBalance.TotalOutstanding : 0,
+                NextPayment = l.AmortizationSchedules
+                    .Where(s => s.AmortizationStatus.Description == "Pendiente")
+                    .OrderBy(s => s.DueDate)
+                    .Select(s => s.DueDate) 
+                    .FirstOrDefault(),
+               MonthlyFee = l.AmortizationSchedules
+                   .Where(s => s.AmortizationStatus.Description == "Pendiente")
+                   .OrderBy(s => s.DueDate)
+                   .Select(s => s.DueAmount) 
+                   .FirstOrDefault(),
+               FeesPaid = l.AmortizationSchedules.Count(x => x.AmortizationStatus.Description == "Pagada"),
+               TotalFees = l.AmortizationSchedules.Count,
+            })
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<(int, double, double)> GetClientLoanSummaryByClientIdAsync(string clientId, CancellationToken cancellationToken = default)
+    {
+        using ApplicationContext context = _dbContext.CreateDbContext();
+
+        var result = await context.Loan
+            .Include(x => x.LoanBalance)
+            .Where(x => x.Client.Id == clientId && x.LoanStatus.Description == "Activo")
+            .AsNoTracking()
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                ActiveLoans = g.Count(),
+                TotalBorrowed = g.Sum(x => x.Amount),
+                OutstandingBalance = g.Sum(x => x.LoanBalance != null ? x.LoanBalance.TotalOutstanding : 0)
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+        
+        return result is null
+            ? (0, 0, 0)
+            : (result.ActiveLoans, result.TotalBorrowed, result.OutstandingBalance);
+    }
+
+    public async Task<BotLoanDetailDTO?> GetBotLoanDetailByLoanNumber(int loanNumber, CancellationToken cancellationToken = default)
+    {
+        using ApplicationContext context = _dbContext.CreateDbContext();
+
+        BotLoanDetailDTO? result = await context.Loan
+            .Include(x => x.LoanBalance)
+            .Include(x => x.LoanStatus)
+            .Include(x => x.AmortizationSchedules)
+            .Where(x => x.LoanNumber == loanNumber)
+            .Select(loan => new
+            {
+                loan,
+                nextPayment = loan.AmortizationSchedules
+                    .Where(s => s.AmortizationStatus.Description == "Pendiente")
+                    .OrderBy(s => s.DueDate)
+                    .FirstOrDefault()
+            })
+            .Select(x => new BotLoanDetailDTO
+            {
+                LoanNumber = x.loan.LoanNumber,
+                StatusName = x.loan.LoanStatus.Name,
+                OriginalAmount = x.loan.Amount,
+                CurrentBalance = x.loan.LoanBalance != null ? x.loan.LoanBalance.TotalOutstanding : 0,
+                NextPaymentDate = x.nextPayment != null ? x.nextPayment.DueDate : null,
+                NextPaymentAmount = x.nextPayment != null ? 
+                    x.nextPayment.DueAmount + (x.loan.LoanBalance != null ? (decimal)x.loan.LoanBalance.LateFeeBalance : 0) : 0
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return result;
     }
 }

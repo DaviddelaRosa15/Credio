@@ -23,7 +23,11 @@ public class AmortizationSchedule : AuditableBaseEntity
 
     public decimal PrincipalAmount { get; set; } 
 
-    public decimal RemainingBalance { get; set; } 
+    public decimal RemainingBalance { get; set; }
+
+    public decimal? PrincipalPaid { get; set; }
+
+    public decimal? InterestPaid { get; set; }
 
     public decimal? PaidAmount { get; set; } 
 
