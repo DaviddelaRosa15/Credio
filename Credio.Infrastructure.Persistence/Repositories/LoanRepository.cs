@@ -226,7 +226,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         using ApplicationContext context = _dbContext.CreateDbContext();
         
         return await context.Loan
-            .Where(l => l.Client.Id == clientId && l.LoanStatus.Description == "Activo")
+            .Where(l => l.Client.Id == clientId && (l.LoanStatus.Description == "Activo" || l.LoanStatus.Description == "En mora"))
             .Select(l => new ClientDashboardLoanDTO
             {
                 LoanNumber = l.LoanNumber,
