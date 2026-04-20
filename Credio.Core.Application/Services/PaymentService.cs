@@ -112,8 +112,9 @@ namespace Credio.Core.Application.Services
                 payment.PaymentStatusId = completeStatus.Id;
 
                 // 6. Registrar el evento de pago realizado
+                var principalApplied = result.TotalPrincipalAppliedAmount + result.RemainingAmount;
                 payment.AddEvent(new PaymentRegisteredEvent(payment.Id, result.TotalInterestAppliedAmount,
-                    result.TotalLateFeeAppliedAmount, result.TotalPrincipalAppliedAmount));
+                    result.TotalLateFeeAppliedAmount, principalApplied));
 
                 await _paymentRepository.UpdateAsync(payment);
             }
