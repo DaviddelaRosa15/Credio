@@ -5,7 +5,6 @@
         // Datos de Identificación y Auditoría
         public string PaymentId { get; set; }
         public string ReceiptNumber { get; set; }
-        public DateOnly PaymentDate { get; set; }
 
         // Información del Cliente y Préstamo
         public string ClientName { get; set; }
