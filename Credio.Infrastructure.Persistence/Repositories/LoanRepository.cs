@@ -257,7 +257,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
 
         var result = await context.Loan
             .Include(x => x.LoanBalance)
-            .Where(x => x.Client.Id == clientId && x.LoanStatus.Description == "Activo")
+            .Where(x => x.Client.Id == clientId && (x.LoanStatus.Description == "Activo" || x.LoanStatus.Description == "En mora"))
             .AsNoTracking()
             .GroupBy(_ => 1)
             .Select(g => new
