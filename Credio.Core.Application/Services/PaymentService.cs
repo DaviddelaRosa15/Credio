@@ -5,6 +5,7 @@ using Credio.Core.Application.Features.Payment.Commands.RegisterPayment;
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Application.Interfaces.Services;
 using Credio.Core.Domain.Entities;
+using Credio.Core.Domain.Events;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -109,6 +110,12 @@ namespace Credio.Core.Application.Services
 
                 //5. Marcar el pago como "Completado"
                 payment.PaymentStatusId = completeStatus.Id;
+
+                // 6. Registrar el evento de pago realizado
+                var principalApplied = result.TotalPrincipalAppliedAmount + result.RemainingAmount;
+                payment.AddEvent(new PaymentRegisteredEvent(payment.Id, result.TotalInterestAppliedAmount,
+                    result.TotalLateFeeAppliedAmount, principalApplied));
+
                 await _paymentRepository.UpdateAsync(payment);
             }
             catch
