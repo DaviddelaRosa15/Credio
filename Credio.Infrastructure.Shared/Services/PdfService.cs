@@ -34,7 +34,7 @@ namespace Credio.Infrastructure.Shared.Services
                         row.RelativeItem().PaddingLeft(15).Column(col =>
                         {
                             col.Item().Text("Comprobante de Desembolso").FontSize(20).FontColor(Colors.White).SemiBold();
-                            col.Item().Text(data.EffectiveDate.ToString()).FontSize(10).FontColor(Colors.White);
+                            col.Item().Text(data.EffectiveDate.ToString("D")).FontSize(10).FontColor(Colors.White);
                         });
 
                         row.ConstantItem(100).AlignRight().Column(loanCol => {
