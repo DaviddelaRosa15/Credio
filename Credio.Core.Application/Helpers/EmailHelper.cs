@@ -1,5 +1,6 @@
 ﻿using Credio.Core.Application.Dtos.CoreConfiguration;
 using Credio.Core.Application.Dtos.Email;
+using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Dtos.Payment;
 using Credio.Core.Application.Interfaces.Helpers;
 using Credio.Core.Application.Interfaces.Services;
@@ -104,6 +105,17 @@ namespace Credio.Core.Application.Helpers
                 { "DaysOverdue", notification.DaysOverdue.ToString() },
                 { "LoanNumber", notification.LoanNumber.ToString() },
                 { "TotalDue", $"RD$ {notification.TotalDue:N2}" }
+            });
+        }
+
+        public string MakeEmailForLoanDisbursement(DisburseLoanNotificationDTO notification)
+        {
+            return _service.RenderTemplate("LoanDisbursement", new Dictionary<string, string>
+            {
+                { "ClientName", notification.ClientName },
+                { "LoanNumber", notification.LoanNumber.ToString() },
+                { "DisbursementDate", notification.EffectiveDate.ToString() },
+                { "DisbursedAmount", $"RD$ {notification.LoanAmount:N2}" }
             });
         }
 
