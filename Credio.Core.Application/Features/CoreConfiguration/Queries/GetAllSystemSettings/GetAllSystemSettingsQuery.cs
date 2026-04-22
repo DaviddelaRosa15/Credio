@@ -11,7 +11,6 @@ namespace Credio.Core.Application.Features.CoreConfiguration.Queries.GetAllSyste
 {
     public class GetAllSystemSettingsQuery : IQuery<List<SystemSettingDTO>>
     {
-        public string DocumentNumber { get; set; } = null!;
     }
 
     public class GetAllSystemSettingsQueryHandler : IQueryHandler<GetAllSystemSettingsQuery, List<SystemSettingDTO>>
