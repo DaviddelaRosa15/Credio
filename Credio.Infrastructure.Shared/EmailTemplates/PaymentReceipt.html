@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Credio - Confirmación de Pago Recibido</title>
+</head>
+
+<body style="
+      margin: 0;
+      padding: 0;
+      background-color: #f0f4ee;
+      font-family: Arial, sans-serif;
+    ">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f0f4ee; padding: 30px 0">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="
+              background-color: #ffffff;
+              border-radius: 16px;
+              overflow: hidden;
+              box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            ">
+                    <tr>
+                        <td style="
+                  background: linear-gradient(
+                    135deg,
+                    #6b7a3a 0%,
+                    #5a6830 60%,
+                    #47542a 100%
+                  );
+                  padding: 40px 32px 44px 32px;
+                ">
+                            <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+                                <tr>
+                                    <td style="padding-right: 12px">
+                                        <img style="
+                            height: 48px;
+                            width: 48px;
+                            background: white;
+                            border-radius: 8px;
+                            padding: 4px;
+                          " src="cid:logoCid" alt="Credio Logo" />
+                                    </td>
+                                    <td>
+                                        <div
+                                            style="color: #ffffff; font-size: 22px; font-weight: bold; line-height: 1.2;">
+                                            Credio
+                                        </div>
+                                        <div
+                                            style="color: #b8bf88; font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;">
+                                            Préstamos & Crédito
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <h2 style="margin: 0 0 8px 0; font-size: 26px; font-weight: bold; color: #ffffff;">
+                                ✅ Pago Recibido
+                            </h2>
+                            <p style="margin: 0; font-size: 14px; color: #c8cca0; line-height: 1.5;">
+                                Su transacción ha sido procesada exitosamente
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 40px 36px; color: #333333">
+                            <p style="font-size: 18px; font-weight: bold; margin: 0 0 16px 0; color: #222;">
+                                Estimado(a) <span style="color: #6b7a3a">{{ClientName}}</span>,
+                            </p>
+                            <p
+                                style="font-size: 14px; line-height: 1.7; color: #555; margin: 0 0 24px 0; text-align: justify;">
+                                Le informamos que hemos recibido su pago en la fecha indicada. Agradecemos su puntualidad, lo cual contribuye a mantener un excelente historial crediticio con nosotros. A continuación, le presentamos el resumen de la transacción.
+                            </p>
+
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="
+                    background-color: #f7f8f0;
+                    border: 1px solid #d6dcb8;
+                    border-radius: 12px;
+                    margin-bottom: 24px;
+                  ">
+                                <tr>
+                                    <td style="padding: 18px 24px 12px 24px">
+                                        <span
+                                            style="font-size: 11px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; color: #8a9a50;">
+                                            🧾 Detalles del Pago
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0 24px">
+                                        <hr style="border: none; border-top: 1px solid #dde0c8; margin: 0;" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding: 14px 24px">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="font-size: 13px; color: #777;">Número de Préstamo</td>
+                                                <td align="right"
+                                                    style="font-size: 14px; font-weight: bold; color: #333;">
+                                                    {{LoanNumber}}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0 24px">
+                                        <hr style="border: none; border-top: 1px solid #dde0c8; margin: 0;" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding: 14px 24px">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="font-size: 13px; color: #777;">Fecha y Hora</td>
+                                                <td align="right"
+                                                    style="font-size: 14px; font-weight: bold; color: #333;">
+                                                    {{PaymentDate}}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0 24px">
+                                        <hr style="border: none; border-top: 1px solid #dde0c8; margin: 0;" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding: 14px 24px">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="font-size: 13px; color: #777;">Monto Pagado</td>
+                                                <td align="right"
+                                                    style="font-size: 16px; font-weight: bold; color: #6b7a3a;">
+                                                    {{PaidAmount}}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 0 24px">
+                                        <hr style="border: none; border-top: 1px solid #dde0c8; margin: 0;" />
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="padding: 16px 24px 20px 24px">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="font-size: 14px; color: #333; font-weight: bold;">Nuevo Saldo Pendiente</td>
+                                                <td align="right"
+                                                    style="font-size: 16px; font-weight: bold; color: #333;">
+                                                    {{RemainingBalance}}</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="
+                    background-color: #f0f7f4;
+                    border-left: 4px solid #6b7a3a;
+                    border-radius: 0 8px 8px 0;
+                    margin-bottom: 28px;
+                  ">
+                                <tr>
+                                    <td
+                                        style="padding: 16px 20px; font-size: 13px; color: #4a5928; line-height: 1.7; text-align: justify;">
+                                        <strong>📄 Comprobante Oficial:</strong><br />
+                                        Hemos adjuntado el recibo detallado en formato PDF a este correo. También puede visualizar su progreso y próximos vencimientos abriendo su <strong>Aplicación de Credio</strong>.
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p
+                                style="font-size: 12px; color: #9aaa72; text-align: center; margin: 0; line-height: 1.6;">
+                                Si tiene alguna duda sobre esta transacción, no dude en contactarnos.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td
+                            style="background-color: #f7f8f0; padding: 24px 36px; text-align: center; border-top: 1px solid #e8edd8;">
+                            <p style="font-size: 12px; color: #8a9a50; margin: 0 0 8px 0; font-weight: bold;">
+                                Atentamente,<br />
+                                Departamento de Cobros - Credio
+                            </p>
+                            <p style="font-size: 11px; color: #b8c090; margin: 0">
+                                © 2026 Credio - Sistema de Préstamos y Crédito. Todos los derechos reservados.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

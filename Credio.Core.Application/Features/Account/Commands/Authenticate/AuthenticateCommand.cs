@@ -18,12 +18,12 @@ namespace Credio.Core.Application.Features.Account.Commands.Authenticate
 
 	public class AuthenticateCommandHandler : ICommandHandler<AuthenticateCommand, AuthenticationResponse>
 	{
-		private readonly IAccountService _accountService;
+		private readonly IAuthService _authService;
 		private readonly IMapper _mapper;
 
-		public AuthenticateCommandHandler(IAccountService accountService, IMapper mapper)
+		public AuthenticateCommandHandler(IAuthService authService, IMapper mapper)
 		{
-			_accountService = accountService;
+			_authService = authService;
 			_mapper = mapper;
 		}
 
@@ -34,7 +34,7 @@ namespace Credio.Core.Application.Features.Account.Commands.Authenticate
 			try
 			{
                 var request = _mapper.Map<AuthenticationRequest>(command);
-                var response = await _accountService.AuthenticateAsync(request);
+                var response = await _authService.AuthenticateAsync(request);
 
                 if (response.HasError)
                 {

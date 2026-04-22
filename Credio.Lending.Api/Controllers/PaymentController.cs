@@ -1,6 +1,7 @@
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Payment;
 using Credio.Core.Application.Features.Payment.Commands.RegisterPayment;
+using Credio.Core.Application.Features.Payment.Queries.GetPaymentSearch;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -35,6 +36,24 @@ public class PaymentController : ControllerBase
     {
         Result<RegisterPaymentResponseDTO> result = await _sender.Send(command, cancellationToken);
 
+        return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure: CustomResult.Problem);
+    }
+
+    [Authorize(Roles = "Collector, Officer, Administrator")]
+    [HttpGet("search")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<PaymentSearchDTO>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    [SwaggerOperation(
+        Summary = "Buscar cuotas pendientes",
+        Description = "Búsqueda de cuotas pendientes de pago para que el usuario pueda visualizar y gestionar los pagos pendientes."
+    )]
+    public async Task<IResult> SearchPendingPayments([FromQuery] GetPaymentSearchQuery query, CancellationToken cancellationToken)
+    {
+        Result<List<PaymentSearchDTO>> result = await _sender.Send(query, cancellationToken);
         return result.Match(
           onSuccess: () => CustomResult.Success(result),
           onFailure: CustomResult.Problem);

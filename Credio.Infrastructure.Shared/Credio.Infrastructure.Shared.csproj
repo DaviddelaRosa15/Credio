@@ -10,6 +10,7 @@
 		<PackageReference Include="MailKit"/>
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
 		<PackageReference Include="MimeKit"/>
+		<PackageReference Include="QuestPDF"/>
 	</ItemGroup>
 
 	<ItemGroup>

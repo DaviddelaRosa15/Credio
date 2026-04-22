@@ -54,17 +54,6 @@ namespace Credio.Interface.Authentication.Controllers
         [Consumes(MediaTypeNames.Application.Json)]
         public async Task<IResult> Authenticate([FromBody] AuthenticateCommand command, CancellationToken cancellationToken)
         {
-            /*
-            string jsonString = JsonSerializer.Serialize(command, new JsonSerializerOptions
-            {
-                WriteIndented = true // Optional: for pretty-printing
-            });
-
-            // Log the JSON string
-            _logger.LogInformation("Object as JSON: {JsonString}", jsonString);
-            var response = await Mediator.Send(command);
-            */
-
             Result<AuthenticationResponse> result = await _sender.Send(command, cancellationToken);
 
             if (result.IsSuccess)

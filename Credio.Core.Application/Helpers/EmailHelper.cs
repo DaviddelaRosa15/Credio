@@ -1,5 +1,7 @@
 ﻿using Credio.Core.Application.Dtos.CoreConfiguration;
 using Credio.Core.Application.Dtos.Email;
+using Credio.Core.Application.Dtos.Loan;
+using Credio.Core.Application.Dtos.Payment;
 using Credio.Core.Application.Interfaces.Helpers;
 using Credio.Core.Application.Interfaces.Services;
 
@@ -106,6 +108,17 @@ namespace Credio.Core.Application.Helpers
             });
         }
 
+        public string MakeEmailForLoanDisbursement(DisburseLoanNotificationDTO notification)
+        {
+            return _service.RenderTemplate("LoanDisbursement", new Dictionary<string, string>
+            {
+                { "ClientName", notification.ClientName },
+                { "LoanNumber", notification.LoanNumber.ToString() },
+                { "DisbursementDate", notification.EffectiveDate.ToString() },
+                { "DisbursedAmount", $"RD$ {notification.LoanAmount:N2}" }
+            });
+        }
+
         public string MakeEmailForReset(string fullName, string code)
         {
             return _service.RenderTemplate("ConfirmationCode", new Dictionary<string, string>
@@ -126,6 +139,18 @@ namespace Credio.Core.Application.Helpers
                 { "ProcessedCount", notification.ProcessedCount.ToString() },
                 { "ProcessName", notification.ProcessName },
                 { "TechnicalDetails", notification.TechnicalDetails }
+            });
+        }
+
+        public string MakeEmailForPaymentNotifications(PaymentNotificationDTO notification)
+        {
+            return _service.RenderTemplate("PaymentReceipt", new Dictionary<string, string>
+            {
+                { "ClientName", notification.ClientName },
+                { "LoanNumber", notification.LoanNumber.ToString() },
+                { "PaymentDate", notification.PaymentDate.ToString() },
+                { "PaidAmount", $"RD$ {notification.AmountPaid:N2}" },
+                { "RemainingBalance", $"RD$ {notification.RemainingBalance:N2}" }
             });
         }
     }

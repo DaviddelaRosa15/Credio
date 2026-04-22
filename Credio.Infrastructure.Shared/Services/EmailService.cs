@@ -40,6 +40,16 @@ namespace Credio.Infrastructure.Shared.Services
                     image.ContentDisposition = new ContentDisposition(ContentDisposition.Inline);
                 }
 
+                // Lógica para procesar los adjuntos
+                if (request.Attachments != null && request.Attachments.Any())
+                {
+                    foreach (var attachment in request.Attachments)
+                    {
+                        // Agregamos el arreglo de bytes como un adjunto
+                        builder.Attachments.Add(attachment.FileName, attachment.Content, MimeKit.ContentType.Parse(attachment.ContentType));
+                    }
+                }
+
                 email.Body = builder.ToMessageBody();
 
                 using var smtp = new SmtpClient();

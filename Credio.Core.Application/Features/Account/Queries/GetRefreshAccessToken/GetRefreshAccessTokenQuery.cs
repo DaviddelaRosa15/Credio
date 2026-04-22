@@ -14,12 +14,12 @@ namespace Credio.Core.Application.Features.Account.Queries.GetRefreshAccessToken
 	public class GetRefreshAccessTokenQueryHandler : IRequestHandler<GetRefreshAccessTokenQuery, RefreshTokenResponse>
 	{
 
-		private readonly IAccountService _accountService;
+		private readonly ITokenService _tokenService;
         private readonly JWTSettings _jwtSettings;
 
-		public GetRefreshAccessTokenQueryHandler(IAccountService accountService, IOptions<JWTSettings> jwtSettings)
+		public GetRefreshAccessTokenQueryHandler(ITokenService tokenService, IOptions<JWTSettings> jwtSettings)
 		{
-			_accountService = accountService;
+			_tokenService = tokenService;
 			_jwtSettings = jwtSettings.Value;
 		}
 
@@ -27,7 +27,7 @@ namespace Credio.Core.Application.Features.Account.Queries.GetRefreshAccessToken
 		{
 			RefreshTokenResponse response = new();
 
-			var result = _accountService.ValidateRefreshToken();
+			var result = _tokenService.ValidateRefreshToken();
 
 			if(result.Contains("Error") || result == "")
 			{
@@ -36,7 +36,7 @@ namespace Credio.Core.Application.Features.Account.Queries.GetRefreshAccessToken
 				return response;
 			}
 
-			var refresh = await _accountService.GenerateJWToken(result);
+			var refresh = await _tokenService.GenerateJWToken(result);
 			response.JWToken = refresh;
             response.ExpiresIn = (_jwtSettings.DurationInMinutes * 60).ToString();
             response.ExpiresAt = DateTime.Now.AddMinutes(_jwtSettings.DurationInMinutes);

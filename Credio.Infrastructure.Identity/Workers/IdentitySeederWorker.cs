@@ -1,3 +1,4 @@
+using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Infrastructure.Identity.Entities;
 using Credio.Infrastructure.Identity.Seeds;
 using Credio.Infrastructure.Shared;
@@ -22,9 +23,11 @@ public class IdentitySeederWorker: BaseWorker<IdentitySeederWorker>
     {
         using IServiceScope scope = _scopeFactory.CreateScope();
 
+        // Resolve the required services from the scope
         UserManager<ApplicationUser> userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
         RoleManager<IdentityRole> roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        IClientRepository clientRepository = scope.ServiceProvider.GetRequiredService<IClientRepository>();
+        IDocumentTypeRepository documentTypeRepository = scope.ServiceProvider.GetRequiredService<IDocumentTypeRepository>();
 
         // TODO: Uncomment when roles are ready
         // This will enable automatic seeding on startup.
@@ -42,7 +45,7 @@ public class IdentitySeederWorker: BaseWorker<IdentitySeederWorker>
         if (!userManager.Users.Any())
         {
             _logger.LogInformation("Users doesn't exist. Seeding.");
-            await DefaultSuperAdminUser.SeedAsync(userManager, roleManager);
+            await DefaultSuperAdminUser.SeedAsync(userManager, clientRepository, documentTypeRepository);
         }
         else
         {
