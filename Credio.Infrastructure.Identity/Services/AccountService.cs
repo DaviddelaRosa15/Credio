@@ -18,73 +18,21 @@ namespace Credio.Infrastructure.Identity.Services
     {
 
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailService _emailService;
-        private readonly ITokenService _tokenService;
         IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<AccountService> _logger;
 
         public AccountService(
               UserManager<ApplicationUser> userManager,
-              SignInManager<ApplicationUser> signInManager,
               IEmailService emailService,
-              ITokenService tokenService,
               IHttpContextAccessor httpContextAccessor,
               ILogger<AccountService> logger
             )
         {
             _userManager = userManager;
-            _signInManager = signInManager;
             _emailService = emailService;
-            _tokenService = tokenService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
-        }
-
-        public async Task<AuthenticationResponse> AuthenticateAsync(AuthenticationRequest request)
-        {
-            AuthenticationResponse response = new();
-            try
-            {
-                var user = await _userManager.FindByNameAsync(request.UserName);
-                if (user == null)
-                {
-                    response.HasError = true;
-                    response.Error = $"Usuario o contraseña inválidos";
-                    return response;
-                }
-
-                var isConfirmed = await _userManager.IsEmailConfirmedAsync(user);
-                if (!isConfirmed)
-                {
-                    response.HasError = true;
-                    response.Error = "El usuario no ha confirmado su cuenta. Revise su correo electrónico";
-                    return response;
-                }
-
-                var result = await _signInManager.PasswordSignInAsync(user.UserName, request.Password, false, lockoutOnFailure: false);
-                if (!result.Succeeded)
-                {
-                    response.HasError = true;
-                    response.Error = $"Usuario o contraseña inválidos";
-                    return response;
-                }
-
-                response.JWToken = await _tokenService.GenerateJWToken(user.Id);
-                response.ExpiresIn = (_tokenService.JwtDurationInMinutes * 60).ToString();
-                response.ExpiresAt = DateTime.Now.AddMinutes(_tokenService.JwtDurationInMinutes);
-                response.RefreshToken = _tokenService.GenerateRefreshToken(user.Id);
-                response.RefreshExpiresIn = (_tokenService.RefreshDurationInMinutes * 60).ToString();
-                response.RefreshExpiresAt = DateTime.Now.AddMinutes(_tokenService.RefreshDurationInMinutes);
-
-                _logger.LogInformation("Inicio de sesión finalizado correctamente");
-                return response;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Un error ocurrió tratando de autenticar al usuario");
-                throw;
-            }
         }
 
         public async Task<RegisterResponse> RegisterEmployeeAsync(RegisterRequest request, Roles role)
