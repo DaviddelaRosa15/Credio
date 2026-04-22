@@ -1,4 +1,5 @@
 using Credio.Core.Application.Dtos.Loan;
+using Credio.Core.Application.Dtos.Payment;
 using Credio.Core.Application.Interfaces.Repositories;
 using Credio.Core.Domain.Entities;
 using Credio.Infrastructure.Persistence.Contexts;
@@ -301,6 +302,45 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
                     x.nextPayment.DueAmount + (x.loan.LoanBalance != null ? (decimal)x.loan.LoanBalance.LateFeeBalance : 0) : 0
             })
             .FirstOrDefaultAsync(cancellationToken);
+
+        return result;
+    }
+
+    public async Task<List<PaymentSearchDTO>> SearchLoansForPaymentAsync(string? searchTerm, CancellationToken cancellationToken = default)
+    {
+        using ApplicationContext db = _dbContext.CreateDbContext();
+
+        IQueryable<Loan> query = db.Loan
+            .Include(x => x.LoanStatus)
+            .Include(x => x.LoanBalance)
+            .Include(x => x.Client)
+            .Include(x => x.AmortizationSchedules)
+                .ThenInclude(x => x.AmortizationStatus)
+            .Where(predicate =>
+                (predicate.LoanStatus.Name == "Activo" || predicate.LoanStatus.Name == "En mora") &&
+                (
+                    string.IsNullOrEmpty(searchTerm) ||
+                    predicate.Client.FirstName.Contains(searchTerm) ||
+                    predicate.Client.LastName.Contains(searchTerm) ||
+                    predicate.LoanNumber.ToString().Contains(searchTerm) ||
+                    predicate.Client.DocumentNumber.Contains(searchTerm)
+                ))
+            .AsNoTracking();
+
+        var result = await query
+            .SelectMany(x => x.AmortizationSchedules, (loan, schedule) => new { loan, schedule })
+            .Where(x => x.schedule.DueDate <= DateOnly.FromDateTime(DateTime.Today).AddDays(7) && x.schedule.AmortizationStatus.Description != "Pagada")
+            .Select(x => new PaymentSearchDTO
+            {
+                DueDate = x.schedule.DueDate,
+                FullName = x.loan.Client.FirstName + " " + x.loan.Client.LastName,
+                InstallmentNumber = x.schedule.InstallmentNumber,
+                InstallmentStatus = x.schedule.AmortizationStatus.Description,
+                LoanNumber = x.loan.LoanNumber,
+                TotalDueAmount = x.schedule.DueAmount + (x.loan.LoanBalance != null ? (decimal)x.loan.LoanBalance.LateFeeBalance : 0)
+            })
+            .OrderBy(x => x.DueDate)
+            .ToListAsync(cancellationToken);
 
         return result;
     }

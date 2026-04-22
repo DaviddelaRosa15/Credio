@@ -1,4 +1,5 @@
 using Credio.Core.Application.Dtos.Loan;
+using Credio.Core.Application.Dtos.Payment;
 using Credio.Core.Domain.Entities;
 
 namespace Credio.Core.Application.Interfaces.Repositories;
@@ -31,4 +32,6 @@ public interface ILoanRepository : IGenericRepository<Loan>
     Task<(int, double, double)> GetClientLoanSummaryByClientIdAsync(string clientId, CancellationToken cancellationToken = default);
 
     Task<BotLoanDetailDTO?> GetBotLoanDetailByLoanNumber(int loanNumber, CancellationToken cancellationToken = default);
+
+    Task<List<PaymentSearchDTO>> SearchLoansForPaymentAsync(string? searchTerm, CancellationToken cancellationToken = default);
 }
