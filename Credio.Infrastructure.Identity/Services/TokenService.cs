@@ -1,4 +1,6 @@
-﻿using Credio.Core.Application.Interfaces.Services;
+﻿using Credio.Core.Application.Enums;
+using Credio.Core.Application.Interfaces.Repositories;
+using Credio.Core.Application.Interfaces.Services;
 using Credio.Core.Domain.Settings;
 using Credio.Infrastructure.Identity.Entities;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +16,8 @@ namespace Credio.Infrastructure.Identity.Services
 {
     public class TokenService : ITokenService
     {
+        private readonly IClientRepository _clientRepository;
+        private readonly IEmployeeRepository _employeeRepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly JWTSettings _jwtSettings;
         private readonly RefreshJWTSettings _refreshSettings;
@@ -21,6 +25,8 @@ namespace Credio.Infrastructure.Identity.Services
         private readonly ILogger<TokenService> _logger;
 
         public TokenService(
+              IClientRepository clientRepository,
+              IEmployeeRepository employeeRepository,
               UserManager<ApplicationUser> userManager,
               IOptions<JWTSettings> jwtSettings,
               IOptions<RefreshJWTSettings> refreshSettings,
@@ -28,6 +34,8 @@ namespace Credio.Infrastructure.Identity.Services
               ILogger<TokenService> logger
             )
         {
+            _clientRepository = clientRepository;
+            _employeeRepository = employeeRepository;
             _userManager = userManager;
             _jwtSettings = jwtSettings.Value;
             _refreshSettings = refreshSettings.Value;
@@ -42,28 +50,8 @@ namespace Credio.Infrastructure.Identity.Services
         public async Task<string> GenerateJWToken(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
-            var userClaims = await _userManager.GetClaimsAsync(user);
-            var roles = await _userManager.GetRolesAsync(user);
 
-            var roleClaims = new List<Claim>();
-
-            foreach (var role in roles)
-            {
-                roleClaims.Add(new Claim("roles", role));
-            }
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub,user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email,user.Email),
-                new Claim("uid", user.Id),
-                new Claim("firstName", user.FirstName),
-                new Claim("lastName", user.LastName),
-                new Claim("UrlImage", user.UrlImage)
-            }
-            .Union(userClaims)
-            .Union(roleClaims);
+            var claims = await GetClaims(user);
 
             var symmectricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
             var signingCredetials = new SigningCredentials(symmectricSecurityKey, SecurityAlgorithms.HmacSha256);
@@ -146,6 +134,50 @@ namespace Credio.Infrastructure.Identity.Services
             }
 
             return userId;
+        }
+
+        private async Task<IEnumerable<Claim>> GetClaims(ApplicationUser user)
+        {
+            var userClaims = await _userManager.GetClaimsAsync(user);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var roleClaims = new List<Claim>();
+
+            foreach (var role in roles)
+            {
+                roleClaims.Add(new Claim("roles", role));
+            }
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub,user.UserName),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.Email,user.Email),
+                new Claim("uid", user.Id),
+                new Claim("firstName", user.FirstName),
+                new Claim("lastName", user.LastName),
+                new Claim("UrlImage", user.UrlImage)
+            }
+            .Union(userClaims)
+            .Union(roleClaims);
+
+            // Agregar el claim de employeeId solo si el usuario tiene un rol relacionado con empleados
+            if (roles.Any(x => x == Roles.Administrator.ToString() || x == Roles.Officer.ToString() || x == Roles.Collector.ToString()))
+            {
+                var employee = await _employeeRepository.GetByPropertyAsync(e => e.UserId == user.Id);
+
+                claims = claims.Append(new Claim("employeeId", employee.Id));
+            }
+
+            // Agregar el claim de employeeId solo si el usuario tiene un rol relacionado con empleados
+            if (roles.Any(x => x == Roles.Client.ToString()))
+            {
+                var client = await _clientRepository.GetByPropertyAsync(c => c.UserId == user.Id);
+
+                claims = claims.Append(new Claim("clientId", client.Id));
+            }
+
+            return claims;
         }
     }
 }
