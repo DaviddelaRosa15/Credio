@@ -133,6 +133,8 @@ namespace Credio.Infrastructure.Identity
 
             #region Services
             services.AddTransient<IAccountService, AccountService>();
+            services.AddTransient<IAuthService, AuthService>();
+            services.AddTransient<ITokenService, TokenService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             #endregion
 

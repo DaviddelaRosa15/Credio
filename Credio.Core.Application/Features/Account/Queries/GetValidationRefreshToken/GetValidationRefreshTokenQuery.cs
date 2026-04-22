@@ -9,11 +9,11 @@ namespace Credio.Core.Application.Features.Account.Queries.GetValidationRefreshT
 
     public class GetValidationRefreshTokenQueryHandler : IRequestHandler<GetValidationRefreshTokenQuery, GetValidationRefreshTokenQueryResponse>
     {
-        private readonly IAccountService _accountService;
+        private readonly ITokenService _tokenService;
 
-        public GetValidationRefreshTokenQueryHandler(IAccountService accountService)
+        public GetValidationRefreshTokenQueryHandler(ITokenService tokenService)
         {
-            _accountService = accountService;
+            _tokenService = tokenService;
         }
 
 
@@ -22,7 +22,7 @@ namespace Credio.Core.Application.Features.Account.Queries.GetValidationRefreshT
             GetValidationRefreshTokenQueryResponse response = new();
             try
             {
-                var result = _accountService.ValidateRefreshToken();
+                var result = _tokenService.ValidateRefreshToken();
                 response.ValidRefreshToken = result != "" && !result.Contains("Error");
                 return response;
             }
