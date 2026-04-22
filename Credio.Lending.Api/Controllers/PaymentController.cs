@@ -2,6 +2,7 @@ using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Payment;
 using Credio.Core.Application.Features.Payment.Commands.RegisterPayment;
 using Credio.Core.Application.Features.Payment.Queries.GetPaymentSearch;
+using Credio.Core.Application.Features.Payments.Queries.GetPaymentHistory;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -54,6 +55,25 @@ public class PaymentController : ControllerBase
     public async Task<IResult> SearchPendingPayments([FromQuery] GetPaymentSearchQuery query, CancellationToken cancellationToken)
     {
         Result<List<PaymentSearchDTO>> result = await _sender.Send(query, cancellationToken);
+        return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure: CustomResult.Problem);
+    }
+
+    [Authorize(Roles = "Administrator, Officer, Collector")]
+    [HttpGet("history")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<PaymentHistoryDTO>))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    [SwaggerOperation(
+        Summary = "Obtiene el historial de pago",
+        Description = "Obtiene todo el historial de pago o filtra por empleado"
+        )]
+    public async Task<IResult> GetPaymentHistory([FromQuery] GetPaymentHistoryQuery query, CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(query, cancellationToken);
+
         return result.Match(
           onSuccess: () => CustomResult.Success(result),
           onFailure: CustomResult.Problem);
