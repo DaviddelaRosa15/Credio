@@ -311,6 +311,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
         using ApplicationContext db = _dbContext.CreateDbContext();
 
         IQueryable<Loan> query = db.Loan
+            .AsNoTracking()
             .Include(x => x.LoanStatus)
             .Include(x => x.LoanBalance)
             .Include(x => x.Client)
@@ -325,7 +326,7 @@ public class LoanRepository : GenericRepository<Loan>, ILoanRepository
                     predicate.LoanNumber.ToString().Contains(searchTerm) ||
                     predicate.Client.DocumentNumber.Contains(searchTerm)
                 ))
-            .AsNoTracking();
+            .AsSplitQuery();
 
         var result = await query
             .SelectMany(x => x.AmortizationSchedules, (loan, schedule) => new { loan, schedule })
