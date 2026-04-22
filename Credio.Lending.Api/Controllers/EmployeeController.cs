@@ -4,6 +4,7 @@ using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Dtos.Requests;
 using Credio.Core.Application.Features.Employee.Commands.RegisterEmployee;
 using Credio.Core.Application.Features.Employee.Queries.GetAll;
+using Credio.Core.Application.Features.Employee.Queries.GetCollectorsWithAddress;
 using Credio.Core.Application.Features.Employee.Queries.GetEmployeeByCode;
 using Credio.Core.Application.Features.Employee.Queries.GetEmployeeById;
 using Credio.Core.Application.Features.Loan.Queries.GetCollectorPortfolioQuery;
@@ -122,6 +123,24 @@ namespace Credio.Lending.Api.Controllers
             return result.Match(
                 onSuccess: () => CustomResult.Success(result),
                 onFailure:CustomResult.Problem);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        [HttpGet("collectors")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(EmployeeCollectorDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+        [SwaggerOperation(
+           Summary = "Consulta los cobradores",
+           Description = "Consulta todos los cobradores disponibles"
+        )]
+        public async Task<IResult> GetAllCollectors([FromQuery] GetCollectorsWithAddressQuery query, CancellationToken cancellationToken)
+        {
+            Result<List<EmployeeCollectorDTO>> result = await _sender.Send(query, cancellationToken);
+
+            return result.Match(
+            onSuccess: () => CustomResult.Success(result),
+            onFailure: CustomResult.Problem);
         }
     }
 }
