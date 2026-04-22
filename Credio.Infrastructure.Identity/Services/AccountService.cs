@@ -5,16 +5,11 @@ using Credio.Core.Application.Dtos.Email;
 using Credio.Core.Application.Enums;
 using Credio.Core.Application.Helpers;
 using Credio.Core.Application.Interfaces.Services;
-using Credio.Core.Domain.Settings;
 using Credio.Infrastructure.Identity.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 
 namespace Credio.Infrastructure.Identity.Services
@@ -25,8 +20,7 @@ namespace Credio.Infrastructure.Identity.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailService _emailService;
-        private readonly JWTSettings _jwtSettings;
-        private readonly RefreshJWTSettings _refreshSettings;
+        private readonly ITokenService _tokenService;
         IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<AccountService> _logger;
 
@@ -34,8 +28,7 @@ namespace Credio.Infrastructure.Identity.Services
               UserManager<ApplicationUser> userManager,
               SignInManager<ApplicationUser> signInManager,
               IEmailService emailService,
-              IOptions<JWTSettings> jwtSettings,
-              IOptions<RefreshJWTSettings> refreshSettings,
+              ITokenService tokenService,
               IHttpContextAccessor httpContextAccessor,
               ILogger<AccountService> logger
             )
@@ -43,8 +36,7 @@ namespace Credio.Infrastructure.Identity.Services
             _userManager = userManager;
             _signInManager = signInManager;
             _emailService = emailService;
-            _jwtSettings = jwtSettings.Value;
-            _refreshSettings = refreshSettings.Value;
+            _tokenService = tokenService;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
         }
@@ -78,12 +70,12 @@ namespace Credio.Infrastructure.Identity.Services
                     return response;
                 }
 
-                response.JWToken = await GenerateJWToken(user.Id);
-                response.ExpiresIn = (_jwtSettings.DurationInMinutes * 60).ToString();
-                response.ExpiresAt = DateTime.Now.AddMinutes(_jwtSettings.DurationInMinutes);
-                response.RefreshToken = GenerateRefreshToken(user.Id);
-                response.RefreshExpiresIn = (_refreshSettings.DurationInMinutes * 60).ToString();
-                response.RefreshExpiresAt = DateTime.Now.AddMinutes(_refreshSettings.DurationInMinutes);
+                response.JWToken = await _tokenService.GenerateJWToken(user.Id);
+                response.ExpiresIn = (_tokenService.JwtDurationInMinutes * 60).ToString();
+                response.ExpiresAt = DateTime.Now.AddMinutes(_tokenService.JwtDurationInMinutes);
+                response.RefreshToken = _tokenService.GenerateRefreshToken(user.Id);
+                response.RefreshExpiresIn = (_tokenService.RefreshDurationInMinutes * 60).ToString();
+                response.RefreshExpiresAt = DateTime.Now.AddMinutes(_tokenService.RefreshDurationInMinutes);
 
                 _logger.LogInformation("Inicio de sesión finalizado correctamente");
                 return response;
@@ -411,115 +403,6 @@ namespace Credio.Infrastructure.Identity.Services
                 response.Error = ex.Message;
                 return response;
             }
-        }
-
-        public async Task<string> GenerateJWToken(string userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            var userClaims = await _userManager.GetClaimsAsync(user);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            var roleClaims = new List<Claim>();
-
-            foreach (var role in roles)
-            {
-                roleClaims.Add(new Claim("roles", role));
-            }
-
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Sub,user.UserName),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email,user.Email),
-                new Claim("uid", user.Id),
-                new Claim("firstName", user.FirstName),
-                new Claim("lastName", user.LastName),
-                new Claim("UrlImage", user.UrlImage)
-            }
-            .Union(userClaims)
-            .Union(roleClaims);
-
-            var symmectricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
-            var signingCredetials = new SigningCredentials(symmectricSecurityKey, SecurityAlgorithms.HmacSha256);
-
-            var jwtSecurityToken = new JwtSecurityToken(
-                issuer: _jwtSettings.Issuer,
-                audience: _jwtSettings.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
-                signingCredentials: signingCredetials);
-
-
-            string token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            return token;
-        }
-
-        public string GenerateRefreshToken(string userId)
-        {
-            var claims = new[]
-            {
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim("uid", userId)
-            };
-
-            var symmectricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_refreshSettings.Key));
-            var signingCredetials = new SigningCredentials(symmectricSecurityKey, SecurityAlgorithms.HmacSha256);
-
-            var jwtSecurityToken = new JwtSecurityToken(
-                issuer: _refreshSettings.Issuer,
-                audience: _refreshSettings.Audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(_refreshSettings.DurationInMinutes),
-                signingCredentials: signingCredetials);
-
-            string token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-
-            return token;
-        }
-
-        public string ValidateRefreshToken()
-        {
-            string token = _httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
-            if (token == null)
-            {
-                return "Error: No existen token de actualización";
-            }
-
-            string userId = "";
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            TokenValidationParameters tokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero,
-                ValidIssuer = _refreshSettings.Issuer,
-                ValidAudience = _refreshSettings.Audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_refreshSettings.Key))
-            };
-
-            try
-            {
-                ClaimsPrincipal claimsPrincipal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken validatedToken);
-
-                if (validatedToken == null)
-                {
-                    return "Error: El token no es válido";
-                }
-                var id = claimsPrincipal.FindFirst("uid");
-                userId = id.Value;
-            }
-            catch (SecurityTokenValidationException ex)
-            {
-                return "Error de validación del token JWT: " + ex.Message;
-            }
-            catch (Exception ex)
-            {
-                return "Error al decodificar el token JWT: " + ex.Message;
-            }
-
-            return userId;
         }
 
         public async Task<UserDTO> GetUsersById(string id)
