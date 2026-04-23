@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Credio.Core.Application.Common.Primitives;
+using Credio.Core.Application.Dtos.Common;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
 using Swashbuckle.AspNetCore.Annotations;
@@ -7,11 +8,8 @@ using System.Text.Json.Serialization;
 
 namespace Credio.Core.Application.Features.Loan.Queries.GetAllLoans
 {
-    public sealed class GetAllLoansQuery : ICachedQuery<List<GetAllLoansQueryResponse>>
+    public sealed class GetAllLoansQuery : PaginationRequest, ICachedQuery<List<GetAllLoansQueryResponse>>
     {
-        public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
-
         [JsonIgnore]
         [SwaggerIgnore]
         public string CachedKey => $"loan-all-{PageNumber}-{PageSize}";
