@@ -68,9 +68,9 @@ public class NotifyClientOnPaymentRegisteredHandler : IDomainEventHandler<Paymen
                     RemainingBalance = loan.LoanBalance.PrincipalBalance,
                     PaidInstallmentsCount = loan.AmortizationSchedules.Count(s => s.AmortizationStatus.Name == "Pagada"),
                     TotalInstallmentsCount = loan.AmortizationSchedules.Count(),
-                    TotalInterestAppliedAmount = notification.TotalInterestAppliedAmount,
-                    TotalLateFeeAppliedAmount = notification.TotalLateFeeAppliedAmount,
-                    TotalPrincipalAppliedAmount = notification.TotalPrincipalAppliedAmount
+                    TotalInterestAppliedAmount = (decimal)payment.InterestAmount,
+                    TotalLateFeeAppliedAmount = (decimal)payment.LateFeeAmount,
+                    TotalPrincipalAppliedAmount = (decimal)payment.PrincipalAmount
                 };
 
                 // Generar el recibo de pago en PDF

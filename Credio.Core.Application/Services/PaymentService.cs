@@ -70,7 +70,7 @@ namespace Credio.Core.Application.Services
                 LoanNumber = loan.LoanNumber,
                 PaymentMethod = payment.PaymentMethod.Name,
                 AmountPaid = payment.AmountPaid,
-                RemainingBalance = loan.LoanBalance.PrincipalBalance,
+                RemainingBalance = (double)payment.RemainingPrincipal,
                 PaidInstallmentsCount = loan.AmortizationSchedules.Count(s => s.AmortizationStatus.Name == "Pagada"),
                 TotalInstallmentsCount = loan.AmortizationSchedules.Count()
             };
@@ -112,11 +112,9 @@ namespace Credio.Core.Application.Services
                 payment.PaymentStatusId = completeStatus.Id;
 
                 // 6. Registrar el evento de pago realizado
-                var principalApplied = result.TotalPrincipalAppliedAmount + result.RemainingAmount;
-                payment.AddEvent(new PaymentRegisteredEvent(payment.Id, result.TotalInterestAppliedAmount,
-                    result.TotalLateFeeAppliedAmount, principalApplied));
+                payment.AddEvent(new PaymentRegisteredEvent(payment.Id));
 
-                payment.PrincipalAmount = principalApplied;
+                payment.PrincipalAmount = result.TotalPrincipalAppliedAmount + result.RemainingAmount;
                 payment.InterestAmount = result.TotalInterestAppliedAmount;
                 payment.LateFeeAmount = result.TotalLateFeeAppliedAmount;
                 payment.RemainingPrincipal = result.RemainingPrincipal;
