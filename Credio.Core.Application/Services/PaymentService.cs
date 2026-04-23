@@ -106,7 +106,7 @@ namespace Credio.Core.Application.Services
                 }
 
                 // 4. Consolidar balances finales
-                await SyncLoanBalances(result, loanId);
+                result =await SyncLoanBalances(result, loanId);
 
                 //5. Marcar el pago como "Completado"
                 payment.PaymentStatusId = completeStatus.Id;
@@ -115,6 +115,11 @@ namespace Credio.Core.Application.Services
                 var principalApplied = result.TotalPrincipalAppliedAmount + result.RemainingAmount;
                 payment.AddEvent(new PaymentRegisteredEvent(payment.Id, result.TotalInterestAppliedAmount,
                     result.TotalLateFeeAppliedAmount, principalApplied));
+
+                payment.PrincipalAmount = principalApplied;
+                payment.InterestAmount = result.TotalInterestAppliedAmount;
+                payment.LateFeeAmount = result.TotalLateFeeAppliedAmount;
+                payment.RemainingPrincipal = result.RemainingPrincipal;
 
                 await _paymentRepository.UpdateAsync(payment);
             }
@@ -325,7 +330,7 @@ namespace Credio.Core.Application.Services
             }
         }
 
-        private async Task SyncLoanBalances(PaymentDistributionState state, string loanId)
+        private async Task<PaymentDistributionState> SyncLoanBalances(PaymentDistributionState state, string loanId)
         {
             try
             {
@@ -359,6 +364,7 @@ namespace Credio.Core.Application.Services
 
                 // Actualizar el balance pendiente
                 loanBalance.TotalOutstanding = Math.Round(loanBalance.PrincipalBalance + loanBalance.InterestBalance + loanBalance.LateFeeBalance, 2);
+                state.RemainingPrincipal = (decimal)loanBalance.TotalOutstanding;
 
                 // Actualizar el balance cuando se paga el capital completamente
                 if (loanBalance.PrincipalBalance <= 0)
@@ -368,6 +374,8 @@ namespace Credio.Core.Application.Services
                     loanBalance.LateFeeBalance = 0;
                     loanBalance.TotalOutstanding = 0;
                     loanBalance.DaysInArrears = 0;
+                    state.RemainingPrincipal = 0;
+
                     var paidOffStatus = await _loanStatusRepository.GetByPropertyAsync(s => s.Name == LoanStatuses.Paid);
                     loan.LoanStatusId = paidOffStatus.Id;
                 }
@@ -376,6 +384,7 @@ namespace Credio.Core.Application.Services
                 await _loanRepository.UpdateAsync(loan);
 
                 _logger.LogInformation("Balances del préstamo {LoanId} actualizados después del pago. Nuevo balance de capital: {PrincipalBalance}, Nuevo balance de intereses: {InterestBalance}, Nuevo balance de mora: {LateFeeBalance}", loan.Id, loanBalance.PrincipalBalance, loanBalance.InterestBalance, loanBalance.LateFeeBalance);
+                return state;
             }
             catch
             {
