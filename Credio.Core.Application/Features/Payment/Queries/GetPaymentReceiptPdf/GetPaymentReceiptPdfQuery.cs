@@ -48,12 +48,12 @@ namespace Credio.Core.Application.Features.Payment.Queries.GetPaymentReceiptPdf
                     LoanNumber = loan.LoanNumber,
                     PaymentMethod = payment.PaymentMethod.Name,
                     AmountPaid = payment.AmountPaid,
-                    RemainingBalance = loan.LoanBalance.PrincipalBalance,
+                    RemainingBalance = (double)(payment.RemainingPrincipal ?? 0),
                     PaidInstallmentsCount = loan.AmortizationSchedules.Count(s => s.AmortizationStatus.Name == "Pagada"),
                     TotalInstallmentsCount = loan.AmortizationSchedules.Count(),
-                    TotalInterestAppliedAmount = 0,
-                    TotalLateFeeAppliedAmount = 0,
-                    TotalPrincipalAppliedAmount = 0
+                    TotalInterestAppliedAmount = (decimal)(payment.InterestAmount ?? 0),
+                    TotalLateFeeAppliedAmount = (decimal)(payment.LateFeeAmount ?? 0),
+                    TotalPrincipalAppliedAmount = (decimal)(payment.PrincipalAmount ?? 0)
                 };
 
                 return Result<PaymentNotificationDTO>.Success(result);
