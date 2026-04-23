@@ -1,10 +1,12 @@
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Common;
 using Credio.Core.Application.Dtos.Loan;
+using Credio.Core.Application.Features.Loan.Queries.GetDisbursementReceiptPdf;
 using Credio.Core.Application.Features.Loan.Queries.GetLoanAmortizationSchedule;
 using Credio.Core.Application.Features.Loan.Queries.PreviewAmortization;
 using Credio.Core.Application.Features.LoanApplications.Commands.CreateLoan;
 using Credio.Core.Application.Features.LoanApplications.Commands.DisburseLoan;
+using Credio.Core.Application.Interfaces.Services;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -18,10 +20,12 @@ namespace Credio.Interface.Lending.Controllers;
 [ApiController]
 public class LoanController : ControllerBase
 {
+    private readonly IPdfService _pdfService;
     private readonly ISender _sender;
 
-    public LoanController(ISender sender)
+    public LoanController(ISender sender, IPdfService pdfService)
     {
+        _pdfService = pdfService;
         _sender = sender;
     }
 
@@ -95,6 +99,36 @@ public class LoanController : ControllerBase
     public async Task<IResult> GetLoanAmortization(string id, CancellationToken cancellationToken)
     {
         Result<LoanAmortizationScheduleResponseDTO> result = await _sender.Send(new GetLoanAmortizationScheduleQuery { LoanId = id}, cancellationToken);
+
+        return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure: CustomResult.Problem);
+    }
+
+    [Authorize(Roles = "Administrator, Officer, Collector")]
+    [HttpGet("{id}/disbursement-receipt")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(File))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    [SwaggerOperation(
+        Summary = "Obtiene el recibo de desembolso del préstamo",
+        Description = "Obtiene el recibo de desembolso actual del préstamo"
+    )]
+    public async Task<IResult> GetDisbursementReceipt(string id, CancellationToken cancellationToken)
+    {
+        Result<DisburseLoanNotificationDTO> result = await _sender.Send(new GetDisbursementReceiptPdfQuery { LoanId = id }, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            // 1. Obtener los datos
+            DisburseLoanNotificationDTO receiptData = result.Value;
+
+            // 2. Generar el PDF en memoria (byte[])
+            byte[] pdfBytes = _pdfService.GenerateDisbursementReceipt(receiptData);
+
+            return Results.File(pdfBytes, "application/pdf", $"Recibo_DS_{receiptData.LoanNumber}_{DateTime.Now:yyyyMMdd}.pdf");
+        }
 
         return result.Match(
           onSuccess: () => CustomResult.Success(result),
