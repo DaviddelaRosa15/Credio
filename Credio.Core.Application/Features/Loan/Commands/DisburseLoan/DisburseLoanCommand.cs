@@ -3,6 +3,7 @@ using Credio.Core.Application.Constants;
 using Credio.Core.Application.Dtos.Loan;
 using Credio.Core.Application.Interfaces.Abstractions;
 using Credio.Core.Application.Interfaces.Repositories;
+using Credio.Core.Application.Interfaces.Services;
 using Credio.Core.Domain.Events;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -19,14 +20,16 @@ public class DisburseLoanCommand : ICommand<DisburseLoanResponseDTO>
 
 public class DisburseLoanCommandHandler : ICommandHandler<DisburseLoanCommand, DisburseLoanResponseDTO>
 {
+    private readonly ICacheService _cacheService;
     private readonly ILoanRepository _loanRepository;
     private readonly ILoanStatusRepository _statusRepository;
 
-
     public DisburseLoanCommandHandler(
+        ICacheService cacheService,
         ILoanRepository loanRepository,
         ILoanStatusRepository statusRepository)
     {
+        _cacheService = cacheService;
         _loanRepository = loanRepository;
         _statusRepository = statusRepository;
     }
@@ -68,6 +71,8 @@ public class DisburseLoanCommandHandler : ICommandHandler<DisburseLoanCommand, D
                 LoanStatus = loan.LoanStatus.Name,
                 EffectiveDate = loan.DisbursedDate.Value
             };
+
+            _cacheService.RemoveByPrefix("loan-all-");
 
             return Result<DisburseLoanResponseDTO>.Success(response);
         }
