@@ -24,6 +24,7 @@ public class CreateLoanCommand : ICommand<LoanDTO>
 
 public class CreateLoanCommandHandler : ICommandHandler<CreateLoanCommand, LoanDTO>
 {
+    private readonly ICacheService _cacheService;
     private readonly IAmortizationCalculatorService _calculatorService;
     private readonly IAmortizationMethodRepository _methodRepository;
     private readonly ILoanRepository _loanRepository;
@@ -33,6 +34,7 @@ public class CreateLoanCommandHandler : ICommandHandler<CreateLoanCommand, LoanD
 
 
     public CreateLoanCommandHandler(
+        ICacheService cacheService,
         IAmortizationCalculatorService calculatorService,
         IAmortizationMethodRepository methodRepository,
         ILoanRepository loanRepository,
@@ -40,6 +42,7 @@ public class CreateLoanCommandHandler : ICommandHandler<CreateLoanCommand, LoanD
         ILoanStatusRepository statusRepository,
         IMapper mapper)
     {
+        _cacheService = cacheService;
         _calculatorService = calculatorService;
         _methodRepository = methodRepository;
         _loanRepository = loanRepository;
@@ -119,6 +122,9 @@ public class CreateLoanCommandHandler : ICommandHandler<CreateLoanCommand, LoanD
             result.ClientName = foundApplication.Client.FirstName + " " + foundApplication.Client.LastName;
             result.LoanStatus = loanStatus.Name;
             result.Frequency = foundApplication.PaymentFrequency.Name;
+
+            // Remover de la cache las listas de préstamos para que se actualicen con el nuevo préstamo creado
+            _cacheService.RemoveByPrefix("loan-all-");
 
             return Result<LoanDTO>.Success(result);
         }
