@@ -45,7 +45,7 @@ public class GetUpcomingInstallmentsQueryHandler : IQueryHandler<GetUpcomingInst
             
             PagedResult<AmortizationSchedule> result = await _amortizationScheduleRepository.GetPagedAsync(
                 request.PageNumber, request.PageSize,
-                [props => props.Loan, props => props.Loan.Client, props => props.AmortizationStatus],
+                [props => props.Loan, props => props.Loan.Client, props => props.AmortizationStatus, props => props.LateFees],
                 predicate => predicate.AmortizationStatus.Description == "Pendiente" &&
                              predicate.DueDate >= startOfWeek && predicate.DueDate <= endDate);
 
