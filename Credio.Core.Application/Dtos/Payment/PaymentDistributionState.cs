@@ -8,5 +8,6 @@
         public decimal TotalInterestAppliedAmount { get; set; }
         public decimal TotalLateFeeAppliedAmount { get; set; }
         public decimal TotalPrincipalAppliedAmount { get; set; }
+        public decimal RemainingPrincipal { get; set; }
     }
 }
