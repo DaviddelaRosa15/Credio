@@ -17,7 +17,8 @@ namespace Credio.Core.Application.Features.Loan.Queries.GetDisbursementReceiptPd
 
         public GetDisbursementReceiptPdfQueryHandler(ILoanRepository loanRepository)
         {
-            _loanRepository = loanRepository;        }
+            _loanRepository = loanRepository;
+        }
 
         public async Task<Result<DisburseLoanNotificationDTO>> Handle(GetDisbursementReceiptPdfQuery query, CancellationToken cancellationToken)
         {
