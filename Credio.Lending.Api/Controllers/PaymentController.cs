@@ -1,7 +1,9 @@
 using Credio.Core.Application.Common.Primitives;
 using Credio.Core.Application.Dtos.Payment;
 using Credio.Core.Application.Features.Payment.Commands.RegisterPayment;
+using Credio.Core.Application.Features.Payment.Queries.GetPaymentReceiptPdf;
 using Credio.Core.Application.Features.Payment.Queries.GetPaymentSearch;
+using Credio.Core.Application.Interfaces.Services;
 using Credio.Interface.Lending.Extensions;
 using Credio.Lending.Api.Common;
 using MediatR;
@@ -15,10 +17,12 @@ namespace Credio.Lending.Api.Controllers;
 [ApiController]
 public class PaymentController : ControllerBase
 {
+    private readonly IPdfService _pdfService;
     private readonly ISender _sender;
 
-    public PaymentController(ISender sender)
+    public PaymentController(ISender sender, IPdfService pdfService)
     {
+        _pdfService = pdfService;
         _sender = sender;
     }
 
@@ -54,6 +58,36 @@ public class PaymentController : ControllerBase
     public async Task<IResult> SearchPendingPayments([FromQuery] GetPaymentSearchQuery query, CancellationToken cancellationToken)
     {
         Result<List<PaymentSearchDTO>> result = await _sender.Send(query, cancellationToken);
+        return result.Match(
+          onSuccess: () => CustomResult.Success(result),
+          onFailure: CustomResult.Problem);
+    }
+
+    [Authorize(Roles = "Administrator, Officer, Collector")]
+    [HttpGet("{id}/receipt-pdf")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(File))]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ProblemDetails))]
+    [SwaggerOperation(
+        Summary = "Obtiene el recibo del pago",
+        Description = "Obtiene el recibo de pago del préstamo"
+    )]
+    public async Task<IResult> GetPaymentReceipt(string id, CancellationToken cancellationToken)
+    {
+        Result<PaymentNotificationDTO> result = await _sender.Send(new GetPaymentReceiptPdfQuery { PaymentId = id }, cancellationToken);
+
+        if (result.IsSuccess)
+        {
+            // 1. Obtener los datos
+            PaymentNotificationDTO receiptData = result.Value;
+
+            // 2. Generar el PDF en memoria (byte[])
+            byte[] pdfBytes = _pdfService.GeneratePaymentReceipt(receiptData);
+
+            return Results.File(pdfBytes, "application/pdf", $"Recibo_{receiptData.ReceiptNumber.Replace("-", "_")}.pdf");
+        }
+
         return result.Match(
           onSuccess: () => CustomResult.Success(result),
           onFailure: CustomResult.Problem);
