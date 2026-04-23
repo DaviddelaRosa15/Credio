@@ -60,10 +60,14 @@ namespace Credio.Core.Application.Mappings
             CreateMap<AmortizationSchedule, UpcomingInstallmentDTO>()
                 .ForMember(dest => dest.Client,
                     opt => opt.MapFrom(src => src.Loan.Client.FirstName + " " + src.Loan.Client.LastName))
+                .ForMember(dest => dest.DocumentNumber,
+                    opt => opt.MapFrom(src => src.Loan.Client.DocumentNumber))
                 .ForMember(dest => dest.Loan,
                     opt => opt.MapFrom(src => src.Loan.LoanNumber))
+                .ForMember(dest => dest.LateFeeAmount,
+                    opt => opt.MapFrom(src => src.LateFees.Sum(fee => fee.Amount)))
                 .ForMember(dest => dest.State,
-                    opt => opt.MapFrom(src => src.AmortizationStatus.Description));
+                    opt => opt.MapFrom(src => src.AmortizationStatus.Name));
             #endregion
 
             #region Catalog
