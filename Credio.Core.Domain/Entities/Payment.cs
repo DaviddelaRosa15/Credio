@@ -31,4 +31,10 @@ public class Payment : AuditableBaseEntity
     public string ReceiptNumber { get; set; }
 
     public string? ReceiptUrl { get; set; } = string.Empty;
+
+    // Columnas de Distribución (Snapshot)
+    public decimal? PrincipalAmount { get; set; }
+    public decimal? InterestAmount { get; set; }
+    public decimal? LateFeeAmount { get; set; }
+    public decimal? RemainingPrincipal { get; set; }
 }

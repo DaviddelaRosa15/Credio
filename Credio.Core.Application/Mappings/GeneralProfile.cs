@@ -10,6 +10,7 @@ using Credio.Core.Application.Dtos.LoanApplication;
 using Credio.Core.Application.Dtos.LoanStatus;
 using Credio.Core.Application.Features.Account.Commands.Authenticate;
 using Credio.Core.Application.Features.Employee.Commands.RegisterEmployee;
+using Credio.Core.Application.Features.Loan.Queries.GetAllLoans;
 using Credio.Core.Domain.Entities;
 
 namespace Credio.Core.Application.Mappings
@@ -59,10 +60,14 @@ namespace Credio.Core.Application.Mappings
             CreateMap<AmortizationSchedule, UpcomingInstallmentDTO>()
                 .ForMember(dest => dest.Client,
                     opt => opt.MapFrom(src => src.Loan.Client.FirstName + " " + src.Loan.Client.LastName))
+                .ForMember(dest => dest.DocumentNumber,
+                    opt => opt.MapFrom(src => src.Loan.Client.DocumentNumber))
                 .ForMember(dest => dest.Loan,
                     opt => opt.MapFrom(src => src.Loan.LoanNumber))
+                .ForMember(dest => dest.LateFeeAmount,
+                    opt => opt.MapFrom(src => src.LateFees.Sum(fee => fee.Amount)))
                 .ForMember(dest => dest.State,
-                    opt => opt.MapFrom(src => src.AmortizationStatus.Description));
+                    opt => opt.MapFrom(src => src.AmortizationStatus.Name));
             #endregion
 
             #region Catalog
@@ -238,7 +243,16 @@ namespace Credio.Core.Application.Mappings
                 .ForMember(dest => dest.PrincipalAmount,
                     opt => opt.MapFrom(src => src.Amount))
                 .ForMember(dest => dest.AmortizationSchedule,
-                    opt => opt.MapFrom(src => src.AmortizationSchedules.OrderBy(a => a.InstallmentNumber)));                
+                    opt => opt.MapFrom(src => src.AmortizationSchedules.OrderBy(a => a.InstallmentNumber)));
+
+            CreateMap<Loan, GetAllLoansQueryResponse>()
+                .ForMember(dest => dest.ClientName,
+                    opt => opt.MapFrom(src => src.Client.FirstName + " " + src.Client.LastName))
+                .ForMember(dest => dest.LoanStatus,
+                    opt => opt.MapFrom(src => src.LoanStatus.Name))
+                .ForMember(dest => dest.Frequency,
+                    opt => opt.MapFrom(src => src.PaymentFrequency.Name))
+                .ReverseMap();
             #endregion
 
             #region LoanApplication
